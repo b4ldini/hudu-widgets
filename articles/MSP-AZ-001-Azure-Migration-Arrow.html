@@ -77,17 +77,24 @@
     align-items: center;
     font-size: 12px;
     font-weight: 500;
-    color: #888;
+    color: #999;
     white-space: nowrap;
     cursor: pointer;
     border-bottom: 3px solid transparent;
     transition: color 0.15s, border-color 0.15s, background 0.15s;
     text-decoration: none;
+    user-select: none;
   }
   .nav-link:hover {
     color: var(--a8-blue);
     background: rgba(37,87,183,0.06);
-    border-bottom-color: var(--a8-blue2);
+    border-bottom-color: rgba(37,87,183,0.35);
+  }
+  .nav-link.active {
+    color: var(--a8-blue);
+    font-weight: 700;
+    border-bottom-color: var(--a8-blue);
+    background: rgba(37,87,183,0.07);
   }
 
   /* ── Page container ─────────────────────────────── */
@@ -1158,6 +1165,48 @@
     var el = document.getElementById(id);
     if (el) el.addEventListener('input', function() {
       if (document.getElementById('email-preview').style.display === 'block') renderPreview();
+    });
+  });
+
+  /* ── Active nav tracking ── */
+  var navSections = ['field-sources', 'process', 'transfer-form', 'checklist', 'notes'];
+  var navLinks = document.querySelectorAll('.nav-link');
+
+  function setActive(id) {
+    navLinks.forEach(function(link) {
+      link.classList.toggle('active', link.dataset.section === id);
+    });
+  }
+
+  // Assign data-section to each nav link by order
+  navLinks.forEach(function(link, i) {
+    link.dataset.section = navSections[i];
+  });
+
+  // IntersectionObserver — highlight whichever section is most prominent on screen
+  var visible = {};
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      visible[entry.target.id] = entry.intersectionRatio;
+    });
+    // Pick the section with highest visibility ratio, in document order as tiebreak
+    var best = null, bestRatio = -1;
+    navSections.forEach(function(id) {
+      var r = visible[id] || 0;
+      if (r > bestRatio) { bestRatio = r; best = id; }
+    });
+    if (best) setActive(best);
+  }, { threshold: [0, 0.1, 0.25, 0.5, 1.0], rootMargin: '-10% 0px -60% 0px' });
+
+  navSections.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+
+  // On click: immediately set active and scroll
+  navLinks.forEach(function(link) {
+    link.addEventListener('click', function() {
+      setActive(link.dataset.section);
     });
   });
 </script>
