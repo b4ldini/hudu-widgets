@@ -533,18 +533,49 @@
     <!-- Footer -->
     <div class="form-footer">
       <p class="footer-note">
-        Submitting will open your email client with this form pre-filled,<br>
-        ready to send to <strong>itsupport@a8mt.co.uk</strong>
+        Click below to prepare the email — then copy and paste it into a new email<br>
+        addressed to <strong>itsupport@a8mt.co.uk</strong>
       </p>
       <button type="button" class="btn-submit" onclick="submitForm()">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
         </svg>
-        Send to IT Support
+        Prepare Email
       </button>
     </div>
 
   </form>
+</div>
+
+<!-- Copy panel (hidden until form submitted) -->
+<div id="copyPanel" style="display:none;margin:32px 24px 40px;background:#0b1a2e;border:1px solid rgba(255,255,255,0.1);border-radius:14px;overflow:hidden;">
+  <div style="background:linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);padding:18px 24px;display:flex;align-items:center;gap:12px;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#c2e000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;flex-shrink:0"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    <div>
+      <div style="font-family:'Courier New',Consolas,monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:#c2e000;margin-bottom:2px;">Ready to send</div>
+      <div style="font-size:14px;font-weight:600;color:#fff;">New email to: <span style="color:#c2e000;">itsupport@a8mt.co.uk</span></div>
+    </div>
+  </div>
+  <div style="padding:20px 24px;">
+    <div style="margin-bottom:14px;">
+      <div style="font-family:'Courier New',Consolas,monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:6px;">Subject line</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <input id="copySubject" readonly style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:7px;padding:9px 12px;color:#fff;font-family:inherit;font-size:13px;outline:none;" />
+        <button onclick="copyField('copySubject','btnCopySubject')" id="btnCopySubject" style="flex-shrink:0;padding:8px 14px;background:rgba(194,224,0,0.15);border:1px solid rgba(194,224,0,0.35);border-radius:7px;color:#c2e000;font-family:'Courier New',Consolas,monospace;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background 0.15s;">Copy</button>
+      </div>
+    </div>
+    <div style="margin-bottom:18px;">
+      <div style="font-family:'Courier New',Consolas,monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:6px;">Email body</div>
+      <textarea id="copyBody" readonly rows="14" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:7px;padding:12px;color:#e8edf5;font-family:'Courier New',Consolas,monospace;font-size:12px;line-height:1.6;outline:none;resize:vertical;"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <button onclick="copyField('copyBody','btnCopyBody')" id="btnCopyBody" style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;background:#1e4aa0;border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:#fff;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.15s;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;flex-shrink:0"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy email body
+      </button>
+      <span style="font-size:12px;color:rgba(255,255,255,0.4);">Then open your email client, create a new email to <strong style="color:rgba(255,255,255,0.7);">itsupport@a8mt.co.uk</strong> and paste.</span>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -635,14 +666,30 @@
       'Submitted via a8 New User Request Form',
     ].join('\n');
 
-    const subject = encodeURIComponent(`New User Request – ${g('forename')} ${g('surname')} (Start: ${startDate})`);
-    const encodedBody = encodeURIComponent(body);
+    const subjectText = `New User Request – ${g('forename')} ${g('surname')} (Start: ${startDate})`;
 
-    const a = document.createElement('a');
-    a.href = `mailto:itsupport@a8mt.co.uk?subject=${subject}&body=${encodedBody}`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    document.getElementById('copySubject').value = subjectText;
+    document.getElementById('copyBody').value = body;
+
+    const panel = document.getElementById('copyPanel');
+    panel.style.display = 'block';
+    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function copyField(fieldId, btnId) {
+    const el = document.getElementById(fieldId);
+    const btn = document.getElementById(btnId);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(el.value).then(() => {
+        btn.textContent = '✓ Copied!';
+        setTimeout(() => { btn.textContent = fieldId === 'copyBody' ? 'Copy email body' : 'Copy'; }, 2000);
+      });
+    } else {
+      el.select();
+      document.execCommand('copy');
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => { btn.textContent = fieldId === 'copyBody' ? 'Copy email body' : 'Copy'; }, 2000);
+    }
   }
 </script>
 </body>
