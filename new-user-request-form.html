@@ -638,7 +638,11 @@
     const subject = encodeURIComponent(`New User Request – ${g('forename')} ${g('surname')} (Start: ${startDate})`);
     const encodedBody = encodeURIComponent(body);
 
-    window.location.href = `mailto:itsupport@a8mt.co.uk?subject=${subject}&body=${encodedBody}`;
+    const a = document.createElement('a');
+    a.href = `mailto:itsupport@a8mt.co.uk?subject=${subject}&body=${encodedBody}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 </script>
 </body>
