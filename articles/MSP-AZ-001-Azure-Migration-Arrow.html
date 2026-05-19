@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Azure Subscription Migration — Arrow ECS | Active8 Managed Technologies</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    /* Light page palette */
+    --page-bg:    #f0f2f4;
+    --card-bg:    #ffffff;
+    --section-bg: #e8eaec;
+    --panel-bg:   #f7f8f9;
+    --border:     #d5d9de;
+    --text:       #333333;
+    --text-muted: #6c757d;
+    --text-dim:   #4a5568;
+    /* Status colours */
+    --green:         #22c55e;
+    --green-dim:     #e8f8ef;
+    --green-border:  #166534;
+    --amber:         #f59e0b;
+    --amber-dim:     #fff8e1;
+    --amber-border:  #f5c518;
+    --red:           #ef4444;
+    --red-dim:       #fdf0ef;
+    --red-border:    #e05252;
+    /* Active8 brand */
+    --a8-blue:  #1e4aa0;
+    --a8-blue2: #2557b7;
+    --a8-lime:  #c2e000;
+    /* Portal mockup palette — intentionally dark */
+    --pm-bg:        #0f1117;
+    --pm-surface:   #181c27;
+    --pm-surface2:  #1e2333;
+    --pm-border:    #2a3048;
+    --pm-accent:    #3b7eff;
+    --pm-text:      #e2e8f0;
+    --pm-muted:     #64748b;
+    --pm-dim:       #94a3b8;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--page-bg);
+    padding: 0;
+  }
+
+  /* ── Sticky nav ─────────────────────────────────── */
+  .sticky-nav {
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  }
+  .sticky-nav-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: stretch;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .sticky-nav-inner::-webkit-scrollbar { display: none; }
+  .nav-link {
+    padding: 0 13px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: #888;
+    white-space: nowrap;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+    text-decoration: none;
+  }
+  .nav-link:hover {
+    color: var(--a8-blue);
+    background: rgba(37,87,183,0.06);
+    border-bottom-color: var(--a8-blue2);
+  }
+
+  /* ── Page container ─────────────────────────────── */
+  .container { max-width: 960px; margin: 0 auto; padding: 36px 24px 0; }
+
+  /* ── Header ─────────────────────────────────────── */
+  .header {
+    border-left: 4px solid var(--a8-blue);
+    padding-left: 20px;
+    margin-bottom: 32px;
+  }
+  .header .badge {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    color: var(--a8-blue2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .header h1 span { color: var(--a8-blue); }
+  .header p { font-size: 13px; color: var(--text-dim); }
+
+  /* ── TOC ────────────────────────────────────────── */
+  .toc {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--a8-blue);
+    border-radius: 0 6px 6px 0;
+    padding: 16px 20px;
+    margin-bottom: 32px;
+  }
+  .toc-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .toc-links { display: flex; flex-wrap: wrap; gap: 6px 20px; }
+  .toc-links a {
+    font-size: 12px;
+    color: var(--a8-blue2);
+    text-decoration: none;
+    font-family: 'Courier New', Consolas, monospace;
+  }
+  .toc-links a:hover { color: var(--a8-blue); }
+
+  /* ── Section headings ───────────────────────────── */
+  h2 {
+    font-size: 11px;
+    font-family: 'Courier New', Consolas, monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    margin-top: 44px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── Phase labels ───────────────────────────────── */
+  .phase { display: flex; align-items: center; gap: 10px; margin: 32px 0 10px; }
+  .phase-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 3px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .phase-label.pre   { background: rgba(37,87,183,0.12); color: var(--a8-blue); border: 1px solid rgba(37,87,183,0.3); }
+  .phase-label.trans { background: var(--amber-dim); color: #92590a; border: 1px solid var(--amber-border); }
+  .phase-label.arrow { background: #f0ecff; color: #6b3fa0; border: 1px solid #c4b0f0; }
+  .phase-label.post  { background: var(--green-dim); color: #166534; border: 1px solid #a3e6be; }
+  .phase-line { flex: 1; height: 1px; background: var(--border); }
+
+  /* ── Step blocks ────────────────────────────────── */
+  .steps { display: flex; flex-direction: column; gap: 4px; margin-bottom: 4px; }
+  .step {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 18px;
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 14px;
+    align-items: start;
+    transition: border-color 0.15s;
+  }
+  .step:hover { border-color: #b0bcd0; }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    background: rgba(37,87,183,0.1);
+    border: 1px solid rgba(37,87,183,0.2);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', Consolas, monospace;
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--a8-blue2);
+    flex-shrink: 0;
+  }
+  .step-title { font-weight: 600; font-size: 13px; color: #111; margin-bottom: 4px; }
+  .step-desc { font-size: 13px; color: var(--text-dim); line-height: 1.65; }
+  .step-desc ul { margin: 6px 0 0 16px; display: flex; flex-direction: column; gap: 3px; }
+  .step-desc ul li { font-size: 12px; }
+  .step-tag {
+    display: inline-block;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-left: 8px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+  }
+  .step-tag.crit { background: var(--red-dim); color: var(--red); border: 1px solid var(--red-border); }
+  .step-tag.info { background: rgba(37,87,183,0.1); color: var(--a8-blue2); border: 1px solid rgba(37,87,183,0.3); }
+  .step-tag.warn { background: var(--amber-dim); color: #92590a; border: 1px solid var(--amber-border); }
+
+  /* Portal tags */
+  .portal-tag {
+    display: inline-block;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-left: 8px;
+    vertical-align: middle;
+    position: relative;
+    top: -1px;
+  }
+  .portal-tag.xsp   { background: #e0f7fa; color: #006064; border: 1px solid #80deea; }
+  .portal-tag.azure { background: #e8f0fe; color: #1a56a8; border: 1px solid #9ab3f5; }
+  .portal-tag.entra { background: #f3eaff; color: #6b3fa0; border: 1px solid #c4b0f0; }
+
+  /* ── Code / pre ─────────────────────────────────── */
+  code {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    background: var(--section-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    color: var(--a8-blue);
+    word-break: break-all;
+  }
+  pre {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    background: #f0f2f4;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    color: var(--a8-blue);
+    line-height: 1.7;
+    overflow-x: auto;
+    margin-top: 8px;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  /* ── Callouts ───────────────────────────────────── */
+  .callout {
+    border-radius: 5px;
+    padding: 11px 14px;
+    font-size: 12px;
+    line-height: 1.6;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-top: 8px;
+  }
+  .callout.warn  { background: var(--amber-dim); border: 1px solid var(--amber-border); color: #7a4f00; }
+  .callout.info  { background: rgba(37,87,183,0.07); border: 1px solid rgba(37,87,183,0.3); color: var(--a8-blue); }
+  .callout.crit  { background: var(--red-dim); border: 1px solid var(--red-border); color: #b03030; }
+  .callout.green { background: var(--green-dim); border: 1px solid #a3e6be; color: #166534; }
+  .callout-icon  { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── Portal mockups (intentionally dark) ────────── */
+  .portal-mockup {
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #1a2035;
+    margin: 12px 0;
+    font-size: 12px;
+  }
+  .pm-bar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; font-family: 'Courier New', Consolas, monospace; font-size: 11px; }
+  .pm-bar.azure-bar { background: #0078d4; color: #fff; }
+  .pm-bar.entra-bar { background: #1e1a3a; color: #c084fc; border-bottom: 1px solid #3b2a6b; }
+  .pm-bar.xsp-bar   { background: #1a2535; color: #00bcd4; border-bottom: 1px solid #00577a; }
+  .pm-bar .pm-dot   { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.3); }
+  .pm-body { background: #1e2333; padding: 0; display: flex; }
+  .pm-sidebar { background: #181c27; border-right: 1px solid #2a3048; padding: 8px 0; min-width: 160px; flex-shrink: 0; }
+  .pm-sidebar-item { padding: 6px 14px; font-size: 11px; color: #64748b; cursor: default; display: flex; align-items: center; gap: 6px; }
+  .pm-sidebar-item.active { background: #1a2f5e; color: #3b7eff; border-left: 2px solid #3b7eff; }
+  .pm-sidebar-item.active.entra-active { background: #1a0a3a; color: #c084fc; border-left-color: #c084fc; }
+  .pm-sidebar-section { padding: 8px 14px 4px; font-size: 10px; font-family: 'Courier New', Consolas, monospace; color: #3d4a65; text-transform: uppercase; letter-spacing: 0.08em; }
+  .pm-content { flex: 1; padding: 16px 20px; color: #94a3b8; }
+  .pm-breadcrumb { font-size: 11px; color: #64748b; margin-bottom: 10px; }
+  .pm-breadcrumb span { color: #3b7eff; }
+  .pm-title { font-size: 15px; font-weight: 600; color: #e2e8f0; margin-bottom: 14px; }
+  .pm-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .pm-table td { padding: 7px 0; border-bottom: 1px solid #2a3048; color: #94a3b8; vertical-align: top; }
+  .pm-table td:first-child { color: #64748b; width: 160px; font-family: 'Courier New', Consolas, monospace; font-size: 11px; }
+  .pm-table td .highlight { background: #1e3a2a; border: 1px solid #166534; border-radius: 3px; padding: 2px 6px; color: #86efac; font-family: 'Courier New', Consolas, monospace; font-size: 11px; display: inline-flex; align-items: center; gap: 6px; }
+  .pm-table td .highlight::before { content: '→'; color: #22c55e; }
+  .pm-notice { background: #1a2535; border: 1px solid #1e3a80; border-radius: 5px; padding: 10px 14px; font-size: 12px; color: #93c5fd; margin-top: 10px; line-height: 1.5; }
+  .pm-notice strong { color: #e2e8f0; }
+  .pm-nav { display: flex; gap: 0; border-bottom: 1px solid #2a3048; margin-bottom: 12px; }
+  .pm-nav-item { padding: 7px 14px; font-size: 11px; color: #64748b; border-bottom: 2px solid transparent; cursor: default; }
+  .pm-nav-item.active { color: #3b7eff; border-bottom-color: #3b7eff; }
+  .pm-sub-label { font-size: 11px; font-family: 'Courier New', Consolas, monospace; color: #64748b; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .pm-input { background: #181c27; border: 1px solid #2a3048; border-radius: 4px; padding: 6px 10px; color: #93c5fd; font-family: 'Courier New', Consolas, monospace; font-size: 11px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+  .pm-input .copy-icon { color: #3b7eff; font-size: 10px; }
+  .pm-reservations-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #2a3048; font-size: 11px; }
+  .pm-reservations-row .rm-check { width: 14px; height: 14px; background: #1a2f5e; border: 1px solid #3b7eff; border-radius: 2px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .pm-reservations-row .rm-check::after { content: '✓'; font-size: 9px; color: #3b7eff; }
+  .pm-reservations-row .rm-status { background: #0c2a18; border: 1px solid #166534; color: #86efac; border-radius: 3px; padding: 1px 6px; font-size: 10px; }
+  .pm-btn { display: inline-flex; align-items: center; gap: 6px; background: #3b7eff; color: #fff; border: none; border-radius: 4px; padding: 6px 14px; font-size: 11px; font-weight: 600; cursor: default; }
+  .pm-btn-ghost { background: #1e2333; border: 1px solid #2a3048; color: #94a3b8; border-radius: 4px; padding: 5px 12px; font-size: 11px; cursor: default; display: inline-flex; align-items: center; gap: 5px; }
+  .pm-toolbar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+  .cost-bar { height: 80px; display: flex; align-items: flex-end; gap: 3px; padding: 0 0 4px; }
+  .cost-bar-item { flex: 1; background: linear-gradient(180deg, #1e40af 0%, #0078d4 100%); border-radius: 2px 2px 0 0; min-height: 20px; }
+  .cost-total { font-size: 22px; font-weight: 700; color: #e2e8f0; margin-bottom: 4px; }
+  .cost-label { font-size: 11px; color: #64748b; margin-bottom: 12px; }
+  .download-panel { background: #181c27; border: 1px solid #2a3048; border-radius: 6px; padding: 14px 16px; margin-top: 10px; }
+  .dl-format-row { display: flex; gap: 6px; margin: 8px 0 12px; }
+  .dl-fmt { padding: 4px 12px; border-radius: 3px; font-size: 11px; font-family: 'Courier New', Consolas, monospace; border: 1px solid #2a3048; color: #64748b; cursor: default; }
+  .dl-fmt.active { background: #3b7eff; border-color: #3b7eff; color: #fff; }
+
+  /* ── Field source reference cards ───────────────── */
+  .field-ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field-ref { background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; }
+  .field-ref-name { font-family: 'Courier New', Consolas, monospace; font-size: 12px; font-weight: 600; color: #111; margin-bottom: 4px; }
+  .field-ref-path { font-size: 11px; color: var(--text-muted); font-family: 'Courier New', Consolas, monospace; margin-bottom: 8px; line-height: 1.5; }
+  .field-ref-path .sep { color: #b0bcd0; margin: 0 4px; }
+  .field-ref-portal { font-size: 10px; font-family: 'Courier New', Consolas, monospace; padding: 2px 7px; border-radius: 3px; display: inline-block; margin-bottom: 8px; }
+  .field-ref-portal.azure { background: #e8f0fe; color: #1a56a8; border: 1px solid #9ab3f5; }
+  .field-ref-portal.entra { background: #f3eaff; color: #6b3fa0; border: 1px solid #c4b0f0; }
+  .field-ref-portal.xsp   { background: #e0f7fa; color: #006064; border: 1px solid #80deea; }
+  .field-ref-value { font-family: 'Courier New', Consolas, monospace; font-size: 11px; color: var(--a8-blue); background: rgba(37,87,183,0.07); border: 1px solid rgba(37,87,183,0.25); border-radius: 4px; padding: 4px 8px; }
+
+  /* ── Transfer request form ───────────────────────── */
+  .form-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px 24px 26px;
+  }
+  .card-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+  .form-section { margin-bottom: 22px; }
+  .form-section-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-family: 'Courier New', Consolas, monospace;
+    margin-bottom: 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 11px; font-family: 'Courier New', Consolas, monospace; color: var(--text-muted); letter-spacing: 0.06em; font-weight: 600; }
+  .source-hint { font-size: 10px; color: var(--a8-blue2); font-family: 'Courier New', Consolas, monospace; margin-top: 1px; }
+  .field input, .field textarea {
+    background: var(--panel-bg);
+    border: 1.5px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    padding: 8px 11px;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    resize: vertical;
+  }
+  .field input::placeholder, .field textarea::placeholder { color: #a3b5c6; }
+  .field input:focus, .field textarea:focus {
+    border-color: var(--a8-blue2);
+    box-shadow: 0 0 0 3px rgba(37,87,183,0.1);
+    background: #fff;
+  }
+  .field textarea { min-height: 80px; }
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+  .actions-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px 18px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--a8-blue); color: #fff; }
+  .btn-primary:hover { background: var(--a8-blue2); }
+  .btn-ghost { background: var(--panel-bg); color: var(--text-dim); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: #b0bcd0; color: var(--text); }
+
+  .notify-toggle { display: flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+  .notify-toggle input[type="checkbox"] { display: none; }
+  .cb-box { width: 18px; height: 18px; border: 1.5px solid var(--border); border-radius: 4px; background: var(--panel-bg); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: background 0.15s, border-color 0.15s; }
+  .notify-toggle input:checked + .cb-box { background: var(--green-dim); border-color: var(--green); }
+  .notify-toggle input:checked + .cb-box::after { content: ''; display: block; width: 5px; height: 9px; border: 2px solid #166534; border-top: none; border-left: none; transform: rotate(45deg) translateY(-1px); }
+  .cb-label { font-size: 13px; color: var(--text-dim); }
+  .notify-fields { display: none; margin-top: 14px; }
+  .notify-fields.visible { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  #email-preview { display: none; margin-top: 16px; background: var(--panel-bg); border: 1px solid var(--border); border-radius: 6px; padding: 16px; }
+  .preview-label { font-family: 'Courier New', Consolas, monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+  #preview-body { font-family: 'Courier New', Consolas, monospace; font-size: 12px; color: var(--text-dim); line-height: 1.75; white-space: pre-wrap; word-break: break-word; }
+
+  /* ── Checklist ──────────────────────────────────── */
+  .checklist { display: flex; flex-direction: column; gap: 2px; }
+  .check-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 11px 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .check-item:hover { border-color: #b0bcd0; }
+  .check-box { width: 16px; height: 16px; border: 1.5px solid var(--border); border-radius: 3px; flex-shrink: 0; background: var(--panel-bg); display: flex; align-items: center; justify-content: center; }
+  .check-item.done .check-box { background: var(--green-dim); border-color: #22c55e; }
+  .check-item.done .check-box::after { content: ''; display: block; width: 4px; height: 8px; border: 2px solid #166534; border-top: none; border-left: none; transform: rotate(45deg) translateY(-1px); }
+  .check-item.done .check-text { color: var(--text-muted); text-decoration: line-through; text-decoration-color: #b0bcd0; }
+  .check-phase { font-family: 'Courier New', Consolas, monospace; font-size: 10px; color: var(--text-muted); margin-left: auto; padding-left: 12px; white-space: nowrap; }
+
+  /* ── Notes ─────────────────────────────────────── */
+  .notes { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 18px 20px; }
+  .notes ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .notes ul li { font-size: 13px; color: var(--text-dim); line-height: 1.6; display: flex; gap: 10px; }
+  .notes ul li::before { content: '—'; color: var(--text-muted); flex-shrink: 0; }
+
+  /* ── Active8 footer ─────────────────────────────── */
+  .article-footer { background: linear-gradient(135deg, var(--a8-blue) 0%, var(--a8-blue2) 60%, var(--a8-blue) 100%); padding: 22px 24px; margin-top: 40px; }
+  .article-footer-inner { max-width: 960px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .footer-brand { font-family: 'Courier New', Consolas, monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--a8-lime); font-weight: 600; }
+  .footer-text { font-size: 12px; color: rgba(255,255,255,0.7); }
+</style>
+</head>
+<body>
+
+<!-- Sticky nav -->
+<nav class="sticky-nav">
+  <div class="sticky-nav-inner">
+    <span class="nav-link" onclick="document.getElementById('field-sources').scrollIntoView({behavior:'smooth'})">Field Sources</span>
+    <span class="nav-link" onclick="document.getElementById('process').scrollIntoView({behavior:'smooth'})">Process Steps</span>
+    <span class="nav-link" onclick="document.getElementById('transfer-form').scrollIntoView({behavior:'smooth'})">Transfer Request</span>
+    <span class="nav-link" onclick="document.getElementById('checklist').scrollIntoView({behavior:'smooth'})">Checklist</span>
+    <span class="nav-link" onclick="document.getElementById('notes').scrollIntoView({behavior:'smooth'})">Notes</span>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="badge">Active8 Managed Technologies &middot; Arrow ECS</div>
+    <h1>Azure Subscription Migration<br><span>Previous Reseller &rarr; Arrow ECS</span></h1>
+    <p>Complete all pre-migration steps and gather required field data before raising the transfer request with Arrow.</p>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-label">Jump to section</div>
+    <div class="toc-links">
+      <a href="#field-sources">Field Sources</a>
+      <a href="#process">Process Steps</a>
+      <a href="#transfer-form">Transfer Request</a>
+      <a href="#checklist">Checklist</a>
+      <a href="#notes">Notes</a>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       FIELD SOURCES
+  ══════════════════════════════════════ -->
+  <h2 id="field-sources">Where to find the required field data</h2>
+
+  <!-- 1. Tenant ID + Primary Domain — Entra -->
+  <div style="margin-bottom:20px;">
+    <div class="phase"><span class="phase-label pre">Entra Admin Center</span><div class="phase-line"></div></div>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Navigate to <strong>entra.microsoft.com</strong> &rarr; Entra ID &rarr; Overview. The Basic information panel contains both the Tenant ID and Primary domain.</p>
+
+    <div class="portal-mockup">
+      <div class="pm-bar entra-bar"><span class="pm-dot"></span><span style="color:#94a3b8;font-size:10px;">Microsoft Entra admin center</span></div>
+      <div class="pm-body">
+        <div class="pm-sidebar">
+          <div class="pm-sidebar-section">Entra ID</div>
+          <div class="pm-sidebar-item active entra-active">&#128203; Overview</div>
+          <div class="pm-sidebar-item">&#128100; Users</div>
+          <div class="pm-sidebar-item">&#128101; Groups</div>
+          <div class="pm-sidebar-item">&#127970; Enterprise apps</div>
+        </div>
+        <div class="pm-content">
+          <div class="pm-breadcrumb">Home <span>›</span> Microsoft Entra Connect</div>
+          <div class="pm-title">Meridian Components Ltd</div>
+          <div class="pm-nav">
+            <div class="pm-nav-item active">Overview</div>
+            <div class="pm-nav-item">Monitoring</div>
+            <div class="pm-nav-item">Properties</div>
+          </div>
+          <div style="font-size:12px;font-weight:600;color:#94a3b8;margin-bottom:8px;">Basic information</div>
+          <table class="pm-table">
+            <tr><td>Name</td><td>Meridian Components Ltd</td></tr>
+            <tr><td>Tenant ID</td><td><span class="highlight">a3f12b84-7c29-4e51-bda0-6f839204e7c1</span></td></tr>
+            <tr><td>Primary domain</td><td><span class="highlight">meridiancomponents.co.uk</span></td></tr>
+            <tr><td>License</td><td>Microsoft Entra ID P1</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-ref-grid" style="margin-top:8px;">
+      <div class="field-ref">
+        <div class="field-ref-portal entra">entra.microsoft.com</div>
+        <div class="field-ref-name">Tenant ID</div>
+        <div class="field-ref-path">Entra ID <span class="sep">›</span> Overview <span class="sep">›</span> Basic information</div>
+        <div class="field-ref-value">Tenant ID row</div>
+      </div>
+      <div class="field-ref">
+        <div class="field-ref-portal entra">entra.microsoft.com</div>
+        <div class="field-ref-name">Primary Domain</div>
+        <div class="field-ref-path">Entra ID <span class="sep">›</span> Overview <span class="sep">›</span> Basic information</div>
+        <div class="field-ref-value">Primary domain row</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Current Distributor — Azure Portal -->
+  <div style="margin-bottom:20px;">
+    <div class="phase"><span class="phase-label pre">Azure Portal — Billing Profile</span><div class="phase-line"></div></div>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Navigate to <strong>portal.azure.com</strong> &rarr; Home &rarr; Subscriptions &rarr; [Subscription] &rarr; Billing &rarr; Billing profile invoices. The notice at the centre of the page names the current distributor billing profile.</p>
+
+    <div class="portal-mockup">
+      <div class="pm-bar azure-bar"><span style="font-size:13px;">&#10063;</span>&nbsp; Microsoft Azure</div>
+      <div class="pm-body">
+        <div class="pm-sidebar">
+          <div class="pm-sidebar-item">&#127968; Overview</div>
+          <div class="pm-sidebar-item">&#128203; Activity log</div>
+          <div class="pm-sidebar-item">&#128274; Access control (IAM)</div>
+          <div class="pm-sidebar-section">Cost Management</div>
+          <div class="pm-sidebar-item">&#128176; Cost analysis</div>
+          <div class="pm-sidebar-section">Billing</div>
+          <div class="pm-sidebar-item active">&#128196; Billing profile invoices</div>
+        </div>
+        <div class="pm-content">
+          <div class="pm-breadcrumb">Home <span>›</span> Azure subscription 1</div>
+          <div class="pm-title">Azure subscription 1 | Billing profile invoices</div>
+          <div style="text-align:center;padding:20px 10px;">
+            <div style="font-size:28px;margin-bottom:10px;">&#128196;</div>
+            <div style="font-size:13px;font-weight:600;color:#e2e8f0;margin-bottom:6px;">Invoices are consolidated for your subscriptions</div>
+            <div class="pm-notice" style="text-align:left;">This subscription is billed to <strong>"Contoso Distribution Ltd"</strong> billing profile. However, you don't have access to this billing profile so you can't view invoices.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-ref-grid" style="margin-top:8px;">
+      <div class="field-ref">
+        <div class="field-ref-portal azure">portal.azure.com</div>
+        <div class="field-ref-name">Current Distributor</div>
+        <div class="field-ref-path">Subscriptions <span class="sep">›</span> [Subscription] <span class="sep">›</span> Billing <span class="sep">›</span> Billing profile invoices</div>
+        <div class="field-ref-value">"billed to [X] billing profile" notice</div>
+      </div>
+      <div class="field-ref">
+        <div class="field-ref-portal azure">portal.azure.com</div>
+        <div class="field-ref-name">Existing Subscription ID</div>
+        <div class="field-ref-path">Resource groups <span class="sep">›</span> [Resource group] <span class="sep">›</span> Essentials panel</div>
+        <div class="field-ref-value">Subscription ID field</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Reservations — Azure Portal -->
+  <div style="margin-bottom:20px;">
+    <div class="phase"><span class="phase-label pre">Azure Portal — Reservations CSV</span><div class="phase-line"></div></div>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Navigate to <strong>portal.azure.com</strong> &rarr; Cost Management &rarr; Reservations + Hybrid Benefit. Check whether any reservations exist. If present, tick all rows and click <strong>Download</strong> to export CSV. If the list is empty, no action is needed here.</p>
+    <div class="callout info" style="margin-bottom:10px;"><span class="callout-icon">&#8505;</span> Reservations may not exist for all customers. If the list shows <strong>no results</strong>, skip the download and note "N/A" in the transfer request.</div>
+
+    <div class="portal-mockup">
+      <div class="pm-bar azure-bar"><span style="font-size:13px;">&#10063;</span>&nbsp; Microsoft Azure</div>
+      <div class="pm-body">
+        <div class="pm-sidebar">
+          <div class="pm-sidebar-section">Reporting + analytics</div>
+          <div class="pm-sidebar-item">&#128202; Cost analysis</div>
+          <div class="pm-sidebar-item">&#128228; Exports</div>
+          <div class="pm-sidebar-section">Optimization</div>
+          <div class="pm-sidebar-item active">&#128278; Reservations + Hybrid Benefit</div>
+          <div class="pm-sidebar-item">&#128190; Savings plans</div>
+        </div>
+        <div class="pm-content">
+          <div class="pm-breadcrumb">Home <span>›</span> Cost Management: Azure subscription 1</div>
+          <div class="pm-title">Reservations + Hybrid Benefit</div>
+          <div class="pm-toolbar">
+            <div class="pm-btn-ghost">+ Add</div>
+            <div class="pm-btn-ghost">&#8644; Exchange</div>
+            <div class="pm-btn-ghost">&#8635; Refresh</div>
+            <div class="pm-btn" style="background:#22c55e;">&#11015; Download</div>
+          </div>
+          <div style="font-size:11px;color:#64748b;margin-bottom:8px;">2 selected &middot; Scope: All &middot; Type: All &middot; Archived: No</div>
+          <div class="pm-reservations-row">
+            <div class="rm-check"></div>
+            <span style="color:#60a5fa;flex:1;">VM_RI_15-03-2024_09-31</span>
+            <span class="rm-status">Succeeded</span>
+            <span style="color:#64748b;width:80px;">01/08/2027</span>
+            <span style="color:#94a3b8;width:120px;">Standard_D4s_v5</span>
+            <span style="color:#94a3b8;">UK South</span>
+          </div>
+          <div class="pm-reservations-row">
+            <div class="rm-check"></div>
+            <span style="color:#60a5fa;flex:1;">VM_RI_15-03-2024_09-32</span>
+            <span class="rm-status">Succeeded</span>
+            <span style="color:#64748b;width:80px;">01/08/2027</span>
+            <span style="color:#94a3b8;width:120px;">Standard_D4s_v5</span>
+            <span style="color:#94a3b8;">UK South</span>
+          </div>
+          <div class="callout green" style="margin-top:10px;font-size:12px;"><span class="callout-icon">&#10003;</span> Reservations downloaded. Save the CSV provided by the browser.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Cost Analysis — Azure Portal -->
+  <div style="margin-bottom:20px;">
+    <div class="phase"><span class="phase-label pre">Azure Portal — Cost Analysis CSV</span><div class="phase-line"></div></div>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">Cost Management &rarr; Cost analysis &rarr; select a view (e.g. <em>Accumulated costs</em>) &rarr; set date range to last 12 months &rarr; <strong>Download</strong> &rarr; select <strong>CSV</strong> &rarr; <strong>Download data</strong>.</p>
+
+    <div class="portal-mockup">
+      <div class="pm-bar azure-bar"><span style="font-size:13px;">&#10063;</span>&nbsp; Microsoft Azure</div>
+      <div class="pm-body">
+        <div class="pm-sidebar">
+          <div class="pm-sidebar-section">Reporting + analytics</div>
+          <div class="pm-sidebar-item active">&#128202; Cost analysis</div>
+          <div class="pm-sidebar-item">&#128228; Exports</div>
+        </div>
+        <div class="pm-content">
+          <div class="pm-title">Cost Management: Azure subscription 1 | Cost analysis</div>
+          <div class="pm-toolbar">
+            <div class="pm-btn-ghost">&#128190; Save</div>
+            <div class="pm-btn-ghost">&#128279; Share</div>
+            <div class="pm-btn">&#11015; Download</div>
+          </div>
+          <div style="font-size:11px;color:#64748b;margin-bottom:8px;">May 2025 – Apr 2026 &middot; Granularity: Monthly &middot; Group by: Resource group</div>
+          <div class="cost-total">&pound;2,847.63</div>
+          <div class="cost-label">Actual cost (GBP only) &middot; May 2025–Apr 2026</div>
+          <div class="cost-bar">
+            <div class="cost-bar-item" style="height:22%"></div><div class="cost-bar-item" style="height:26%"></div>
+            <div class="cost-bar-item" style="height:30%"></div><div class="cost-bar-item" style="height:34%"></div>
+            <div class="cost-bar-item" style="height:38%"></div><div class="cost-bar-item" style="height:40%"></div>
+            <div class="cost-bar-item" style="height:42%"></div><div class="cost-bar-item" style="height:44%"></div>
+            <div class="cost-bar-item" style="height:50%"></div><div class="cost-bar-item" style="height:55%"></div>
+            <div class="cost-bar-item" style="height:80%"></div><div class="cost-bar-item" style="height:100%"></div>
+          </div>
+          <div class="download-panel">
+            <div style="font-size:13px;font-weight:600;color:#e2e8f0;margin-bottom:8px;">Download — Cost analysis</div>
+            <div class="dl-format-row">
+              <div class="dl-fmt">PNG</div><div class="dl-fmt">Excel</div><div class="dl-fmt active">CSV</div>
+            </div>
+            <div class="pm-btn">&#11015; Download data</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. New Subscription ID — XSP -->
+  <div style="margin-bottom:20px;">
+    <div class="phase"><span class="phase-label arrow">XSP — New Subscription ID</span><div class="phase-line"></div></div>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:10px;">After the Azure subscription order is fulfilled in Arrowsphere, navigate to <strong>xsp.arrow.com</strong> &rarr; Manage &rarr; Customer's Services &rarr; [Customer] &rarr; click the Azure subscription &rarr; Subscription Sheet &rarr; <strong>Consumption tab</strong>. The Subscription ID is shown in the panel.</p>
+
+    <div class="portal-mockup">
+      <div class="pm-bar xsp-bar"><span style="font-weight:700;color:#fff;">Arrow</span><span style="color:#00bcd4;font-weight:700;">Sphere</span> <span style="color:#64748b;margin-left:8px;font-size:10px;">Cloud</span></div>
+      <div class="pm-body">
+        <div class="pm-sidebar">
+          <div class="pm-sidebar-item" style="color:#00bcd4;font-size:10px;">Home › Customer's Services ›</div>
+          <div class="pm-sidebar-section">Subscription</div>
+          <div class="pm-sidebar-item" style="color:#e2e8f0;">&#128311; Microsoft Azure Subscription (Azure Plan)</div>
+          <div class="pm-sidebar-item" style="font-size:10px;color:#64748b;padding-left:24px;">VENDOR SKU: DZH318Z0BPS6:0001</div>
+        </div>
+        <div class="pm-content">
+          <div class="pm-breadcrumb">Home <span>›</span> Customer's Services <span>›</span> Subscription Sheet</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+            <span style="font-size:20px;">&#128311;</span>
+            <div>
+              <div style="font-size:14px;font-weight:600;color:#00bcd4;">Microsoft Azure Subscription (Azure Plan)</div>
+              <div style="font-size:11px;color:#64748b;">VENDOR SKU: DZH318Z0BPS6:0001</div>
+            </div>
+            <span style="background:#0c2a18;border:1px solid #166534;color:#86efac;border-radius:3px;padding:2px 8px;font-size:11px;margin-left:auto;">Activated</span>
+          </div>
+          <div class="pm-nav">
+            <div class="pm-nav-item active">Consumption</div>
+            <div class="pm-nav-item">Pricing</div>
+            <div class="pm-nav-item">License Details</div>
+            <div class="pm-nav-item">Billing Comments</div>
+          </div>
+          <div class="pm-sub-label">Subscription ID</div>
+          <div class="pm-input">
+            <span style="color:#86efac;">f8b23c90-5ae1-4d77-b162-9e407c831d25</span>
+            <span class="copy-icon">&#10697; copy</span>
+          </div>
+          <div class="pm-sub-label" style="margin-top:4px;">Month</div>
+          <div class="pm-input" style="color:#64748b;">05-2026</div>
+          <div class="callout info" style="margin-top:10px;font-size:12px;"><span class="callout-icon">&#8505;</span> This is the <strong>new Arrow Subscription ID</strong> required for the transfer request email to Arrow.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-ref-grid" style="margin-top:8px;">
+      <div class="field-ref">
+        <div class="field-ref-portal xsp">xsp.arrow.com</div>
+        <div class="field-ref-name">New Arrow Subscription ID</div>
+        <div class="field-ref-path">Customer's Services <span class="sep">›</span> [Azure Subscription] <span class="sep">›</span> Subscription Sheet <span class="sep">›</span> Consumption tab</div>
+        <div class="field-ref-value">Subscription ID field</div>
+      </div>
+      <div class="field-ref">
+        <div class="field-ref-portal xsp">xsp.arrow.com</div>
+        <div class="field-ref-name">Order Confirmation</div>
+        <div class="field-ref-path">Notification Center <span class="sep">›</span> Order status update email</div>
+        <div class="field-ref-value">Order fulfilled notification</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       PROCESS STEPS
+  ══════════════════════════════════════ -->
+  <h2 id="process">Process</h2>
+
+  <!-- PRE-MIGRATION -->
+  <div class="phase"><span class="phase-label pre">Pre-Migration — Information Gathering</span><div class="phase-line"></div></div>
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Identify the current distributor <span class="portal-tag azure">Azure Portal</span></div>
+        <div class="step-desc">
+          Go to <code>portal.azure.com</code> &rarr; Home &rarr; Subscriptions &rarr; [Customer Subscription] &rarr; Billing &rarr; <strong>Billing profile invoices</strong>. The page will display a notice: <em>"This subscription is billed to [Distributor] billing profile."</em> Note the distributor name — this is required in the transfer request and you will need to contact them to approve the transfer.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Collect Tenant ID and Primary Domain <span class="portal-tag entra">Entra Admin Center</span></div>
+        <div class="step-desc">
+          Go to <code>entra.microsoft.com</code> &rarr; Entra ID &rarr; Overview. From the Basic information panel, note:
+          <ul>
+            <li><strong>Tenant ID</strong> — the GUID shown in the Tenant ID row</li>
+            <li><strong>Primary domain</strong> — the .onmicrosoft or custom domain</li>
+            <li><strong>Tenant Name</strong> — the display name of the organisation</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Document existing resources and Subscription ID <span class="portal-tag azure">Azure Portal</span></div>
+        <div class="step-desc">
+          Go to <code>portal.azure.com</code> &rarr; Resource groups &rarr; select the relevant resource group. From the Essentials panel note the <strong>Subscription ID</strong> (this is the old subscription from the current reseller). List all resources in the resource group — this forms the <em>Resources to Transfer</em> section of the Arrow email.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Check and download Reservations CSV <span class="portal-tag azure">Azure Portal</span></div>
+        <div class="step-desc">
+          Go to Cost Management &rarr; <strong>Reservations + Hybrid Benefit</strong>. If reservations are listed, select all rows and click <strong>Download</strong> to export the CSV — attach this to the Arrow transfer request email. If the list is empty, note "N/A" in the transfer request.
+          <div class="callout warn" style="margin-top:8px;"><span class="callout-icon">&#9888;</span> Reservations are <strong>not automatically migrated</strong>. Where they exist, Arrow must re-purchase them under the new subscription after the transfer completes.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <div class="step-title">Download Cost Analysis CSV (last 12 months) <span class="portal-tag azure">Azure Portal</span></div>
+        <div class="step-desc">
+          Go to Cost Management &rarr; <strong>Cost analysis</strong> &rarr; select <em>Accumulated costs</em> view &rarr; set date range to last 12 months &rarr; <strong>Download</strong> &rarr; select <strong>CSV</strong> &rarr; <strong>Download data</strong>. Attach this CSV to the Arrow transfer request email.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-body">
+        <div class="step-title">Confirm customer exists in Arrowsphere <span class="portal-tag xsp">xsp.arrow.com</span></div>
+        <div class="step-desc">
+          Log in to <code>xsp.arrow.com</code>. Confirm the customer is already set up under your partner account. If not, add them using their <strong>Primary Domain Name</strong> — this must exactly match the Entra primary domain noted in step 2.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">7</div>
+      <div class="step-body">
+        <div class="step-title">Order Azure subscription for the customer <span class="portal-tag xsp">xsp.arrow.com</span><span class="step-tag crit">Critical</span></div>
+        <div class="step-desc">
+          Go to Catalog &rarr; search <strong>Microsoft Azure Subscription (Azure Plan)</strong> &rarr; select <em>Corporate</em> type &rarr; add to cart &rarr; assign to the correct customer &rarr; checkout. Wait for the order status to show <strong>Fulfilled</strong> in the notification centre before proceeding.
+          <div class="callout warn" style="margin-top:8px;"><span class="callout-icon">&#9888;</span> Do not raise the Arrow transfer request until this order is confirmed as Fulfilled and the Subscription ID is visible on the Subscription Sheet.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">8</div>
+      <div class="step-body">
+        <div class="step-title">Note the new Arrow Subscription ID <span class="portal-tag xsp">xsp.arrow.com</span></div>
+        <div class="step-desc">
+          Navigate to Manage &rarr; Customer's Services &rarr; select the customer &rarr; click the Microsoft Azure Subscription &rarr; <strong>Subscription Sheet</strong> &rarr; <strong>Consumption tab</strong>. Copy the <strong>Subscription ID</strong> shown in the panel. This is the <em>New Arrow Subscription ID</em> field in the transfer request.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">9</div>
+      <div class="step-body">
+        <div class="step-title">Send transfer request to Arrow <span class="step-tag info">Email Action</span></div>
+        <div class="step-desc">
+          Complete the form below and use <strong>Open in Mail</strong> to send to <code>technical.ecs.uk@arrow.com</code>. Arrow will raise the transfer request with Microsoft on your behalf. Attach the Reservations CSV and Cost Analysis CSV to the email.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TRANSFER REQUEST phase -->
+  <div class="phase"><span class="phase-label trans">Transfer Request</span><div class="phase-line"></div></div>
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-num">10</div>
+      <div class="step-body">
+        <div class="step-title">Notify current distributor to approve</div>
+        <div class="step-desc">
+          Contact the current distributor (identified in step 1) and request they approve the transfer request. Inform the customer's service manager that the transfer has been initiated — they may need to communicate with their current provider.
+          <div class="callout warn" style="margin-top:8px;"><span class="callout-icon">&#9888;</span> Transfer requests are valid for <strong>30 days</strong>. If the outbound distributor does not approve within this window, a new request must be raised.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- POST TRANSFER -->
+  <div class="phase"><span class="phase-label post">Post-Transfer</span><div class="phase-line"></div></div>
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-num">11</div>
+      <div class="step-body">
+        <div class="step-title">Implement GDAP (Reseller + Arrow) <span class="step-tag crit">Critical</span></div>
+        <div class="step-desc">Once transfer is confirmed, implement Granular Delegated Admin Privileges for both Active8 (reseller) and Arrow. This replaces the previous reseller's admin access.</div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">12</div>
+      <div class="step-body">
+        <div class="step-title">Run Arrow Foreign Principle (PEC) scripts</div>
+        <div class="step-desc">
+          Run the Arrow Foreign Principle scripts to establish correct billing attribution. Send a screenshot of the completed output to Arrow.
+          <div class="callout info" style="margin-top:8px;"><span class="callout-icon">&#8505;</span> Euro billing environments use different Foreign Principle IDs — contact Arrow if this applies.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">13</div>
+      <div class="step-body">
+        <div class="step-title">Remove previous reseller / distributor RBAC <span class="step-tag crit">Critical</span></div>
+        <div class="step-desc">
+          In <code>portal.azure.com</code> &rarr; Subscriptions &rarr; [Subscription] &rarr; Access control (IAM) &rarr; Role assignments, remove any Owner or Contributor entries belonging to the previous reseller or distributor. Verify no lingering service principals remain.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">14</div>
+      <div class="step-body">
+        <div class="step-title">Review Reservations, Alerts and Thresholds</div>
+        <div class="step-desc">
+          If reservations existed pre-migration, re-create them under the new Arrow subscription. Review cost alerts, budgets and thresholds in Cost Management — these do not carry over automatically.
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">15</div>
+      <div class="step-body">
+        <div class="step-title">Implement Partner Admin Link (PAL)</div>
+        <div class="step-desc">Link your MPN/partner ID to the customer subscription via PAL to ensure correct partner attribution for Azure credits and incentives.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════
+       TRANSFER REQUEST FORM
+  ══════════════════════════════════════ -->
+  <h2 id="transfer-form">Transfer Request Form</h2>
+  <div class="form-card">
+    <div class="card-label">Populate all fields before generating the email</div>
+
+    <div class="form-section">
+      <div class="form-section-title">Customer Details</div>
+      <div class="field-grid">
+        <div class="field">
+          <label>CUSTOMER NAME</label>
+          <div class="source-hint">&#8627; Entra admin center &rarr; Overview &rarr; Name</div>
+          <input id="f-customer" type="text" placeholder="e.g. Meridian Components Ltd">
+        </div>
+        <div class="field">
+          <label>TENANT PRIMARY DOMAIN</label>
+          <div class="source-hint">&#8627; Entra admin center &rarr; Overview &rarr; Primary domain</div>
+          <input id="f-tenant-domain" type="text" placeholder="e.g. meridiancomponents.co.uk">
+        </div>
+        <div class="field">
+          <label>TENANT ID</label>
+          <div class="source-hint">&#8627; Entra admin center &rarr; Overview &rarr; Tenant ID</div>
+          <input id="f-tenant-id" type="text" placeholder="e.g. a3f12b84-7c29-4e51-bda0-6f839204e7c1">
+        </div>
+        <div class="field">
+          <label>CUSTOMER ADMIN NAME</label>
+          <input id="f-admin-name" type="text" placeholder="e.g. James Whitfield">
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label>CUSTOMER ADMIN EMAIL</label>
+          <input id="f-admin-email" type="email" placeholder="e.g. admin@meridiancomponents.co.uk">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Transfer Details</div>
+      <div class="field-grid">
+        <div class="field">
+          <label>CURRENT DISTRIBUTOR</label>
+          <div class="source-hint">&#8627; Azure Portal &rarr; Subscription &rarr; Billing profile invoices</div>
+          <input id="f-disti" type="text" placeholder="e.g. Contoso Distribution Ltd">
+        </div>
+        <div class="field">
+          <label>EXISTING SUBSCRIPTION ID</label>
+          <div class="source-hint">&#8627; Azure Portal &rarr; Resource group &rarr; Essentials</div>
+          <input id="f-sub-old" type="text" placeholder="e.g. c71d4a82-3fb6-4109-a8e3-2d150f963b47">
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label>NEW ARROW SUBSCRIPTION ID</label>
+          <div class="source-hint">&#8627; xsp.arrow.com &rarr; Customer's Services &rarr; Subscription Sheet &rarr; Consumption tab</div>
+          <input id="f-sub-new" type="text" placeholder="e.g. f8b23c90-5ae1-4d77-b162-9e407c831d25">
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label>RESERVATIONS <span style="color:var(--text-muted);font-weight:400;">(optional — N/A if none exist)</span></label>
+          <div class="source-hint">&#8627; Azure Portal &rarr; Cost Management &rarr; Reservations + Hybrid Benefit &rarr; Download CSV if present</div>
+          <textarea id="f-ri" placeholder="N/A — no reservations found&#10;&#10;— or if present —&#10;VM_RI_15-03-2024_09-31, Standard_D4s_v5, UK South, expiry 01/08/2027"></textarea>
+        </div>
+        <div class="field" style="grid-column:1/-1">
+          <label>RESOURCES TO TRANSFER (from resource group)</label>
+          <div class="source-hint">&#8627; Azure Portal &rarr; Resource groups &rarr; [Resource group] &rarr; Resources list</div>
+          <textarea id="f-resources" placeholder="e.g. MC-Azure-Prod resource group — VMs, VNet, Storage, VPN Gateway, AVD Host Pool..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Engineer Details</div>
+      <div class="field-grid">
+        <div class="field">
+          <label>ENGINEER NAME</label>
+          <input id="f-engineer" type="text" placeholder="Your name">
+        </div>
+        <div class="field">
+          <label>ENGINEER EMAIL</label>
+          <input id="f-eng-email" type="email" placeholder="your@a8mt.co.uk">
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <label class="notify-toggle" onclick="toggleNotifyFields()">
+      <input type="checkbox" id="cb-notify">
+      <div class="cb-box"></div>
+      <span class="cb-label">Also notify service manager / outbound distributor contact</span>
+    </label>
+    <div id="notify-fields" class="notify-fields">
+      <div class="field">
+        <label>SERVICE MANAGER NAME</label>
+        <input id="f-sm-name" type="text" placeholder="e.g. Account Manager">
+      </div>
+      <div class="field">
+        <label>SERVICE MANAGER EMAIL</label>
+        <input id="f-sm-email" type="email" placeholder="sm@customer.co.uk">
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="actions-row">
+      <button class="btn btn-primary" onclick="openEmail()">&#9993; Open in Mail</button>
+      <button class="btn btn-ghost" onclick="showPreview()">Preview email</button>
+    </div>
+
+    <div id="email-preview">
+      <div class="preview-label">Email Preview</div>
+      <div id="preview-body"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       CHECKLIST
+  ══════════════════════════════════════ -->
+  <h2 id="checklist">Checklist</h2>
+  <div class="checklist">
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Current distributor identified from Azure Billing profile invoices</span><span class="check-phase">Pre-Migration</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Tenant ID and Primary domain collected from Entra admin center</span><span class="check-phase">Pre-Migration</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Existing Subscription ID noted from Azure Resource group</span><span class="check-phase">Pre-Migration</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">All resources in resource group documented</span><span class="check-phase">Pre-Migration</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Reservations checked — CSV downloaded if present, N/A noted if none</span><span class="check-phase">Pre-Migration</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Cost Analysis CSV downloaded (12 months, monthly granularity)</span><span class="check-phase">Pre-Migration</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Customer confirmed / added in Arrowsphere</span><span class="check-phase">Arrow — XSP</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Azure subscription ordered and confirmed Fulfilled in XSP</span><span class="check-phase">Arrow — XSP</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">New Arrow Subscription ID noted from Subscription Sheet (Consumption tab)</span><span class="check-phase">Arrow — XSP</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Transfer request email sent to technical.ecs.uk@arrow.com with CSVs attached</span><span class="check-phase">Transfer</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Current distributor notified to approve the transfer request</span><span class="check-phase">Transfer</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Private Offers and renewal dates reviewed</span><span class="check-phase">Transfer</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Reseller GDAP implemented post-transfer</span><span class="check-phase">Post-Transfer</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Arrow GDAP implemented post-transfer</span><span class="check-phase">Post-Transfer</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Arrow Foreign Principle (PEC) scripts run — screenshot sent to Arrow</span><span class="check-phase">Post-Transfer</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Previous reseller / distributor RBAC permissions removed from IAM</span><span class="check-phase">Post-Transfer</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Reservations re-purchased under new Arrow subscription (if applicable)</span><span class="check-phase">Post-Transfer</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Cost alerts, budgets and thresholds re-configured</span><span class="check-phase">Post-Transfer</span></div>
+    <div class="check-item" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-text">Partner Admin Link (PAL) implemented</span><span class="check-phase">Post-Transfer</span></div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       NOTES
+  ══════════════════════════════════════ -->
+  <h2 id="notes">Notes</h2>
+  <div class="notes">
+    <ul>
+      <li>Transfer requests are valid for 30 days. If the outbound distributor does not approve within that window, a new request must be raised.</li>
+      <li>The Subscription ID shown in the XSP Subscription Sheet (Consumption tab) is the new Arrow subscription ID — not the old one from the resource group essentials panel.</li>
+      <li>Reservations may not exist for all customers. Always check the Reservations + Hybrid Benefit page before assuming — if the list is empty, note N/A and skip the CSV. Where reservations do exist, they are not automatically migrated and must be re-purchased by Arrow under the new subscription after transfer.</li>
+      <li>Arrowsphere data may take several days to reflect correctly after a completed transfer.</li>
+      <li>Euro billing environments use different Foreign Principle IDs — contact Arrow if this applies.</li>
+      <li>If the Billing profile invoices page shows "Select a scope" rather than the distributor name, navigate directly to the subscription (not via Cost Management) and access Billing from the subscription blade.</li>
+      <li>Update this document after the first live run to reflect any corrections or additional steps.</li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- Active8 footer -->
+<div class="article-footer">
+  <div class="article-footer-inner">
+    <div class="footer-brand">Active8 Managed Technologies &nbsp;&middot;&nbsp; IT Service Management</div>
+    <div class="footer-text">This article is maintained by the Active 8 IT team.</div>
+  </div>
+</div>
+
+<script>
+  function getFields() {
+    return {
+      customer:     document.getElementById('f-customer').value.trim()     || '[Customer Name]',
+      tenantDomain: document.getElementById('f-tenant-domain').value.trim()|| '[Tenant Primary Domain]',
+      tenantId:     document.getElementById('f-tenant-id').value.trim()    || '[Tenant ID not provided]',
+      adminName:    document.getElementById('f-admin-name').value.trim()   || '[Admin Name]',
+      adminEmail:   document.getElementById('f-admin-email').value.trim()  || '[Admin Email]',
+      disti:        document.getElementById('f-disti').value.trim()        || '[Current Distributor]',
+      subOld:       document.getElementById('f-sub-old').value.trim()      || '[Existing Subscription ID]',
+      subNew:       document.getElementById('f-sub-new').value.trim()      || '[New Arrow Subscription ID]',
+      ri:           document.getElementById('f-ri').value.trim()           || 'N/A',
+      resources:    document.getElementById('f-resources').value.trim()    || '[No resources listed]',
+      engineer:     document.getElementById('f-engineer').value.trim()     || '[Engineer Name]',
+      engEmail:     document.getElementById('f-eng-email').value.trim()    || '',
+      smName:       document.getElementById('f-sm-name').value.trim()      || '[Service Manager Name]',
+      smEmail:      document.getElementById('f-sm-email').value.trim()     || '',
+    };
+  }
+
+  function buildEmail(f) {
+    const resourceLines = f.resources.split('\n').map(function(l){ return '  ' + l.trim(); }).join('\n');
+    const replyLine = f.engEmail ? '\nEmail: ' + f.engEmail : '';
+    return 'Hi Arrow Technical Team,\n\nWe would like to request an Azure subscription transfer for the following customer.\n\n\u2500\u2500 Customer Details \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nCustomer Name:          ' + f.customer + '\nTenant Primary Domain:  ' + f.tenantDomain + '\nTenant ID:              ' + f.tenantId + '\nAdmin Name:             ' + f.adminName + '\nAdmin Email:            ' + f.adminEmail + '\n\n\u2500\u2500 Transfer Details \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nCurrent Distributor:    ' + f.disti + '\nExisting Sub ID:        ' + f.subOld + '\nNew Arrow Sub ID:       ' + f.subNew + '\nReservations:           ' + f.ri + '\n\n\u2500\u2500 Resources to Transfer \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n' + resourceLines + '\n\nPlease can you advise on next steps and confirm once the transfer request has been raised with Microsoft. We will contact the current distributor to request their approval.\n\nAttached: Cost Analysis CSV (last 12 months)' + (f.ri && f.ri.toLowerCase() !== 'n/a' ? ', Reservations CSV' : '') + '.\n\nLet me know if you need anything further.\n\nKind regards,\n' + f.engineer + replyLine;
+  }
+
+  function buildNotifyNote(f) {
+    const emailLine = f.smEmail ? '\nService Manager Email: ' + f.smEmail : '';
+    return '\n\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nSEPARATE ACTION \u2014 Notify Service Manager\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nCustomer:              ' + f.customer + '\nService Manager:       ' + f.smName + emailLine + '\n\nNotify the above that an inbound migration request has been raised and that approval of the transfer request will be required from the current distributor (' + f.disti + ').';
+  }
+
+  function renderPreview() {
+    var notify = document.getElementById('cb-notify').checked;
+    var f = getFields();
+    document.getElementById('preview-body').textContent = buildEmail(f) + (notify ? buildNotifyNote(f) : '');
+  }
+
+  function showPreview() {
+    document.getElementById('email-preview').style.display = 'block';
+    renderPreview();
+  }
+
+  function openEmail() {
+    var f = getFields();
+    var subject = encodeURIComponent('Azure Subscription Transfer Request \u2013 ' + f.customer);
+    var body = encodeURIComponent(buildEmail(f));
+    window.open('mailto:technical.ecs.uk@arrow.com?subject=' + subject + '&body=' + body, '_blank');
+    showPreview();
+  }
+
+  function toggleNotifyFields() {
+    var cb = document.getElementById('cb-notify');
+    document.getElementById('notify-fields').classList.toggle('visible', cb.checked);
+    if (document.getElementById('email-preview').style.display === 'block') renderPreview();
+  }
+
+  function toggleCheck(el) { el.classList.toggle('done'); }
+
+  var fieldIds = ['f-customer','f-tenant-domain','f-tenant-id','f-admin-name','f-admin-email',
+                  'f-disti','f-sub-old','f-sub-new','f-ri','f-resources',
+                  'f-engineer','f-eng-email','f-sm-name','f-sm-email'];
+  fieldIds.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', function() {
+      if (document.getElementById('email-preview').style.display === 'block') renderPreview();
+    });
+  });
+</script>
+</body>
+</html>
