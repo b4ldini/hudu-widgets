@@ -46,6 +46,8 @@
     box-shadow: 0 2px 10px rgba(0,0,0,0.07);
   }
   .sticky-nav-inner {
+    max-width: 960px;
+    margin: 0 auto;
     padding: 0 24px;
     display: flex;
     align-items: stretch;
@@ -100,11 +102,11 @@
   .subnav { background: var(--navy-light); padding: 0 24px; display: flex; }
   .subnav span { font-size: 12px; color: #b8c4d0; padding: 9px 14px; }
   .subnav span:first-child { color: #fff; }
-  .breadcrumb { padding: 8px 24px 0; font-size: 12px; color: var(--text-muted); background: var(--page-bg); }
-  .page-title { padding: 4px 24px 16px; background: var(--page-bg); }
+  .breadcrumb { padding: 8px 24px 0; font-size: 12px; color: var(--text-muted); background: var(--page-bg); max-width: 960px; margin: 0 auto; }
+  .page-title { padding: 4px 24px 16px; background: var(--page-bg); max-width: 960px; margin: 0 auto; }
   .page-title h1 { font-size: 16px; font-weight: 600; color: var(--teal); text-transform: uppercase; letter-spacing: 0.04em; }
   .page-title p { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
-  .content { padding: 0 24px 40px; }
+  .content { padding: 0 24px 40px; max-width: 960px; margin: 0 auto; }
 
   /* ── Stepper ────────────────────────────────────────── */
   .stepper {
@@ -209,12 +211,16 @@
   .article-footer {
     background: linear-gradient(135deg, var(--a8-blue) 0%, var(--a8-blue2) 60%, var(--a8-blue) 100%);
     padding: 22px 24px;
+    margin-top: 28px;
+  }
+  .article-footer-inner {
+    max-width: 960px;
+    margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 10px;
-    margin-top: 28px;
   }
   .footer-brand {
     font-family: 'Courier New', Consolas, monospace;
@@ -517,8 +523,10 @@
 
 <!-- Active8 footer -->
 <div class="article-footer">
-  <div class="footer-brand">Active8 Managed Technologies &nbsp;&middot;&nbsp; IT Service Management</div>
-  <div class="footer-text">This article is maintained by the Active 8 IT team.</div>
+  <div class="article-footer-inner">
+    <div class="footer-brand">Active8 Managed Technologies &nbsp;&middot;&nbsp; IT Service Management</div>
+    <div class="footer-text">This article is maintained by the Active 8 IT team.</div>
+  </div>
 </div>
 
 </body>
