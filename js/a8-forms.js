@@ -111,11 +111,8 @@ function openEmailClient() {
   if (!_a8ValidateForm('newUserForm', 'validationMsg')) return;
 
   const { subject, body } = _a8BuildNewUserEmail();
-  const a = document.createElement('a');
-  a.href = `mailto:itsupport@a8mt.co.uk?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  const mailtoHref = `mailto:itsupport@a8mt.co.uk?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.open(mailtoHref, '_blank');
 }
 
 /**
