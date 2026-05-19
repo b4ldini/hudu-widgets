@@ -536,12 +536,20 @@
         Click below to prepare the email — then copy and paste it into a new email<br>
         addressed to <strong>itsupport@a8mt.co.uk</strong>
       </p>
-      <button type="button" class="btn-submit" onclick="submitForm()">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
-        </svg>
-        Prepare Email
-      </button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <button type="button" class="btn-submit" onclick="submitForm()">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+          </svg>
+          Prepare Email
+        </button>
+        <button type="button" class="btn-submit" onclick="openEmailClient()" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+          Open in Email Client
+        </button>
+      </div>
     </div>
 
   </form>
@@ -578,11 +586,11 @@
   </div>
 </div>
 
+<script src="https://b4ldini.github.io/hudu-widgets/js/a8-forms.js"></script>
 <script>
-  // Set today's date as default for auth date
+  // Page-specific init — form methods live in a8-forms.js
   document.getElementById('authDate').valueAsDate = new Date();
 
-  // Show/hide leaver name field based on licence selection
   document.getElementById('m365licence').addEventListener('change', function() {
     const leaverField = document.getElementById('leaverNameField');
     const leaverInput = document.getElementById('leaverName');
@@ -595,102 +603,6 @@
       leaverInput.value = '';
     }
   });
-
-  function submitForm() {
-    const form = document.getElementById('newUserForm');
-    const required = form.querySelectorAll('[required]');
-    let valid = true;
-
-    required.forEach(el => {
-      if (!el.value.trim()) {
-        el.style.borderColor = '#e05252';
-        valid = false;
-      } else {
-        el.style.borderColor = '';
-      }
-    });
-
-    if (!valid) {
-      document.getElementById('validationMsg').classList.add('show');
-      return;
-    }
-
-    document.getElementById('validationMsg').classList.remove('show');
-
-    const g = id => document.getElementById(id)?.value?.trim() || '(not provided)';
-    const r = name => {
-      const el = document.querySelector(`input[name="${name}"]:checked`);
-      return el ? el.value : '(not specified)';
-    };
-
-    const startDateRaw = document.getElementById('startdate').value;
-    const startDate = startDateRaw ? new Date(startDateRaw).toLocaleDateString('en-GB', {day:'2-digit',month:'long',year:'numeric'}) : '(not provided)';
-    const authDateRaw = document.getElementById('authDate').value;
-    const authDate = authDateRaw ? new Date(authDateRaw).toLocaleDateString('en-GB', {day:'2-digit',month:'long',year:'numeric'}) : '(not provided)';
-
-    const body = [
-      'NEW USER REQUEST',
-      '=====================================',
-      '',
-      'USER DETAILS',
-      '------------',
-      `Forename:                    ${g('forename')}`,
-      `Surname:                     ${g('surname')}`,
-      `Office / Dept / Job Title:   ${g('jobtitle')}`,
-      `Start Date:                  ${startDate}`,
-      `Email Address:               ${g('email')}`,
-      `Logon Username:              ${g('username')}`,
-      `Logon Password:              ${g('password')}`,
-      `Account to copy from:        ${g('copyFrom')}`,
-      `M365 Licence Required:       ${g('m365licence')}`,
-      `Leaver (licence transfer):   ${g('leaverName')}`,
-      `New Laptop Required:         ${r('newLaptop')}`,
-      `Existing Machine Name:       ${g('machineName')}`,
-      '',
-      'SERVICES & ACCESS REQUIREMENTS',
-      '-------------------------------',
-      `Email Groups:                ${g('emailGroups')}`,
-      `Additional Mailbox Access:   ${g('mailboxAccess')}`,
-      `Remote Access (VPN):         ${r('vpn')}`,
-      `Remote Access (Terminal):    ${r('terminalServer')}`,
-      `Network / Shared Drives:     ${g('sharedDrives')}`,
-      `Other Notes:                 ${g('otherNotes')}`,
-      '',
-      'AUTHORISATION',
-      '--------------',
-      `Authorised by:               ${g('authName')}`,
-      `Company:                     ${g('authCompany')}`,
-      `Date of Authorisation:       ${authDate}`,
-      '',
-      '=====================================',
-      'Submitted via a8 New User Request Form',
-    ].join('\n');
-
-    const subjectText = `New User Request – ${g('forename')} ${g('surname')} (Start: ${startDate})`;
-
-    document.getElementById('copySubject').value = subjectText;
-    document.getElementById('copyBody').value = body;
-
-    const panel = document.getElementById('copyPanel');
-    panel.style.display = 'block';
-    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  function copyField(fieldId, btnId) {
-    const el = document.getElementById(fieldId);
-    const btn = document.getElementById(btnId);
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(el.value).then(() => {
-        btn.textContent = '✓ Copied!';
-        setTimeout(() => { btn.textContent = fieldId === 'copyBody' ? 'Copy email body' : 'Copy'; }, 2000);
-      });
-    } else {
-      el.select();
-      document.execCommand('copy');
-      btn.textContent = '✓ Copied!';
-      setTimeout(() => { btn.textContent = fieldId === 'copyBody' ? 'Copy email body' : 'Copy'; }, 2000);
-    }
-  }
 </script>
 </body>
 </html>
