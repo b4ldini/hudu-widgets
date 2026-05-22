@@ -765,6 +765,38 @@
           <span class="step-detail">If the site uses an IPsec or SSL VPN on the Draytek, attempt to connect from an external location. A successful tunnel handshake confirms DMZ is passing traffic correctly.</span>
         </td>
       </tr>
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-green">5</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Confirm the Draytek admin portal is reachable from the internet</span>
+          <span class="step-detail">Find the site's external IP address — check <strong>Draytek WAN Status</strong> for the gateway's public IP, or visit <a href="https://whatismyip.com" target="_blank" style="color:#2557b7">whatismyip.com</a> from a device inside the network. Then, from a device <em>outside</em> the network (mobile on 4G/5G or a remote machine), browse to:</span>
+          <div class="ui-mock" style="margin-top:10px;max-width:480px">
+            <div class="ui-mock-bar" style="background:#1a1a1a">
+              <div class="ui-dot" style="background:#ff5f57"></div>
+              <div class="ui-dot" style="background:#ffbd2e"></div>
+              <div class="ui-dot" style="background:#28c840"></div>
+              <div class="ui-mock-url" style="background:rgba(255,255,255,0.08);color:#c2e000;font-size:11px">🔒 https://&lt;site-external-ip&gt;:8443</div>
+            </div>
+            <div class="ui-mock-body" style="background:#f8faff;text-align:center;padding:18px 20px">
+              <div style="font-size:20px;margin-bottom:6px">🔷</div>
+              <div style="font-size:13px;font-weight:700;color:#1e4aa0;margin-bottom:3px">Draytek Vigor — Admin Login</div>
+              <div style="font-size:11px;color:#888">You should see the Draytek login page.<br>A certificate warning is normal — proceed past it.</div>
+            </div>
+          </div>
+          <table class="callout-success" style="margin-top:4px">
+            <tr><td class="callout-td">
+              <strong style="display:block;font-family:'Courier New',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;color:#15803d">✓ Expected result</strong>
+              <span style="font-size:12px">The Draytek login page loads. A self-signed certificate warning is expected — accept and continue. If the page does not load, check that the Draytek's firewall allows inbound access on port <code>8443</code> (Management → Router Management → HTTPS Port).</span>
+            </td></tr>
+          </table>
+          <table class="callout-warning" style="margin-top:4px">
+            <tr><td class="callout-td">
+              <strong style="display:block;font-family:'Courier New',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;color:#b45309">⚠ Security note</strong>
+              <span style="font-size:12px">Confirming access on port <code>8443</code> is a smoke-test only. Once verified, ensure remote admin access is restricted to authorised IPs in <strong>Firewall → Filter Rules</strong> or disabled entirely if not required.</span>
+            </td></tr>
+          </table>
+        </td>
+      </tr>
     </table>
 
     <!-- TROUBLESHOOTING TABLE -->
