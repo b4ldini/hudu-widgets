@@ -403,7 +403,7 @@
         <div class="diag-node">
           <div class="diag-icon icon-isp">📡</div>
           <div class="diag-name">BT / VM Hub</div>
-          <div class="diag-ip">192.168.1.1</div>
+          <div class="diag-ip">BT: .254 · VM: .0.1</div>
         </div>
         <div class="diag-arrow">
           <div class="arrow-line"></div>
@@ -444,7 +444,7 @@
       </tr>
       <tr>
         <td><strong>Virgin Media Hub 3/4/5</strong></td>
-        <td><code>192.168.100.1</code></td>
+        <td><code>192.168.0.1</code></td>
         <td><code>admin</code> / label on base</td>
         <td>Advanced → DHCP → Reserved IP Addresses</td>
         <td>Advanced → Security → DMZ</td>
@@ -604,12 +604,12 @@
       </div>
     </div>
 
-    <div class="router-badge rb-vm">📡 Virgin Media Hub 3 / Hub 4 / Hub 5 &nbsp;|&nbsp; Admin: <code style="background:none;border:none;padding:0">192.168.100.1</code></div>
+    <div class="router-badge rb-vm">📡 Virgin Media Hub 3 / Hub 4 / Hub 5 &nbsp;|&nbsp; Admin: <code style="background:none;border:none;padding:0">192.168.0.1</code></div>
 
     <table class="callout-info" style="margin-bottom:16px">
       <tr><td class="callout-td">
         <strong style="display:block;font-family:'Courier New',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;color:#2563eb">ℹ Virgin Media DHCP range</strong>
-        <span style="font-size:12px">The VM Hub uses the <code>192.168.100.0/24</code> subnet by default. The hub itself is at <code>192.168.100.1</code>. A safe reserved IP for the Draytek is <code>192.168.100.10</code>. Verify the active DHCP pool range in the hub UI (typically <code>.2</code>–<code>.254</code>) and pick an address outside it, or reduce the pool ceiling first.</span>
+        <span style="font-size:12px">The VM Hub in router mode uses the <code>192.168.0.0/24</code> subnet. The hub itself is at <code>192.168.0.1</code>. A safe reserved IP for the Draytek is <code>192.168.0.10</code>. Verify the active DHCP pool range in the hub UI (typically <code>.2</code>–<code>.254</code>) and pick an address outside it, or reduce the pool ceiling first.</span>
       </td></tr>
     </table>
 
@@ -619,13 +619,13 @@
         <td class="step-num-cell"><div class="step-circle sc-vm">1</div></td>
         <td class="step-content-cell">
           <span class="step-strong">Log in to the Virgin Media Hub admin panel</span>
-          <span class="step-detail">From a device on the VM Hub's network, open a browser and go to <code>192.168.100.1</code>. Log in with username <code>admin</code> and the password printed on the label on the base of the hub (or the default <code>changeme</code> if never changed).</span>
+          <span class="step-detail">From a device on the VM Hub's network, open a browser and go to <code>192.168.0.1</code>. Log in with username <code>admin</code> and the password printed on the label on the base of the hub (or the default <code>changeme</code> if never changed).</span>
           <div class="ui-mock" style="margin-top:10px">
             <div class="ui-mock-bar" style="background:#f0f2f5">
               <div class="ui-dot" style="background:#ff5f57"></div>
               <div class="ui-dot" style="background:#ffbd2e"></div>
               <div class="ui-dot" style="background:#28c840"></div>
-              <div class="ui-mock-url">🔒 192.168.100.1</div>
+              <div class="ui-mock-url">🔒 192.168.0.1</div>
             </div>
             <div class="ui-mock-body" style="background:#fdf8f8;text-align:center;padding:22px">
               <div style="font-size:22px;margin-bottom:8px">📡</div>
@@ -664,7 +664,7 @@
               </div>
               <div class="ui-field-row">
                 <div class="ui-label">Reserved IP address</div>
-                <div class="ui-value-highlight" style="background:#ba0c2f">192.168.100.10</div>
+                <div class="ui-value-highlight" style="background:#ba0c2f">192.168.0.10</div>
               </div>
               <div style="margin-top:12px;display:flex;gap:8px">
                 <div style="background:#ba0c2f;color:#fff;font-size:11px;font-weight:600;padding:6px 16px;border-radius:5px;display:inline-block">Save</div>
@@ -677,7 +677,7 @@
         <td class="step-num-cell"><div class="step-circle sc-vm">4</div></td>
         <td class="step-content-cell">
           <span class="step-strong">Reboot the Draytek to pick up the reserved IP</span>
-          <span class="step-detail">Power-cycle the Draytek (or release/renew its WAN DHCP lease). Confirm the Draytek WAN status page now shows <code>192.168.100.10</code> before setting up DMZ.</span>
+          <span class="step-detail">Power-cycle the Draytek (or release/renew its WAN DHCP lease). Confirm the Draytek WAN status page now shows <code>192.168.0.10</code> before setting up DMZ.</span>
         </td>
       </tr>
       <tr>
@@ -704,7 +704,7 @@
               </div>
               <div class="ui-field-row">
                 <div class="ui-label">DMZ Host IP Address</div>
-                <div class="ui-value-highlight" style="background:#ba0c2f">192.168.100.10</div>
+                <div class="ui-value-highlight" style="background:#ba0c2f">192.168.0.10</div>
               </div>
               <div style="margin-top:12px;display:flex;gap:8px">
                 <div style="background:#ba0c2f;color:#fff;font-size:11px;font-weight:600;padding:6px 16px;border-radius:5px;display:inline-block">Apply</div>
@@ -735,7 +735,7 @@
         <td class="step-num-cell"><div class="step-circle sc-green">1</div></td>
         <td class="step-content-cell">
           <span class="step-strong">Confirm the Draytek WAN IP matches the reservation</span>
-          <span class="step-detail">Log into the Draytek admin panel. Go to <strong>System Status</strong> or <strong>WAN Status</strong>. The WAN IP shown should match the reserved IP you set in the ISP router (<code>192.168.1.10</code> for BT, <code>192.168.100.10</code> for Virgin Media).</span>
+          <span class="step-detail">Log into the Draytek admin panel. Go to <strong>System Status</strong> or <strong>WAN Status</strong>. The WAN IP shown should match the reserved IP you set in the ISP router (<code>192.168.1.10</code> for BT, <code>192.168.0.10</code> for Virgin Media).</span>
           <table class="callout-success" style="margin-top:8px">
             <tr><td class="callout-td">
               <strong style="display:block;font-family:'Courier New',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;color:#15803d">✓ Good sign</strong>
@@ -748,7 +748,7 @@
         <td class="step-num-cell"><div class="step-circle sc-green">2</div></td>
         <td class="step-content-cell">
           <span class="step-strong">Check the Draytek's WAN gateway</span>
-          <span class="step-detail">Still in Draytek WAN Status, the <strong>Gateway</strong> IP should be the ISP router's address — <code>192.168.1.254</code> (BT) or <code>192.168.100.1</code> (Virgin Media). If it is blank or wrong, release and renew the WAN DHCP lease.</span>
+          <span class="step-detail">Still in Draytek WAN Status, the <strong>Gateway</strong> IP should be the ISP router's address — <code>192.168.1.254</code> (BT) or <code>192.168.0.1</code> (Virgin Media). If it is blank or wrong, release and renew the WAN DHCP lease.</span>
         </td>
       </tr>
       <tr>
