@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACS Device Firmware Dashboard — Process Guide | Active8 Managed Technologies</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --page-bg:    #f0f2f4;
+    --card-bg:    #ffffff;
+    --section-bg: #e8eaec;
+    --panel-bg:   #f7f8f9;
+    --border:     #d5d9de;
+    --text:       #333333;
+    --text-muted: #6c757d;
+    --text-dim:   #4a5568;
+    --green:         #22c55e;
+    --green-dim:     #e8f8ef;
+    --green-border:  #a3e6be;
+    --amber:         #f59e0b;
+    --amber-dim:     #fff8e1;
+    --amber-border:  #f5c518;
+    --red:           #ef4444;
+    --red-dim:       #fdf0ef;
+    --red-border:    #e05252;
+    --a8-blue:  #1e4aa0;
+    --a8-blue2: #2557b7;
+    --a8-lime:  #c2e000;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--page-bg);
+  }
+
+  /* ── Sticky nav ─────────────────────────────────── */
+  .sticky-nav { background: #fff; border-bottom: 1px solid rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.07); }
+  .sticky-nav-inner { max-width: 960px; margin: 0 auto; padding: 0 24px; display: flex; align-items: stretch; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .sticky-nav-inner::-webkit-scrollbar { display: none; }
+  .nav-link { padding: 0 13px; height: 42px; display: flex; align-items: center; font-size: 12px; font-weight: 500; color: #999; white-space: nowrap; cursor: pointer; border-bottom: 3px solid transparent; transition: color 0.15s, border-color 0.15s, background 0.15s; text-decoration: none; user-select: none; }
+  .nav-link:hover { color: var(--a8-blue); background: rgba(37,87,183,0.06); border-bottom-color: rgba(37,87,183,0.35); }
+  .nav-link.active { color: var(--a8-blue); font-weight: 700; border-bottom-color: var(--a8-blue); background: rgba(37,87,183,0.07); }
+
+  /* ── Container ──────────────────────────────────── */
+  .container { max-width: 960px; margin: 0 auto; padding: 36px 24px 0; }
+
+  /* ── Header ─────────────────────────────────────── */
+  .header { border-left: 4px solid var(--a8-blue); padding-left: 20px; margin-bottom: 32px; }
+  .header .badge { font-family: 'Courier New', Consolas, monospace; font-size: 11px; color: var(--a8-blue2); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
+  .header h1 { font-size: 24px; font-weight: 700; color: #111; line-height: 1.2; margin-bottom: 8px; }
+  .header h1 span { color: var(--a8-blue); }
+  .header p { font-size: 13px; color: var(--text-dim); line-height: 1.6; max-width: 680px; }
+
+  /* ── Section headings ───────────────────────────── */
+  h2 { font-size: 11px; font-family: 'Courier New', Consolas, monospace; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px; margin-top: 44px; display: flex; align-items: center; gap: 10px; }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  h3 { font-size: 13px; font-weight: 700; color: #111; margin: 22px 0 10px; }
+
+  /* ── Body text ──────────────────────────────────── */
+  .body-text { font-size: 13px; color: var(--text-dim); line-height: 1.65; margin-bottom: 14px; }
+
+  /* ── Steps ──────────────────────────────────────── */
+  .steps { display: flex; flex-direction: column; gap: 4px; margin-bottom: 4px; }
+  .step { background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; padding: 13px 17px; display: grid; grid-template-columns: 28px 1fr; gap: 14px; align-items: start; transition: border-color 0.15s; }
+  .step:hover { border-color: #b0bcd0; }
+  .step-num { width: 28px; height: 28px; background: rgba(37,87,183,0.1); border: 1px solid rgba(37,87,183,0.2); border-radius: 5px; display: flex; align-items: center; justify-content: center; font-family: 'Courier New', Consolas, monospace; font-weight: 600; font-size: 12px; color: var(--a8-blue2); flex-shrink: 0; }
+  .step-title { font-weight: 600; font-size: 13px; color: #111; margin-bottom: 3px; }
+  .step-desc { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+
+  /* ── Callouts ───────────────────────────────────── */
+  .callout { border-radius: 5px; padding: 12px 15px; font-size: 13px; line-height: 1.6; display: flex; gap: 10px; align-items: flex-start; margin: 12px 0; }
+  .callout.warn  { background: var(--amber-dim); border: 1px solid var(--amber-border); color: #7a4f00; }
+  .callout.info  { background: rgba(37,87,183,0.07); border: 1px solid rgba(37,87,183,0.3); color: var(--a8-blue); }
+  .callout.green { background: var(--green-dim); border: 1px solid var(--green-border); color: #166534; }
+  .callout-icon  { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── Standard tables ────────────────────────────── */
+  .std-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 4px; }
+  .std-table th { background: var(--section-bg); padding: 9px 13px; font-size: 11px; font-family: 'Courier New', Consolas, monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); text-align: left; border-bottom: 1px solid var(--border); }
+  .std-table td { padding: 10px 13px; font-size: 12px; color: var(--text-dim); border-bottom: 1px solid var(--section-bg); vertical-align: top; line-height: 1.5; }
+  .std-table tr:last-child td { border-bottom: none; }
+  .std-table td:first-child { font-weight: 600; color: #111; }
+  .std-table td.normal { font-weight: normal; color: var(--text-dim); }
+
+  /* ── Monthly process table ──────────────────────── */
+  .process-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 4px; }
+  .process-table th { background: var(--section-bg); padding: 9px 13px; font-size: 11px; font-family: 'Courier New', Consolas, monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); text-align: left; border-bottom: 1px solid var(--border); }
+  .process-table td { padding: 10px 13px; font-size: 12px; color: var(--text-dim); border-bottom: 1px solid var(--section-bg); vertical-align: top; line-height: 1.5; }
+  .process-table tr:last-child td { border-bottom: none; }
+  .process-table td.step-cell { font-family: 'Courier New', Consolas, monospace; font-weight: 700; color: var(--a8-blue2); width: 40px; text-align: center; }
+  .process-table td.output-cell { color: var(--text-muted); font-size: 11px; font-style: italic; width: 180px; }
+
+  /* ── Indicator pills ────────────────────────────── */
+  .pill { display: inline-block; font-family: 'Courier New', Consolas, monospace; font-size: 11px; padding: 2px 8px; border-radius: 3px; font-weight: 600; }
+  .pill-green { background: var(--green-dim); color: #166534; border: 1px solid var(--green-border); }
+  .pill-amber { background: var(--amber-dim); color: #7a4f00; border: 1px solid var(--amber-border); }
+  .pill-red   { background: var(--red-dim);   color: #b03030; border: 1px solid var(--red-border); }
+  .pill-muted { background: var(--section-bg); color: var(--text-muted); border: 1px solid var(--border); }
+  .pill-blue  { background: rgba(37,87,183,0.1); color: var(--a8-blue2); border: 1px solid rgba(37,87,183,0.3); }
+
+  code { font-family: 'Courier New', Consolas, monospace; font-size: 11px; background: var(--section-bg); border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px; color: var(--a8-blue); }
+
+  /* ── Related docs ───────────────────────────────── */
+  .related-list { background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; padding: 16px 20px; }
+  .related-list ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  .related-list ul li { font-size: 13px; color: var(--text-dim); display: flex; gap: 10px; align-items: flex-start; }
+  .related-list ul li::before { content: '—'; color: var(--text-muted); flex-shrink: 0; }
+
+  /* ── Dashboard embed wrapper ────────────────────── */
+  .dashboard-embed { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin: 16px 0; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .dashboard-embed iframe { display: block; width: 100%; height: 640px; border: none; }
+
+  /* ── Active8 footer ─────────────────────────────── */
+  .article-footer { background: linear-gradient(135deg, var(--a8-blue) 0%, var(--a8-blue2) 60%, var(--a8-blue) 100%); padding: 22px 24px; margin-top: 40px; }
+  .article-footer-inner { max-width: 960px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .footer-brand { font-family: 'Courier New', Consolas, monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--a8-lime); font-weight: 600; }
+  .footer-text { font-size: 12px; color: rgba(255,255,255,0.7); }
+</style>
+</head>
+<body>
+
+<!-- Sticky nav -->
+<nav class="sticky-nav">
+  <div class="sticky-nav-inner">
+    <span class="nav-link" data-section="overview">Overview</span>
+    <span class="nav-link" data-section="export">Export from ACS</span>
+    <span class="nav-link" data-section="dashboard">Using the Dashboard</span>
+    <span class="nav-link" data-section="pdf">PDF Export</span>
+    <span class="nav-link" data-section="monthly">Monthly Process</span>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="badge">Active8 Managed Technologies &middot; Partou UK</div>
+    <h1>ACS Device Firmware<br><span>Dashboard &amp; PDF Report Generator</span></h1>
+    <p>A self-contained tool for importing, reviewing, and reporting on Draytek router firmware status across the Partou UK nursery estate. This guide covers exporting from VigorACS&nbsp;3, using the dashboard below, and generating the monthly compliance PDF.</p>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       OVERVIEW
+  ══════════════════════════════════════ -->
+  <h2 id="overview">Purpose &amp; prerequisites</h2>
+
+  <p class="body-text">The dashboard serves two purposes:</p>
+  <div class="steps" style="margin-bottom:20px;">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Operational review</div>
+        <div class="step-desc">Quickly identify offline devices, flag outdated firmware, and filter the estate by status during routine monthly checks.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Client reporting</div>
+        <div class="step-desc">Generate a branded, multi-section PDF compliance report for delivery to the Partou UK Infrastructure &amp; Delivery Manager as part of the monthly patching cycle.</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Prerequisites</h3>
+  <table class="std-table">
+    <thead><tr><th>Requirement</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td>ACS export file</td><td class="normal">Downloaded from VigorACS&nbsp;3 as <code>.xls</code> or <code>.xlsx</code></td></tr>
+      <tr><td>Browser</td><td class="normal">Chrome or Edge recommended. An internet connection is required on first load (firmware version lookup).</td></tr>
+      <tr><td>ACS export cadence</td><td class="normal">Exported monthly from VigorACS&nbsp;3 via Monitoring &rarr; Devices. Export covers all CPEs in the Partou UK network group.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout info" style="margin-top:14px;">
+    <span class="callout-icon">&#8505;</span>
+    <span>The dashboard does not store or transmit any data. All processing happens locally in the browser. The only outbound request is to the Draytek UK downloads page to check the latest firmware version.</span>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       EXPORT FROM ACS
+  ══════════════════════════════════════ -->
+  <h2 id="export">Exporting from VigorACS 3</h2>
+
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Log in to VigorACS 3</div><div class="step-desc">Navigate to the VigorACS&nbsp;3 portal and sign in.</div></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Open the Device Status report</div><div class="step-desc">Go to <strong>Monitoring &rarr; Device Status</strong>.</div></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Select the correct network group</div><div class="step-desc">Ensure the <strong>Partou UK</strong> network group is selected before exporting.</div></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-body"><div class="step-title">Export as XLS</div><div class="step-desc">Click <strong>Export</strong> and choose <code>XLS</code> format. Save the file — the filename follows the pattern <code>monitoring_devices_XXXXX.xls</code>.</div></div></div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       USING THE DASHBOARD
+  ══════════════════════════════════════ -->
+  <h2 id="dashboard">Using the dashboard</h2>
+
+  <p class="body-text">Drag the ACS export file onto the drop target below, or click <strong>Choose file</strong> to browse. The dashboard loads automatically once the file is selected.</p>
+
+  <div class="dashboard-embed">
+    <iframe src="https://b4ldini.github.io/hudu-widgets/tools/acs-dashboard.html" title="ACS Device Firmware Dashboard" allow="downloads"></iframe>
+  </div>
+
+  <h3>Firmware version indicator</h3>
+  <p class="body-text">On load, the tool queries the Draytek UK downloads page and shows the latest recommended firmware version in the header bar:</p>
+  <table class="std-table">
+    <thead><tr><th>Indicator</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill pill-green">&#9679; 4.5.2.2_BT</span></td><td class="normal">Version fetched live from Draytek UK. All firmware comparisons use this value.</td></tr>
+      <tr><td><span class="pill pill-muted">&#9679; 4.5.2.2_BT (cached)</span></td><td class="normal">Using a value fetched within the last 6 hours — no re-fetch needed.</td></tr>
+      <tr><td><span class="pill pill-amber">&#9651; input box</span></td><td class="normal">Fetch failed. Type the version manually (e.g. <code>4.5.2.2_BT</code>) and press Enter. The value is saved locally.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Stat cards</h3>
+  <p class="body-text">Five clickable cards appear across the top. Clicking a card filters the table to that subset:</p>
+  <table class="std-table">
+    <thead><tr><th>Card</th><th>Filters to</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill pill-blue">Total devices</span></td><td class="normal">All devices — clears any active stat filter</td></tr>
+      <tr><td><span class="pill pill-green">Online</span></td><td class="normal">Devices currently reporting as online in ACS</td></tr>
+      <tr><td><span class="pill pill-red">Offline</span></td><td class="normal">Devices not checking in — requires investigation</td></tr>
+      <tr><td><span class="pill pill-green">Current firmware</span></td><td class="normal">Devices running the latest firmware version</td></tr>
+      <tr><td><span class="pill pill-amber">Outdated firmware</span></td><td class="normal">Devices running any firmware below current — priority for patching</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Toolbar filters</h3>
+  <table class="std-table">
+    <thead><tr><th>Control</th><th>Function</th></tr></thead>
+    <tbody>
+      <tr><td>Search box</td><td class="normal">Free-text search across device name, IP, MAC, model, and firmware version</td></tr>
+      <tr><td>Private IP chip</td><td class="normal">Shows only devices behind NAT (private IP). These cannot be directly accessed without going via ACS.</td></tr>
+      <tr><td>Rebooted &lt;24h chip</td><td class="normal">Shows devices with less than one day of uptime — useful for spotting recent unexpected reboots or newly updated devices</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Table columns</h3>
+  <table class="std-table">
+    <thead><tr><th>Column</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Device</td><td class="normal">ACS device name (matches site naming convention)</td></tr>
+      <tr><td>IP Address</td><td class="normal">Public WAN IP. Port is stripped from display. <code>NAT</code> badge shown if private range.</td></tr>
+      <tr><td>Model</td><td class="normal">Router model as reported by ACS</td></tr>
+      <tr><td>Status</td><td class="normal"><span class="pill pill-green">Online</span> / <span class="pill pill-red">Offline</span></td></tr>
+      <tr><td>Uptime</td><td class="normal"><span class="pill pill-green">Green</span> = stable (&gt;7 days) &nbsp; <span class="pill pill-amber">Amber</span> = recently rebooted (&lt;7 days) &nbsp; <span class="pill pill-muted">Grey</span> = offline</td></tr>
+      <tr><td>Firmware</td><td class="normal"><span class="pill pill-green">Green</span> = current &nbsp; <span class="pill pill-amber">Amber</span> = one cycle behind &nbsp; <span class="pill pill-red">Red</span> = significantly outdated</td></tr>
+      <tr><td>Last Seen</td><td class="normal">Timestamp of last ACS check-in. Offline devices with old last-seen dates may indicate a hardware fault.</td></tr>
+      <tr><td>Clients / Send / Receive</td><td class="normal">Connected client count and traffic. Hidden by default in the PDF export but available in the dashboard view.</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ══════════════════════════════════════
+       PDF EXPORT
+  ══════════════════════════════════════ -->
+  <h2 id="pdf">Generating the PDF report</h2>
+
+  <p class="body-text">Click <strong>Export PDF</strong> in the dashboard toolbar (active once a report file is loaded). A panel slides in from the right.</p>
+
+  <h3>Report header fields</h3>
+  <table class="std-table">
+    <thead><tr><th>Field</th><th>Default</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Title</td><td class="normal"><em>Partou UK &mdash; ACS Device Report</em></td><td class="normal">Appears as the large heading on every section page</td></tr>
+      <tr><td>Sub-heading</td><td class="normal"><em>optional</em></td><td class="normal">Use for the review period, e.g. <em>Monthly Review &mdash; May 2026</em></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Column selection</h3>
+  <p class="body-text">Toggle individual columns on or off. Columns marked <strong>always</strong> are locked. Default state:</p>
+  <table class="std-table">
+    <thead><tr><th>Column(s)</th><th>PDF default</th></tr></thead>
+    <tbody>
+      <tr><td>Device, Status, Firmware</td><td class="normal"><span class="pill pill-green">&#10003; Always on</span></td></tr>
+      <tr><td>IP Address, Model, Uptime, Last Seen</td><td class="normal"><span class="pill pill-green">&#10003; On by default</span></td></tr>
+      <tr><td>Clients, &uarr;&nbsp;Send, &darr;&nbsp;Receive</td><td class="normal"><span class="pill pill-muted">&mdash; Off by default</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Subset filter</h3>
+  <p class="body-text">Five chips control which devices are exported. Counts update live based on current selection:</p>
+  <table class="std-table">
+    <thead><tr><th>Chip</th><th>Exports</th></tr></thead>
+    <tbody>
+      <tr><td>All</td><td class="normal">All devices in the selected row source</td></tr>
+      <tr><td><span class="pill pill-green">Online</span></td><td class="normal">Online devices only</td></tr>
+      <tr><td><span class="pill pill-red">Offline</span></td><td class="normal">Offline devices only — use for incident or escalation reports</td></tr>
+      <tr><td><span class="pill pill-green">Current FW</span></td><td class="normal">Devices on the latest firmware only</td></tr>
+      <tr><td><span class="pill pill-amber">Outdated</span></td><td class="normal">Devices with outdated firmware — use for patching priority reports</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Export options</h3>
+  <table class="std-table">
+    <thead><tr><th>Option</th><th>Choices</th><th>Guidance</th></tr></thead>
+    <tbody>
+      <tr><td>Orientation</td><td class="normal">Portrait / Landscape</td><td class="normal">Landscape recommended if Clients, Send, Receive columns are included</td></tr>
+      <tr><td>Row source</td><td class="normal">Current filter / All devices</td><td class="normal">Use <em>Current filter</em> to export only what is shown on screen</td></tr>
+      <tr><td>Colour scheme</td><td class="normal">Colour / Mono</td><td class="normal">Mono for black-and-white printing</td></tr>
+      <tr><td>Font size</td><td class="normal">8 / 9 / 10 pt</td><td class="normal">8&nbsp;pt fits the full estate on fewer pages</td></tr>
+    </tbody>
+  </table>
+
+  <h3>PDF structure</h3>
+  <table class="std-table">
+    <thead><tr><th>Section</th><th>Content</th></tr></thead>
+    <tbody>
+      <tr><td>Page 1 header</td><td class="normal">Report title, sub-heading, generation timestamp, latest firmware pill, and four stat chips (Online / Offline / Current FW / Outdated)</td></tr>
+      <tr><td>Full device table</td><td class="normal">All exported devices in a single table starting page 1</td></tr>
+      <tr><td>Online Devices section</td><td class="normal">Green section header + table of online devices only</td></tr>
+      <tr><td>Offline Devices section</td><td class="normal">Red section header + table of offline devices only</td></tr>
+      <tr><td>Current Firmware section</td><td class="normal">Green section header + devices on latest firmware</td></tr>
+      <tr><td>Outdated Firmware section</td><td class="normal">Amber section header + devices with outdated firmware</td></tr>
+      <tr><td>Page footer</td><td class="normal">Active8 IT &bull; report title &bull; page N of N (every page)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout green">
+    <span class="callout-icon">&#10003;</span>
+    <span><strong>Clickable navigation:</strong> The four stat chips in the PDF header are clickable links that jump directly to each section. The PDF bookmarks sidebar also lists all sections for quick navigation.</span>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       MONTHLY PROCESS
+  ══════════════════════════════════════ -->
+  <h2 id="monthly">Monthly firmware review process</h2>
+
+  <p class="body-text">Complete the following steps once per calendar month, aligned with the Active8 IT patching schedule for Partou UK.</p>
+
+  <table class="process-table">
+    <thead>
+      <tr>
+        <th style="width:44px;">Step</th>
+        <th>Action</th>
+        <th>Output</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="step-cell">1</td>
+        <td>Export device report from VigorACS&nbsp;3 — Monitoring &rarr; Device Status &rarr; Export XLS.</td>
+        <td class="output-cell"><code>.xls</code> file</td>
+      </tr>
+      <tr>
+        <td class="step-cell">2</td>
+        <td>Load the file into the dashboard above. Confirm the latest firmware indicator is green.</td>
+        <td class="output-cell">Dashboard loaded with live firmware reference</td>
+      </tr>
+      <tr>
+        <td class="step-cell">3</td>
+        <td>Click <strong>Offline</strong> card. Review any offline devices. Log each in the firmware version log with reason.</td>
+        <td class="output-cell">Offline device list noted</td>
+      </tr>
+      <tr>
+        <td class="step-cell">4</td>
+        <td>Click <strong>Outdated firmware</strong> card. Identify devices requiring patching. Cross-reference against the pre-deployment checklist in the Firmware Update Process guide.</td>
+        <td class="output-cell">Patching target list</td>
+      </tr>
+      <tr>
+        <td class="step-cell">5</td>
+        <td>Complete firmware deployments via the ACS portal or direct login per the Firmware Update Process guide.</td>
+        <td class="output-cell">Devices updated</td>
+      </tr>
+      <tr>
+        <td class="step-cell">6</td>
+        <td>Re-export from ACS after deployments. Load the new file into the dashboard to confirm compliance.</td>
+        <td class="output-cell">Updated dashboard view</td>
+      </tr>
+      <tr>
+        <td class="step-cell">7</td>
+        <td>Click <strong>Export PDF</strong>. Set the sub-heading to include the review month (e.g. <em>Monthly Review &mdash; May 2026</em>). Leave subset on <strong>All</strong>. Click <strong>Download PDF</strong>.</td>
+        <td class="output-cell">Compliance PDF generated</td>
+      </tr>
+      <tr>
+        <td class="step-cell">8</td>
+        <td>Deliver the PDF to the Partou UK Infrastructure &amp; Delivery Manager by the last working day of the month.</td>
+        <td class="output-cell">Monthly report delivered</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout warn">
+    <span class="callout-icon">&#9888;</span>
+    <span><strong>If outdated devices remain after patching:</strong> document the exception with reason (e.g. device offline, vendor bug), notify the Partou UK Infrastructure &amp; Delivery Manager within 5 working days, and include the exception in the monthly compliance report per the Firmware Update Process guide.</span>
+  </div>
+
+  <h2 id="related" style="margin-top:40px;">Related documents</h2>
+  <div class="related-list">
+    <ul>
+      <li>Network Device Firmware Update Process v1.0 (Active8 IT)</li>
+      <li>Partou UK Patching and Update Policy v1.0 (April 2026)</li>
+      <li>Active8 IT &mdash; Draytek Firmware Version Log</li>
+    </ul>
+  </div>
+
+  <div style="height:8px;"></div>
+</div>
+
+<!-- Active8 footer -->
+<div class="article-footer">
+  <div class="article-footer-inner">
+    <div class="footer-brand">Active8 Managed Technologies &nbsp;&middot;&nbsp; IT Service Management</div>
+    <div class="footer-text">This article is maintained by the Active 8 IT team.</div>
+  </div>
+</div>
+
+<script>
+  var navSections = ['overview', 'export', 'dashboard', 'pdf', 'monthly'];
+  var navLinks = document.querySelectorAll('.nav-link');
+
+  function setActive(id) {
+    navLinks.forEach(function(link) { link.classList.toggle('active', link.dataset.section === id); });
+  }
+
+  var visible = {};
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) { visible[e.target.id] = e.intersectionRatio; });
+    var best = null, bestR = -1;
+    navSections.forEach(function(id) { var r = visible[id] || 0; if (r > bestR) { bestR = r; best = id; } });
+    if (best) setActive(best);
+  }, { threshold: [0, 0.1, 0.25, 0.5, 1.0], rootMargin: '-10% 0px -60% 0px' });
+
+  navSections.forEach(function(id) { var el = document.getElementById(id); if (el) observer.observe(el); });
+
+  navLinks.forEach(function(link) {
+    link.addEventListener('click', function() {
+      var el = document.getElementById(link.dataset.section);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      setActive(link.dataset.section);
+    });
+  });
+</script>
+</body>
+</html>
