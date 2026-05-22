@@ -1154,13 +1154,14 @@ function runExport() {
     };
   }
 
+  const TOTAL_PAGES_TOKEN = '{total_pages}';
+
   function drawFooter() {
-    const pg    = doc.internal.getCurrentPageInfo().pageNumber;
-    const total = doc.internal.getNumberOfPages();
+    const pg = doc.internal.getCurrentPageInfo().pageNumber;
     doc.setFontSize(7);
     doc.setTextColor(160,160,160);
     doc.text('Active8 IT  \u00B7  ' + title, 14, doc.internal.pageSize.height - 6);
-    doc.text('Page ' + pg + ' of ' + total, pw - 14, doc.internal.pageSize.height - 6, { align: 'right' });
+    doc.text('Page ' + pg + ' of ' + TOTAL_PAGES_TOKEN, pw - 14, doc.internal.pageSize.height - 6, { align: 'right' });
   }
 
   function drawTable(tableRows, startY) {
@@ -1180,6 +1181,8 @@ function runExport() {
   // ── Page 1: full table ──────────────────────────────────────────────────────
   drawTable(rows, 34);
 
+  // Replace total-pages placeholder now that all pages exist
+  doc.putTotalPages(TOTAL_PAGES_TOKEN);
 
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
   const dateStr = new Date().toISOString().slice(0,10);
