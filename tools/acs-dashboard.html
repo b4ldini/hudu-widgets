@@ -1091,7 +1091,6 @@ function runExport() {
     { label: 'Outdated',  val: String(fwOutdated), r: mono?140:180,g: mono?140:83, b: mono?140:9,  cat: 'fwOld'  },
   ];
   const chipW = 20, chipH = 7, chipGap = 2;
-  const chipAreas = [];
   const chipsTotal = chips.length * chipW + (chips.length - 1) * chipGap;
   let cx = pw - 14 - chipsTotal;
   const cy = 20;
@@ -1108,12 +1107,6 @@ function runExport() {
     doc.setFontSize(5.5);
     doc.setTextColor(110, 110, 110);
     doc.text(chip.label.toUpperCase(), cx + chipW / 2, cy + 6.2, { align: 'center' });
-    // Underline label to signal clickability
-    doc.setDrawColor(chip.r, chip.g, chip.b);
-    doc.setLineWidth(0.15);
-    const lw = doc.getTextWidth(chip.label.toUpperCase());
-    doc.line(cx + chipW/2 - lw/2, cy + 6.8, cx + chipW/2 + lw/2, cy + 6.8);
-    chipAreas.push({ cat: chip.cat, x: cx, y: cy, w: chipW, h: chipH });
     cx += chipW + chipGap;
   });
 
@@ -1187,51 +1180,6 @@ function runExport() {
   // ── Page 1: full table ──────────────────────────────────────────────────────
   drawTable(rows, 34);
 
-  // ── Category sections — each on a new page ──────────────────────────────────
-  // Chips link to these pages; each section contains ONLY that category's rows.
-  const catSections = [
-    { cat: 'online',  label: 'Online Devices',      filter: r => (r[5]||'').toLowerCase() === 'online', color: [22,163,74]  },
-    { cat: 'offline', label: 'Offline Devices',      filter: r => (r[5]||'').toLowerCase() !== 'online', color: [220,38,38]  },
-    { cat: 'fwOk',    label: 'Current Firmware',     filter: r => r[7] === latestFW,                     color: [22,163,74]  },
-    { cat: 'fwOld',   label: 'Outdated Firmware',    filter: r => r[7] !== latestFW,                     color: [180,83,9]   },
-  ];
-  const sectionPage = {};
-
-  catSections.forEach(sec => {
-    const secRows = rows.filter(sec.filter);
-    if (!secRows.length) return;
-
-    doc.addPage();
-    sectionPage[sec.cat] = doc.internal.getCurrentPageInfo().pageNumber;
-
-    // Section heading bar
-    doc.setFillColor(...(mono ? [60,60,60] : sec.color));
-    doc.rect(14, 8, pw - 28, 9, 'F');
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(9);
-    doc.setTextColor(255,255,255);
-    doc.text(sec.label + '  (' + secRows.length + ' devices)', 18, 13.8);
-
-    drawTable(secRows, 20);
-  });
-
-  // ── Wire chip links to section pages ────────────────────────────────────────
-  doc.setPage(1);
-  chipAreas.forEach(area => {
-    const pg = sectionPage[area.cat];
-    if (pg) {
-      // Use #page= URL format — works in Chrome PDF viewer and Adobe
-      doc.link(area.x, area.y, area.w, area.h, { url: '#page=' + pg });
-    }
-  });
-
-  // PDF outline bookmarks
-  doc.outline.add(null, 'All Devices (' + rows.length + ')', { pageNumber: 1 });
-  catSections.forEach(sec => {
-    const pg = sectionPage[sec.cat];
-    const count = rows.filter(sec.filter).length;
-    if (pg && count) doc.outline.add(null, sec.label + ' (' + count + ')', { pageNumber: pg });
-  });
 
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
   const dateStr = new Date().toISOString().slice(0,10);
