@@ -1145,25 +1145,18 @@
     link.dataset.section = navSections[i];
   });
 
-  // IntersectionObserver — highlight whichever section is most prominent on screen
-  var visible = {};
-  var observer = new IntersectionObserver(function(entries) {
-    entries.forEach(function(entry) {
-      visible[entry.target.id] = entry.intersectionRatio;
-    });
-    // Pick the section with highest visibility ratio, in document order as tiebreak
-    var best = null, bestRatio = -1;
+  function updateActive() {
+    var threshold = 110;
+    var active = navSections[0];
     navSections.forEach(function(id) {
-      var r = visible[id] || 0;
-      if (r > bestRatio) { bestRatio = r; best = id; }
+      var el = document.getElementById(id);
+      if (el && el.getBoundingClientRect().top <= threshold) active = id;
     });
-    if (best) setActive(best);
-  }, { threshold: [0, 0.1, 0.25, 0.5, 1.0], rootMargin: '-10% 0px -60% 0px' });
+    setActive(active);
+  }
 
-  navSections.forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) observer.observe(el);
-  });
+  window.addEventListener('scroll', updateActive, { passive: true });
+  updateActive();
 
   // On click: immediately set active and scroll
   navLinks.forEach(function(link) {
