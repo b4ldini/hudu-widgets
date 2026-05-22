@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ACS Device Report</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:    #0f1724;
+    --navy2:   #1a2638;
+    --navy3:   #243347;
+    --slate:   #3d5166;
+    --muted:   #7a92a8;
+    --border:  #2a3d52;
+    --text:    #e2eaf2;
+    --text2:   #9db3c8;
+    --green:   #22c55e;
+    --green-bg:#0d2818;
+    --amber:   #f59e0b;
+    --amber-bg:#1f1500;
+    --red:     #ef4444;
+    --red-bg:  #1f0808;
+    --blue:    #3b82f6;
+    --blue-bg: #0a1628;
+    --accent:  #38bdf8;
+  }
+
+  html, body { height: 100%; background: var(--navy); color: var(--text); font-family: 'IBM Plex Sans', sans-serif; font-size: 14px; }
+
+  /* ── Drop zone ─────────────────────────────────────────── */
+  #drop-zone {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 100vh; gap: 20px; padding: 40px;
+  }
+  #drop-zone .logo {
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.2em;
+    color: var(--muted); text-transform: uppercase; margin-bottom: 12px;
+  }
+  #drop-zone h1 {
+    font-size: 28px; font-weight: 300; color: var(--text); letter-spacing: -0.5px; text-align: center;
+  }
+  #drop-zone h1 span { color: var(--accent); font-weight: 500; }
+  .drop-target {
+    border: 1.5px dashed var(--border); border-radius: 12px;
+    padding: 48px 64px; text-align: center; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    background: var(--navy2);
+  }
+  .drop-target:hover, .drop-target.drag-over {
+    border-color: var(--accent); background: #0d1f35;
+  }
+  .drop-target svg { display: block; margin: 0 auto 16px; opacity: 0.4; }
+  .drop-target p { color: var(--muted); line-height: 1.6; }
+  .drop-target p strong { color: var(--text); }
+  #file-input { display: none; }
+  .btn-upload {
+    display: inline-block; margin-top: 16px; padding: 9px 22px;
+    background: var(--accent); color: var(--navy); font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px; font-weight: 600; border: none; border-radius: 6px; cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn-upload:hover { opacity: 0.85; }
+
+  /* ── Dashboard ─────────────────────────────────────────── */
+  #dashboard { display: none; height: 100vh; overflow: hidden; flex-direction: column; }
+
+  /* header */
+  .dash-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px; background: var(--navy2); border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .dash-header-left { display: flex; align-items: center; gap: 12px; }
+  .dash-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .dash-subtitle { font-size: 11px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; }
+  .btn-reset {
+    font-size: 11px; padding: 5px 12px; background: transparent; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 5px; cursor: pointer; font-family: 'IBM Plex Sans', sans-serif;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .btn-reset:hover { color: var(--text); border-color: var(--muted); }
+
+  /* stat bar */
+  .stat-bar {
+    display: flex; gap: 1px; background: var(--border); flex-shrink: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .stat {
+    flex: 1; background: var(--navy2); padding: 14px 20px; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .stat:hover { background: var(--navy3); }
+  .stat.active { background: var(--navy3); box-shadow: inset 0 -2px 0 var(--accent); }
+  .stat-val { font-size: 24px; font-weight: 500; line-height: 1; margin-bottom: 4px; font-family: 'IBM Plex Mono', monospace; }
+  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .stat-val.c-green { color: var(--green); }
+  .stat-val.c-red   { color: var(--red); }
+  .stat-val.c-amber { color: var(--amber); }
+  .stat-val.c-blue  { color: var(--accent); }
+
+  /* toolbar */
+  .toolbar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 20px; background: var(--navy2); border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .search-wrap { position: relative; flex: 1; max-width: 320px; }
+  .search-wrap svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); opacity: 0.4; pointer-events: none; }
+  #search {
+    width: 100%; padding: 7px 10px 7px 32px; background: var(--navy);
+    border: 1px solid var(--border); border-radius: 6px; color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; outline: none;
+    transition: border-color 0.15s;
+  }
+  #search:focus { border-color: var(--accent); }
+  #search::placeholder { color: var(--muted); }
+  .filter-chip {
+    padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); font-size: 12px; cursor: pointer;
+    font-family: 'IBM Plex Sans', sans-serif; transition: all 0.15s; white-space: nowrap;
+  }
+  .filter-chip:hover { border-color: var(--muted); color: var(--text); }
+  .filter-chip.on { background: var(--navy3); border-color: var(--accent); color: var(--accent); }
+  .row-count { margin-left: auto; font-size: 11px; color: var(--muted); font-family: 'IBM Plex Mono', monospace; white-space: nowrap; }
+
+  /* table */
+  .table-wrap { flex: 1; overflow: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    position: sticky; top: 0; background: var(--navy3); color: var(--text2);
+    padding: 10px 14px; text-align: left; font-weight: 500; font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.07em; border-bottom: 1px solid var(--border);
+    cursor: pointer; white-space: nowrap; user-select: none;
+  }
+  thead th:hover { color: var(--text); }
+  thead th.sort-asc::after  { content: " ↑"; color: var(--accent); }
+  thead th.sort-desc::after { content: " ↓"; color: var(--accent); }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:hover { background: var(--navy2); }
+  tbody td { padding: 9px 14px; color: var(--text); vertical-align: middle; white-space: nowrap; }
+  tbody td.wrap { white-space: normal; }
+
+  /* badges */
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px; border-radius: 4px; font-size: 11px; font-weight: 500;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .badge-online  { background: var(--green-bg); color: var(--green); }
+  .badge-offline { background: var(--red-bg);   color: var(--red); }
+  .badge-fw-ok   { background: #0d1f10; color: #4ade80; }
+  .badge-fw-warn { background: var(--amber-bg); color: var(--amber); }
+  .badge-fw-old  { background: var(--red-bg);   color: var(--red); }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; display: inline-block; }
+
+  .mono { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text2); }
+  .site-name { font-weight: 500; color: var(--text); }
+  .uptime-val { font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+  .uptime-ok   { color: var(--green); }
+  .uptime-warn { color: var(--amber); }
+  .uptime-new  { color: var(--muted); }
+  .clients-val { font-family: 'IBM Plex Mono', monospace; }
+  .traffic-val { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--text2); }
+
+  /* empty */
+  .empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .fw-checking { animation: pulse 1.2s ease-in-out infinite; }
+  .empty h3 { font-size: 16px; font-weight: 400; margin-bottom: 6px; color: var(--text2); }
+
+  /* ── Export panel ──────────────────────────────────────────── */
+  #export-overlay {
+    display: none; position: fixed; inset: 0; z-index: 100;
+    background: rgba(0,0,0,0.55); backdrop-filter: blur(2px);
+  }
+  #export-panel {
+    position: absolute; right: 0; top: 0; bottom: 0; width: 560px;
+    background: var(--navy2); border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .ep-header {
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  .ep-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .ep-close { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; line-height: 1; padding: 0 4px; }
+  .ep-close:hover { color: var(--text); }
+  .ep-body { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+  .ep-section-label {
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--muted); margin-bottom: 10px;
+  }
+  .ep-field label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 5px; }
+  .ep-field input[type=text] {
+    width: 100%; padding: 7px 10px; background: var(--navy); border: 1px solid var(--border);
+    border-radius: 6px; color: var(--text); font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; outline: none;
+  }
+  .ep-field input[type=text]:focus { border-color: var(--accent); }
+  .col-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .col-toggle {
+    display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+    border: 1px solid var(--border); border-radius: 6px; cursor: pointer;
+    background: var(--navy); transition: border-color 0.15s, background 0.15s; user-select: none;
+  }
+  .col-toggle:hover { border-color: var(--muted); }
+  .col-toggle.on { border-color: var(--accent); background: #0d1f35; }
+  .col-toggle.on .col-check { background: var(--accent); border-color: var(--accent); }
+  .col-toggle.on .col-check::after { opacity: 1; }
+  .col-check {
+    width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid var(--border);
+    flex-shrink: 0; position: relative; transition: all 0.15s;
+  }
+  .col-check::after {
+    content: ''; position: absolute; left: 2px; top: 0; width: 4px; height: 8px;
+    border: 2px solid var(--navy); border-top: none; border-left: none;
+    transform: rotate(45deg); opacity: 0; transition: opacity 0.1s;
+  }
+  .col-name { font-size: 12px; color: var(--text); }
+  .col-toggle.locked { opacity: 0.5; cursor: default; }
+  .ep-opt-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 0.5px solid var(--border); }
+  .ep-opt-row:last-child { border-bottom: none; }
+  .ep-opt-label { font-size: 12px; color: var(--text2); }
+  .ep-toggle-wrap { display: flex; gap: 4px; }
+  .ep-opt-btn {
+    padding: 4px 12px; border-radius: 4px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); font-size: 11px; cursor: pointer;
+    font-family: 'IBM Plex Sans', sans-serif; transition: all 0.15s;
+  }
+  .ep-opt-btn.sel { background: var(--navy3); border-color: var(--accent); color: var(--accent); }
+  /* Preview */
+  .ep-preview-wrap { background: #d0d0d0; border-radius: 6px; padding: 12px; overflow: auto; max-height: 320px; }
+  .ep-preview-page {
+    background: white; border-radius: 2px; padding: 16px 18px;
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 10px; color: #111;
+    min-width: 460px;
+  }
+  .ep-preview-page h2 { font-size: 13px; font-weight: 600; color: #0f1724; margin: 0 0 2px; }
+  .ep-preview-page .ep-meta { font-size: 9px; color: #666; margin-bottom: 10px; }
+  .ep-prev-table { width: 100%; border-collapse: collapse; font-size: 9px; }
+  .ep-prev-table th { background: #1a1a2e; color: #fff; padding: 4px 6px; text-align: left; font-weight: 500; font-size: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .ep-prev-table td { padding: 3px 6px; border-bottom: 0.5px solid #e5e7eb; }
+  .ep-prev-table tr:nth-child(even) td { background: #f9fafb; }
+  .ep-prev-table .status-on  { color: #16a34a; font-weight: 500; }
+  .ep-prev-table .status-off { color: #dc2626; font-weight: 500; }
+  .ep-prev-table .fw-ok   { color: #16a34a; }
+  .ep-prev-table .fw-warn { color: #b45309; }
+  .ep-prev-table .fw-old  { color: #dc2626; }
+  /* Footer */
+  .ep-footer {
+    padding: 14px 20px; border-top: 1px solid var(--border); flex-shrink: 0;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .btn-export {
+    flex: 1; padding: 10px; background: var(--accent); color: var(--navy);
+    border: none; border-radius: 6px; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: 'IBM Plex Sans', sans-serif; transition: opacity 0.15s;
+  }
+  .btn-export:hover { opacity: 0.85; }
+  .btn-export:disabled { opacity: 0.4; cursor: default; }
+  .export-count { font-size: 11px; color: var(--muted); white-space: nowrap; font-family: 'IBM Plex Mono', monospace; }
+  .subset-chip {
+    display: inline-flex; flex-direction: column; align-items: center;
+    padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border);
+    cursor: pointer; min-width: 52px; transition: all 0.15s;
+    background: var(--navy);
+  }
+  .subset-chip:hover { border-color: var(--muted); }
+  .subset-chip.active { border-width: 1.5px; }
+  .subset-chip .sc-val  { font-size: 14px; font-weight: 500; font-family: 'IBM Plex Mono', monospace; line-height: 1; }
+  .subset-chip .sc-label{ font-size: 9px; color: var(--muted); margin-top: 3px; white-space: nowrap; }
+
+  .btn-pdf-open {
+    padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border);
+    background: transparent; color: var(--text2); font-size: 12px; cursor: pointer;
+    font-family: 'IBM Plex Sans', sans-serif; transition: all 0.15s; white-space: nowrap;
+  }
+  .btn-pdf-open:hover { border-color: var(--accent); color: var(--accent); }
+
+</style>
+</head>
+<body>
+
+<!-- ── Drop Zone ──────────────────────────────────────────────────────────── -->
+<div id="drop-zone">
+  <div class="logo">Active8 IT &nbsp;/&nbsp; Partou UK</div>
+  <h1>ACS Device <span>Report Viewer</span></h1>
+  <div class="drop-target" id="drop-target" onclick="document.getElementById('file-input').click()">
+    <svg width="40" height="40" fill="none" stroke="#7a92a8" stroke-width="1.5" viewBox="0 0 24 24">
+      <path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12V4m0 0L8 8m4-4l4 4"/>
+    </svg>
+    <p><strong>Drop your ACS export here</strong><br>or click to browse</p>
+    <p style="margin-top:8px; font-size:12px;">Supports .xls and .xlsx</p>
+    <button class="btn-upload" onclick="event.stopPropagation(); document.getElementById('file-input').click()">Choose file</button>
+  </div>
+  <input type="file" id="file-input" accept=".xls,.xlsx">
+</div>
+
+<!-- ── Dashboard ─────────────────────────────────────────────────────────── -->
+<div id="dashboard">
+  <div class="dash-header">
+    <div class="dash-header-left">
+      <div>
+        <div class="dash-title">ACS Device Report</div>
+        <div class="dash-subtitle" id="report-meta"></div>
+      </div>
+      <div id="fw-indicator" style="display:none; margin-left:16px; align-items:center; gap:8px; padding:5px 12px; border-radius:6px; border:1px solid var(--border); background:var(--navy); font-size:12px;">
+        <span id="fw-dot" style="width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0"></span>
+        <span style="color:var(--muted); font-family:'IBM Plex Mono',monospace; font-size:11px;">Latest FW:</span>
+        <span id="fw-latest-label" style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text2);">checking…</span>
+        <a id="fw-link" href="https://www.draytek.co.uk/support/downloads/vigor-2865" target="_blank" style="color:var(--muted);font-size:10px;text-decoration:none;opacity:0.6" title="Open DrayTek firmware page">↗</a>
+      </div>
+    </div>
+    <button class="btn-reset" onclick="resetDashboard()">↩ Load new file</button>
+  </div>
+
+  <div class="stat-bar" id="stat-bar">
+    <div class="stat" onclick="filterStat('all')" id="stat-all">
+      <div class="stat-val c-blue" id="sv-total">—</div>
+      <div class="stat-label">Total devices</div>
+    </div>
+    <div class="stat" onclick="filterStat('online')" id="stat-online">
+      <div class="stat-val c-green" id="sv-online">—</div>
+      <div class="stat-label">Online</div>
+    </div>
+    <div class="stat" onclick="filterStat('offline')" id="stat-offline">
+      <div class="stat-val c-red" id="sv-offline">—</div>
+      <div class="stat-label">Offline</div>
+    </div>
+    <div class="stat" onclick="filterStat('fw-ok')" id="stat-fw-ok">
+      <div class="stat-val c-green" id="sv-fw-ok">—</div>
+      <div class="stat-label">Current firmware</div>
+    </div>
+    <div class="stat" onclick="filterStat('fw-old')" id="stat-fw-old">
+      <div class="stat-val c-amber" id="sv-fw-old">—</div>
+      <div class="stat-label">Outdated firmware</div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="search" placeholder="Search device, IP, MAC, firmware…" oninput="applyFilters()">
+    </div>
+    <button class="filter-chip" id="chip-private" onclick="toggleChip('private')">Private IP</button>
+    <button class="filter-chip" id="chip-reboot"  onclick="toggleChip('reboot')">Rebooted &lt;24h</button>
+    <span class="row-count" id="row-count"></span>
+    <button class="btn-pdf-open" id="btn-open-export" onclick="openExport()" disabled>Export PDF</button>
+  </div>
+
+  <div class="table-wrap">
+    <table id="main-table">
+      <thead>
+        <tr>
+          <th onclick="sortBy(0)">Device</th>
+          <th onclick="sortBy(1)">IP Address</th>
+          <th onclick="sortBy(2)">Model</th>
+          <th onclick="sortBy(3)">Status</th>
+          <th onclick="sortBy(4)">Uptime</th>
+          <th onclick="sortBy(5)">Firmware</th>
+          <th onclick="sortBy(6)">Last Seen</th>
+          <th onclick="sortBy(7)" style="text-align:right">Clients</th>
+          <th onclick="sortBy(8)" style="text-align:right">↑ Send</th>
+          <th onclick="sortBy(9)" style="text-align:right">↓ Receive</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+    <div class="empty" id="empty-state" style="display:none">
+      <h3>No devices match</h3>
+      <p>Try adjusting your search or filters</p>
+    </div>
+  </div>
+<!-- ── Export Panel ─────────────────────────────────────────────────────── -->
+<div id="export-overlay" onclick="if(event.target===this)closeExport()">
+  <div id="export-panel">
+    <div class="ep-header">
+      <span class="ep-title">Export PDF</span>
+      <button class="ep-close" onclick="closeExport()">×</button>
+    </div>
+    <div class="ep-body">
+
+      <div>
+        <div class="ep-section-label">Report header</div>
+        <div class="ep-field" style="margin-bottom:8px">
+          <label>Title</label>
+          <input type="text" id="ep-title" value="Partou UK — ACS Device Report" oninput="refreshPreview()">
+        </div>
+        <div class="ep-field">
+          <label>Sub-heading (optional)</label>
+          <input type="text" id="ep-subtitle" placeholder="e.g. Monthly review — May 2026" oninput="refreshPreview()">
+        </div>
+      </div>
+
+      <div>
+        <div class="ep-section-label">Columns</div>
+        <div class="col-grid" id="col-grid"></div>
+      </div>
+
+      <div>
+        <div class="ep-section-label">Options</div>
+        <div class="ep-opt-row">
+          <span class="ep-opt-label">Page orientation</span>
+          <div class="ep-toggle-wrap">
+            <button class="ep-opt-btn sel" id="opt-portrait"  onclick="setOpt('orient','portrait')">Portrait</button>
+            <button class="ep-opt-btn"     id="opt-landscape" onclick="setOpt('orient','landscape')">Landscape</button>
+          </div>
+        </div>
+        <div class="ep-opt-row">
+          <span class="ep-opt-label">Row source</span>
+          <div class="ep-toggle-wrap">
+            <button class="ep-opt-btn sel" id="opt-filtered" onclick="setOpt('rows','filtered')">Current filter</button>
+            <button class="ep-opt-btn"     id="opt-all"      onclick="setOpt('rows','all')">All devices</button>
+          </div>
+        </div>
+        <div class="ep-opt-row" style="align-items:flex-start; padding-bottom:12px">
+          <span class="ep-opt-label" style="padding-top:2px">Subset</span>
+          <div id="subset-chips" style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end"></div>
+        </div>
+        <div class="ep-opt-row">
+          <span class="ep-opt-label">Colour scheme</span>
+          <div class="ep-toggle-wrap">
+            <button class="ep-opt-btn sel" id="opt-colour" onclick="setOpt('colour','colour')">Colour</button>
+            <button class="ep-opt-btn"     id="opt-mono"   onclick="setOpt('colour','mono')">Mono</button>
+          </div>
+        </div>
+        <div class="ep-opt-row">
+          <span class="ep-opt-label">Font size</span>
+          <div class="ep-toggle-wrap">
+            <button class="ep-opt-btn sel" id="opt-fs8"  onclick="setOpt('fs',8)">8</button>
+            <button class="ep-opt-btn" id="opt-fs9" onclick="setOpt('fs',9)">9</button>
+            <button class="ep-opt-btn" id="opt-fs10" onclick="setOpt('fs',10)">10</button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="ep-section-label">Preview <span style="font-size:9px;color:var(--muted);text-transform:none;letter-spacing:0">(first 10 rows)</span></div>
+        <div class="ep-preview-wrap"><div id="ep-preview"></div></div>
+      </div>
+
+    </div>
+    <div class="ep-footer">
+      <span class="export-count" id="ep-row-count"></span>
+      <button class="btn-export" id="btn-export" onclick="runExport()">Download PDF</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+let allRows = [];
+let latestFW = '';
+let sortCol = -1, sortDir = 1;
+let activeStatFilter = 'all';
+let chips = { private: false, reboot: false };
+let fileName = '';
+
+// ── Utilities ───────────────────────────────────────────────────────────────
+
+function fmtBytes(n) {
+  n = parseInt(n) || 0;
+  if (n === 0) return '—';
+  if (n < 1024) return n + ' B';
+  if (n < 1048576) return (n/1024).toFixed(1) + ' KB';
+  if (n < 1073741824) return (n/1048576).toFixed(1) + ' MB';
+  return (n/1073741824).toFixed(2) + ' GB';
+}
+
+function parseUptimeDays(str) {
+  if (!str || str === '0 days 00:00:00') return 0;
+  const m = str.match(/^(\d+)\s+days?\s+(\d+):(\d+):(\d+)/);
+  if (!m) return 0;
+  return parseInt(m[1]) + parseInt(m[2])/24 + parseInt(m[3])/1440;
+}
+
+function uptimeClass(days) {
+  if (days < 1)  return 'uptime-new';
+  if (days < 7)  return 'uptime-warn';
+  return 'uptime-ok';
+}
+
+function isPrivateIP(ip) {
+  const addr = ip.split(':')[0];
+  return /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(addr);
+}
+
+function fwClass(fw) {
+  if (fw === latestFW) return 'badge-fw-ok';
+  const rank = { '4.4.6.2_BT': 2, '4.4.6.1_BT': 2, '4.4.3_BT': 3, '3.9.9_BT': 3 };
+  return (rank[fw] || 0) >= 3 ? 'badge-fw-old' : 'badge-fw-warn';
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Firmware lookup ──────────────────────────────────────────────────────────
+//
+// Strategy:
+//  1. Use localStorage cached value immediately (instant, no flash)
+//  2. Attempt live fetch via three CORS proxies in sequence
+//     The Draytek downloads page is JS-rendered so we can't get the version 
+//     from the main page HTML. Instead we fetch the plain-text release notes
+//     index which lists filenames like "Vigor2865_v4.5.2.2_BT_ALL.zip" — 
+//     these are in static anchor hrefs and survive proxy fetching.
+//  3. If all proxies fail, show a manual override input
+
+const FW_CACHE_KEY = 'draytek_2865_latest_fw';
+
+// Pages to try — ordered by most likely to have static version strings
+// The /release-notes path is a Joomla article, fully server-rendered
+// The older-firmware page lists all versions as static links
+const FW_URLS = [
+  'https://www.draytek.co.uk/support/downloads/vigor-2865',
+  'https://www.draytek.co.uk/support/downloads/vigor-2865/older-firmware',
+];
+
+// CORS proxies to try in order
+// allorigins: returns JSON { contents: "<html>..." }
+// corsproxy.io: returns raw HTML
+// codetabs: returns raw HTML
+const PROXIES = [
+  { name: 'allorigins', url: u => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`, parse: async r => { const j = await r.json(); return j.contents || ''; } },
+  { name: 'corsproxy',  url: u => `https://corsproxy.io/?${encodeURIComponent(u)}`,              parse: async r => r.text() },
+  { name: 'codetabs',   url: u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`, parse: async r => r.text() },
+];
+
+// Regexes to find the version — ordered from most specific to broadest
+// Filenames like Vigor2865_v4.5.2.2_BT are the most reliable signal
+const FW_PATTERNS = [
+  />(\d+\.\d+\.\d+(?:\.\d+)?)\s+BT<\/a>/,                        // anchor text: ">4.5.2.2 BT</a>"  ← actual Draytek page format
+  /v2865-(\d)(\d+)-(\d+)-(\d+)-bt/i,                                   // href slug: v2865-4-5-2-2-bt
+  /Vigor2865[^"'\s]*?v(\d+\.\d+\.\d+(?:\.\d+)?)_BT/i,             // filename: Vigor2865_v4.5.2.2_BT
+  /(\d+\.\d+\.\d+(?:\.\d+)?)\s+BT[^<]{0,120}Recommended/i,        // "4.5.2.2 BT ... Recommended"
+  /(\d+\.\d+\.\d+(?:\.\d+)?)_BT/,                                   // any _BT version string
+];
+
+function extractVersion(html) {
+  // Pattern 0: anchor text ">4.5.2.2 BT</a>"
+  let m = html.match(/>(\d+\.\d+\.\d+(?:\.\d+)?)\s+BT<\/a>/);
+  if (m) { console.log('[FW] matched anchor text →', m[1]); return m[1]; }
+
+  // Pattern 1: href slug like /v2865-4522-bt or /v2865-4-5-2-2-bt
+  m = html.match(/v2865-(\d{3,8})-bt/i);
+  if (m) {
+    // "4522" → "4.5.2.2" by splitting digits into groups
+    const slug = m[1];
+    const ver = slug.length === 4
+      ? slug[0]+'.'+slug[1]+'.'+slug[2]+'.'+slug[3]   // 4522 → 4.5.2.2
+      : slug[0]+'.'+slug.slice(1);                      // fallback
+    console.log('[FW] matched href slug →', ver);
+    return ver;
+  }
+
+  // Remaining patterns
+  for (const pat of FW_PATTERNS.slice(2)) {
+    const m2 = html.match(pat);
+    if (m2) { console.log('[FW] matched pattern', pat, '→', m2[1]); return m2[1]; }
+  }
+  return null;
+}
+
+function applyFwVersion(ver, source) {
+  const acsVer = ver.includes('_BT') ? ver : ver + '_BT';
+  latestFW = acsVer;
+  localStorage.setItem(FW_CACHE_KEY, JSON.stringify({ ver: acsVer, ts: Date.now() }));
+
+  const label = document.getElementById('fw-latest-label');
+  const dot   = document.getElementById('fw-dot');
+  label.textContent = acsVer;
+  label.className = '';
+  label.style.color = 'var(--green)';
+  dot.style.background = 'var(--green)';
+  document.getElementById('fw-indicator').title = `Source: ${source}`;
+  console.log('[FW] resolved to', acsVer, 'via', source);
+
+  if (allRows.length) { buildStats(); applyFilters(); }
+}
+
+function showFwManual(reason) {
+  console.warn('[FW] auto-detect failed:', reason, '— showing manual input');
+  const label = document.getElementById('fw-latest-label');
+  const dot   = document.getElementById('fw-dot');
+  dot.style.background = 'var(--amber)';
+  label.className = '';
+
+  // Replace label with an editable input
+  const inp = document.createElement('input');
+  inp.id = 'fw-manual-input';
+  inp.type = 'text';
+  inp.placeholder = 'e.g. 4.5.2.2_BT';
+  inp.style.cssText = `background:transparent; border:none; border-bottom:1px solid var(--border);
+    color:var(--amber); font-family:'IBM Plex Mono',monospace; font-size:11px;
+    width:110px; outline:none; padding:0;`;
+
+  // Pre-fill with cached value if available
+  const cached = (() => { try { return JSON.parse(localStorage.getItem(FW_CACHE_KEY)||'null'); } catch(e){return null;} })();
+  if (cached) inp.value = cached.ver;
+
+  inp.addEventListener('change', () => {
+    const v = inp.value.trim();
+    if (v) applyFwVersion(v, 'manual');
+  });
+
+  label.replaceWith(inp);
+  inp.focus();
+}
+
+async function tryProxy(proxy, pageUrl) {
+  const url = proxy.url(pageUrl);
+  console.log('[FW] trying', proxy.name, 'for', pageUrl);
+  const r = await fetch(url, { signal: AbortSignal.timeout(10000) });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  const html = await proxy.parse(r);
+  console.log('[FW]', proxy.name, 'got', html.length, 'chars');
+  const ver = extractVersion(html);
+  if (!ver) throw new Error('version not in response');
+  return ver;
+}
+
+async function fetchLatestFirmware() {
+  const indicator = document.getElementById('fw-indicator');
+  const dot       = document.getElementById('fw-dot');
+  const label     = document.getElementById('fw-latest-label');
+  indicator.style.display = 'flex';
+
+  // 1. Serve cached value immediately so UI isn't blank
+  const cached = (() => { try { return JSON.parse(localStorage.getItem(FW_CACHE_KEY)||'null'); } catch(e){return null;} })();
+  const cacheAge = cached ? (Date.now() - cached.ts) / 3600000 : Infinity; // hours
+  if (cached) {
+    latestFW = cached.ver;
+    label.textContent = cached.ver + ' (cached)';
+    label.style.color = 'var(--text2)';
+    dot.style.background = 'var(--muted)';
+    if (allRows.length) { buildStats(); applyFilters(); }
+  } else {
+    label.textContent = 'checking…';
+    label.className = 'fw-checking';
+    dot.style.background = 'var(--muted)';
+  }
+
+  // 2. Skip live fetch if cache is fresh (< 6 hours)
+  if (cacheAge < 6) {
+    label.textContent = cached.ver;
+    label.style.color = 'var(--green)';
+    dot.style.background = 'var(--green)';
+    label.className = '';
+    console.log('[FW] using fresh cache:', cached.ver);
+    return;
+  }
+
+  // 3. Try every proxy × every URL until something works
+  for (const pageUrl of FW_URLS) {
+    for (const proxy of PROXIES) {
+      try {
+        const ver = await tryProxy(proxy, pageUrl);
+        applyFwVersion(ver, `${proxy.name} → ${pageUrl}`);
+        return;
+      } catch(e) {
+        console.warn('[FW]', proxy.name, 'failed:', e.message);
+      }
+    }
+  }
+
+  // 4. All failed — show manual input (keep cached value active if we had one)
+  showFwManual('all proxies exhausted');
+}
+
+// ── Parse file ──────────────────────────────────────────────────────────────
+
+function handleFile(file) {
+  fileName = file.name;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const data = new Uint8Array(e.target.result);
+    const wb = XLSX.read(data, { type: 'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const raw = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+    // skip header row
+    allRows = raw.slice(1).filter(r => r[0]);
+
+    // If Draytek lookup already resolved, keep it; otherwise detect from report as fallback
+    if (!latestFW) {
+      const fwCounts = {};
+      allRows.filter(r => (r[5]||'').toLowerCase() === 'online').forEach(r => {
+        const fw = r[7] || '';
+        fwCounts[fw] = (fwCounts[fw] || 0) + 1;
+      });
+      latestFW = Object.entries(fwCounts).sort((a,b) => b[1]-a[1])[0]?.[0] || '';
+    }
+
+    buildStats();
+    applyFilters();
+    document.getElementById('btn-open-export').disabled = false;
+    document.getElementById('report-meta').textContent =
+      `${fileName}  ·  ${allRows.length} devices  ·  Imported ${new Date().toLocaleString('en-GB')}`;
+
+    document.getElementById('drop-zone').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'flex';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ── Stats ────────────────────────────────────────────────────────────────────
+
+function buildStats() {
+  const total   = allRows.length;
+  const online  = allRows.filter(r => (r[5]||'').toLowerCase() === 'online').length;
+  const offline = total - online;
+  const fwOk    = allRows.filter(r => r[7] === latestFW).length;
+  const fwOld   = total - fwOk;
+
+  document.getElementById('sv-total').textContent  = total;
+  document.getElementById('sv-online').textContent  = online;
+  document.getElementById('sv-offline').textContent = offline;
+  document.getElementById('sv-fw-ok').textContent   = fwOk;
+  document.getElementById('sv-fw-old').textContent  = fwOld;
+}
+
+// ── Filters ──────────────────────────────────────────────────────────────────
+
+function filterStat(f) {
+  activeStatFilter = f;
+  document.querySelectorAll('.stat').forEach(s => s.classList.remove('active'));
+  document.getElementById('stat-' + (f === 'fw-ok' ? 'fw-ok' : f === 'fw-old' ? 'fw-old' : f)).classList.add('active');
+  applyFilters();
+}
+
+function toggleChip(key) {
+  chips[key] = !chips[key];
+  document.getElementById('chip-' + key).classList.toggle('on', chips[key]);
+  applyFilters();
+}
+
+function applyFilters() {
+  const q = (document.getElementById('search').value || '').toLowerCase();
+
+  let rows = allRows.filter(r => {
+    // stat filter
+    const status = (r[5] || '').toLowerCase();
+    const fw = r[7] || '';
+    if (activeStatFilter === 'online'  && status !== 'online')  return false;
+    if (activeStatFilter === 'offline' && status !== 'offline') return false;
+    if (activeStatFilter === 'fw-ok'   && fw !== latestFW)      return false;
+    if (activeStatFilter === 'fw-old'  && fw === latestFW)      return false;
+
+    // chips
+    if (chips.private && !isPrivateIP(String(r[1] || ''))) return false;
+    if (chips.reboot  && parseUptimeDays(String(r[6] || '')) >= 1) return false;
+
+    // search
+    if (q) {
+      const haystack = [r[0],r[1],r[2],r[3],r[7]].join(' ').toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
+    return true;
+  });
+
+  // sort
+  if (sortCol >= 0) {
+    rows = [...rows].sort((a, b) => {
+      let av = sortableVal(a, sortCol), bv = sortableVal(b, sortCol);
+      return (av < bv ? -1 : av > bv ? 1 : 0) * sortDir;
+    });
+  }
+
+  lastFilteredRows = rows;
+  renderTable(rows);
+  document.getElementById('row-count').textContent = `${rows.length} of ${allRows.length}`;
+}
+
+function sortableVal(row, col) {
+  switch(col) {
+    case 4: return parseUptimeDays(String(row[6] || '')); // uptime
+    case 7: return parseInt(row[9]) || 0;  // clients
+    case 8: return parseInt(row[10]) || 0; // send
+    case 9: return parseInt(row[11]) || 0; // receive
+    default:
+      const map = [0,1,3,5,6,7,8];
+      return String(row[map[col]] || '').toLowerCase();
+  }
+}
+
+// ── Sort ─────────────────────────────────────────────────────────────────────
+
+function sortBy(col) {
+  if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = 1; }
+  document.querySelectorAll('thead th').forEach((th, i) => {
+    th.classList.remove('sort-asc','sort-desc');
+    if (i === col) th.classList.add(sortDir === 1 ? 'sort-asc' : 'sort-desc');
+  });
+  applyFilters();
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+
+function renderTable(rows) {
+  const tbody = document.getElementById('table-body');
+  const empty = document.getElementById('empty-state');
+  if (!rows.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = rows.map(r => {
+    const name     = r[0] || '';
+    const ip       = r[1] || '';
+    const mac      = r[2] || '';
+    const model    = r[3] || '';
+    const status   = (r[5] || '').toLowerCase();
+    const uptime   = r[6] || '';
+    const fw       = r[7] || '';
+    const lastSeen = r[8] || '';
+    const clients  = r[9] || '0';
+    const send     = r[10] || '0';
+    const recv     = r[11] || '0';
+
+    const isOnline   = status === 'online';
+    const uptimeDays = parseUptimeDays(String(uptime));
+    const uClass     = isOnline ? uptimeClass(uptimeDays) : 'uptime-new';
+    const uptimeStr  = isOnline ? uptime : '—';
+
+    const priv = isPrivateIP(String(ip)) ? ' <span style="font-size:10px;color:var(--amber);margin-left:4px">NAT</span>' : '';
+
+    const lastSeenFmt = lastSeen ? lastSeen.replace('/', '-').replace('/', '-') : '—';
+
+    return `<tr>
+      <td class="site-name">${escHtml(name)}</td>
+      <td class="mono">${escHtml(ip)}${priv}</td>
+      <td class="mono" style="font-size:11px">${escHtml(model)}</td>
+      <td><span class="badge badge-${isOnline ? 'online' : 'offline'}"><span class="dot"></span>${isOnline ? 'Online' : 'Offline'}</span></td>
+      <td class="uptime-val ${uClass}">${escHtml(uptimeStr)}</td>
+      <td><span class="badge ${fwClass(fw)}">${escHtml(fw)}</span></td>
+      <td class="mono" style="font-size:11px">${escHtml(lastSeenFmt)}</td>
+      <td class="clients-val mono" style="text-align:right">${isOnline ? escHtml(clients) : '—'}</td>
+      <td class="traffic-val" style="text-align:right">${isOnline ? fmtBytes(send) : '—'}</td>
+      <td class="traffic-val" style="text-align:right">${isOnline ? fmtBytes(recv) : '—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── Reset ────────────────────────────────────────────────────────────────────
+
+function resetDashboard() {
+  allRows = []; sortCol = -1; sortDir = 1;
+  activeStatFilter = 'all'; chips = { private: false, reboot: false };
+  document.getElementById('chip-private').classList.remove('on');
+  document.getElementById('chip-reboot').classList.remove('on');
+  document.getElementById('search').value = '';
+  document.querySelectorAll('.stat').forEach(s => s.classList.remove('active'));
+  document.getElementById('file-input').value = '';
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('drop-zone').style.display = 'flex';
+}
+
+// ── Events ────────────────────────────────────────────────────────────────────
+
+fetchLatestFirmware();   // kick off lookup immediately on page load
+
+
+document.getElementById('file-input').addEventListener('change', e => {
+  if (e.target.files[0]) handleFile(e.target.files[0]);
+});
+
+const dt = document.getElementById('drop-target');
+dt.addEventListener('dragover', e => { e.preventDefault(); dt.classList.add('drag-over'); });
+dt.addEventListener('dragleave', () => dt.classList.remove('drag-over'));
+dt.addEventListener('drop', e => {
+  e.preventDefault(); dt.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+
+
+// ── Export / PDF ─────────────────────────────────────────────────────────────
+
+const COL_DEFS = [
+  { key: 'device',    label: 'Device',    locked: true,  on: true  },
+  { key: 'ip',        label: 'IP Address',locked: false, on: true  },
+  { key: 'model',     label: 'Model',     locked: false, on: true  },
+  { key: 'status',    label: 'Status',    locked: true,  on: true  },
+  { key: 'uptime',    label: 'Uptime',    locked: false, on: true  },
+  { key: 'firmware',  label: 'Firmware',  locked: true,  on: true  },
+  { key: 'lastseen',  label: 'Last Seen', locked: false, on: true  },
+  { key: 'clients',   label: 'Clients',   locked: false, on: false },
+  { key: 'send',      label: '↑ Send',    locked: false, on: false },
+  { key: 'receive',   label: '↓ Receive', locked: false, on: false },
+];
+
+const pdfOpts = { orient: 'portrait', rows: 'filtered', colour: 'colour', fs: 8, subset: 'all' };
+let lastFilteredRows = [];
+
+function openExport() {
+  buildColGrid();
+  refreshPreview();
+  document.getElementById('export-overlay').style.display = 'block';
+}
+
+function closeExport() {
+  document.getElementById('export-overlay').style.display = 'none';
+}
+
+function buildColGrid() {
+  const grid = document.getElementById('col-grid');
+  grid.innerHTML = COL_DEFS.map((c, i) => `
+    <div class="col-toggle ${c.on ? 'on' : ''} ${c.locked ? 'locked' : ''}"
+         id="ct-${c.key}" onclick="${c.locked ? '' : `toggleCol(${i})`}">
+      <div class="col-check"></div>
+      <span class="col-name">${c.label}${c.locked ? ' <span style="font-size:9px;opacity:.5">always</span>' : ''}</span>
+    </div>`).join('');
+}
+
+function toggleCol(i) {
+  COL_DEFS[i].on = !COL_DEFS[i].on;
+  const el = document.getElementById('ct-' + COL_DEFS[i].key);
+  el.classList.toggle('on', COL_DEFS[i].on);
+  refreshPreview();
+}
+
+function setOpt(key, val) {
+  pdfOpts[key] = val;
+  // Update button states
+  const groups = {
+    orient: ['portrait','landscape'],
+    rows:   ['filtered','all'],
+    colour: ['colour','mono'],
+    fs:     [8,9,10],
+  };
+  (groups[key] || []).forEach(v => {
+    const btn = document.getElementById('opt-' + (key==='fs' ? 'fs'+v : v));
+    if (btn) btn.classList.toggle('sel', v === val);
+  });
+  refreshPreview();
+}
+
+function selectSubset(key) {
+  pdfOpts.subset = key;
+  refreshPreview();
+}
+
+function getExportRows() {
+  let base = pdfOpts.rows === 'all' ? allRows : lastFilteredRows;
+  if (pdfOpts.subset === 'online')  return base.filter(r => (r[5]||'').toLowerCase() === 'online');
+  if (pdfOpts.subset === 'offline') return base.filter(r => (r[5]||'').toLowerCase() !== 'online');
+  if (pdfOpts.subset === 'fw-ok')   return base.filter(r => r[7] === latestFW);
+  if (pdfOpts.subset === 'fw-old')  return base.filter(r => r[7] !== latestFW);
+  return base;
+}
+
+function cellVal(row, key) {
+  const online = (row[5]||'').toLowerCase() === 'online';
+  switch(key) {
+    case 'device':   return String(row[0] || '');
+    case 'ip':       return String(row[1] || '').split(':')[0];
+    case 'model':    return String(row[3] || '');
+    case 'status':   return online ? 'Online' : 'Offline';
+    case 'uptime':   return online ? String(row[6] || '') : '—';
+    case 'firmware': return String(row[7] || '');
+    case 'lastseen': return String(row[8] || '');
+    case 'clients':  return online ? String(row[9] || '0') : '—';
+    case 'send':     return online ? fmtBytes(row[10]) : '—';
+    case 'receive':  return online ? fmtBytes(row[11]) : '—';
+    default: return '';
+  }
+}
+
+function refreshPreview() {
+  // Build subset chips from the SOURCE rows (before subset filter)
+  const srcRows = pdfOpts.rows === 'all' ? allRows : lastFilteredRows;
+  const subsets = [
+    { key: 'all',     label: 'All',        val: srcRows.length,                                               col: 'var(--text2)',  bg: 'var(--navy3)' },
+    { key: 'online',  label: 'Online',     val: srcRows.filter(r=>(r[5]||'').toLowerCase()==='online').length, col: 'var(--green)', bg: 'var(--green-bg)' },
+    { key: 'offline', label: 'Offline',    val: srcRows.filter(r=>(r[5]||'').toLowerCase()!=='online').length, col: 'var(--red)',   bg: 'var(--red-bg)' },
+    { key: 'fw-ok',   label: 'Current FW', val: srcRows.filter(r=>r[7]===latestFW).length,                    col: 'var(--green)', bg: 'var(--green-bg)' },
+    { key: 'fw-old',  label: 'Outdated',   val: srcRows.filter(r=>r[7]!==latestFW).length,                    col: 'var(--amber)', bg: 'var(--amber-bg)' },
+  ];
+  const chipContainer = document.getElementById('subset-chips');
+  if (chipContainer) {
+    chipContainer.innerHTML = subsets.map(s => `
+      <div class="subset-chip ${pdfOpts.subset===s.key?'active':''}"
+           style="${pdfOpts.subset===s.key ? `border-color:${s.col};background:${s.bg}` : ''}"
+           onclick="selectSubset('${s.key}')">
+        <span class="sc-val" style="color:${s.col}">${s.val}</span>
+        <span class="sc-label">${s.label}</span>
+      </div>`).join('');
+  }
+
+  const rows   = getExportRows();
+  const active = COL_DEFS.filter(c => c.on);
+  const sample = rows.slice(0, 10);
+  const title  = document.getElementById('ep-title').value || 'ACS Device Report';
+  const sub    = document.getElementById('ep-subtitle').value;
+
+  const thead = '<tr>' + active.map(c => `<th>${escHtml(c.label)}</th>`).join('') + '</tr>';
+  const tbody = sample.map(row => {
+    const cells = active.map(c => {
+      const v = cellVal(row, c.key);
+      let cls = '';
+      if (c.key === 'status') cls = v === 'Online' ? 'status-on' : 'status-off';
+      if (c.key === 'firmware') {
+        cls = v === latestFW ? 'fw-ok' : (v.match(/^4\.[45]/) ? 'fw-warn' : 'fw-old');
+      }
+      return `<td class="${cls}">${escHtml(v)}</td>`;
+    }).join('');
+    return '<tr>' + cells + '</tr>';
+  }).join('');
+
+  const ts = new Date().toLocaleString('en-GB', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  document.getElementById('ep-preview').innerHTML = `
+    <div class="ep-preview-page">
+      <h2>${escHtml(title)}</h2>
+      <div class="ep-meta">${sub ? escHtml(sub) + ' &nbsp;·&nbsp; ' : ''}Generated: ${ts} &nbsp;·&nbsp; ${rows.length} devices</div>
+      <table class="ep-prev-table"><thead>${thead}</thead><tbody>${tbody}</tbody></table>
+      ${rows.length > 10 ? `<div style="color:#999;font-size:8px;margin-top:6px">… and ${rows.length - 10} more rows in the full export</div>` : ''}
+    </div>`;
+
+  document.getElementById('ep-row-count').textContent = rows.length + ' rows';
+}
+
+function runExport() {
+  const { jsPDF } = window.jspdf;
+  const rows   = getExportRows();
+  const active = COL_DEFS.filter(c => c.on);
+  const title  = document.getElementById('ep-title').value || 'ACS Device Report';
+  const sub    = document.getElementById('ep-subtitle').value;
+  const mono   = pdfOpts.colour === 'mono';
+
+  const navyR = mono ? 60  : 15,  navyG = mono ? 60  : 23,  navyB = mono ? 60  : 46;
+  const altR  = mono ? 245 : 249, altG  = mono ? 245 : 250, altB  = mono ? 245 : 251;
+  const onCol  = mono ? [40,40,40]  : [22,163,74];
+  const offCol = mono ? [120,120,120]: [220,38,38];
+  const fwOkCol  = mono ? [40,40,40]   : [22,163,74];
+  const fwWarnCol= mono ? [80,80,80]   : [180,83,9];
+  const fwOldCol = mono ? [120,120,120]: [220,38,38];
+
+  const doc = new jsPDF({ orientation: pdfOpts.orient, unit: 'mm', format: 'a4' });
+  const ts  = new Date().toLocaleString('en-GB', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const pw  = pdfOpts.orient === 'landscape' ? 297 : 210;
+
+  // ── PDF Header ─────────────────────────────────────────────────────────────
+  // Title (left)
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(14);
+  doc.setTextColor(navyR, navyG, navyB);
+  doc.text(title, 14, 14);
+
+  // Firmware pill (right-aligned, top)
+  const fwLabel   = latestFW || 'Unknown';
+  const pillW     = 42;
+  const pillX     = pw - 14 - pillW;
+  const pillY     = 7;
+  const pillH     = 10;
+  const pillR     = 2;
+  // Pill background — navy
+  doc.setFillColor(navyR, navyG, navyB);
+  doc.roundedRect(pillX, pillY, pillW, pillH, pillR, pillR, 'F');
+  // Label inside: "Latest FW" in muted, version in white
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(6);
+  doc.setTextColor(160, 175, 190);
+  doc.text('LATEST FIRMWARE', pillX + pillW / 2, pillY + 3.8, { align: 'center' });
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(8);
+  doc.setTextColor(255, 255, 255);
+  doc.text(fwLabel, pillX + pillW / 2, pillY + 7.5, { align: 'center' });
+
+  // Firmware compliance summary row
+  const fwOnLatest = rows.filter(r => r[7] === latestFW).length;
+  const fwOutdated = rows.length - fwOnLatest;
+  const fwOnline   = rows.filter(r => (r[5]||'').toLowerCase() === 'online').length;
+  const fwOffline  = rows.length - fwOnline;
+
+  // Sub-line (left)
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(110, 110, 110);
+  const subLine = [sub, `Generated: ${ts}`, `${rows.length} devices`].filter(Boolean).join('   ·   ');
+  doc.text(subLine, 14, 20);
+
+  // Stat chips on the right below the pill
+  const chips = [
+    { label: 'Online',    val: String(fwOnline),   r: mono?60:22,  g: mono?60:163, b: mono?60:74,  cat: 'online'  },
+    { label: 'Offline',   val: String(fwOffline),  r: mono?120:220,g: mono?120:38, b: mono?120:38, cat: 'offline' },
+    { label: 'Current FW',val: String(fwOnLatest), r: mono?60:22,  g: mono?60:163, b: mono?60:74,  cat: 'fwOk'   },
+    { label: 'Outdated',  val: String(fwOutdated), r: mono?140:180,g: mono?140:83, b: mono?140:9,  cat: 'fwOld'  },
+  ];
+  const chipW = 20, chipH = 7, chipGap = 2;
+  const chipAreas = [];
+  const chipsTotal = chips.length * chipW + (chips.length - 1) * chipGap;
+  let cx = pw - 14 - chipsTotal;
+  const cy = 20;
+  chips.forEach(chip => {
+    doc.setFillColor(chip.r, chip.g, chip.b);
+    doc.setGState(new doc.GState({ opacity: 0.12 }));
+    doc.roundedRect(cx, cy, chipW, chipH, 1.5, 1.5, 'F');
+    doc.setGState(new doc.GState({ opacity: 1 }));
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(8);
+    doc.setTextColor(chip.r, chip.g, chip.b);
+    doc.text(chip.val, cx + chipW / 2, cy + 4, { align: 'center' });
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(5.5);
+    doc.setTextColor(110, 110, 110);
+    doc.text(chip.label.toUpperCase(), cx + chipW / 2, cy + 6.2, { align: 'center' });
+    // Underline label to signal clickability
+    doc.setDrawColor(chip.r, chip.g, chip.b);
+    doc.setLineWidth(0.15);
+    const lw = doc.getTextWidth(chip.label.toUpperCase());
+    doc.line(cx + chipW/2 - lw/2, cy + 6.8, cx + chipW/2 + lw/2, cy + 6.8);
+    chipAreas.push({ cat: chip.cat, x: cx, y: cy, w: chipW, h: chipH });
+    cx += chipW + chipGap;
+  });
+
+  // Divider
+  doc.setDrawColor(220, 220, 220);
+  doc.line(14, 30, pw - 14, 30);
+
+  // ── Shared table config ────────────────────────────────────────────────────
+  const head = [active.map(c => c.label.replace(/[↑↓]\s*/,''))];
+  const pageW = pdfOpts.orient === 'landscape' ? 269 : 182;
+  const COL_WIDTHS = {
+    device: 38, ip: 30, model: 22, status: 18,
+    uptime: 24, firmware: 22, lastseen: 26,
+    clients: 14, send: 18, receive: 18,
+  };
+  const totalW = active.reduce((s, c) => s + (COL_WIDTHS[c.key] || 20), 0);
+  const scale  = totalW > pageW ? pageW / totalW : 1;
+
+  function makeColStyles() {
+    const cs = {};
+    active.forEach((c, i) => {
+      cs[i] = { cellWidth: Math.round((COL_WIDTHS[c.key] || 20) * scale * 10) / 10 };
+      if (c.key === 'status')   cs[i].fontStyle = 'bold';
+      if (c.key === 'send' || c.key === 'receive' || c.key === 'clients') cs[i].halign = 'right';
+      if (c.key === 'uptime' || c.key === 'lastseen') cs[i].overflow = 'ellipsize';
+    });
+    return cs;
+  }
+
+  function makeParseCell(tableRows) {
+    return function(data) {
+      if (data.section !== 'body') return;
+      const col = active[data.column.index];
+      const row = tableRows[data.row.index];
+      if (!col || !row) return;
+      const online = (row[5]||'').toLowerCase() === 'online';
+      if (col.key === 'status') {
+        data.cell.styles.textColor = online ? onCol : offCol;
+        data.cell.styles.fontSize = 7;
+      }
+      if (col.key === 'firmware') {
+        const fw = row[7] || '';
+        data.cell.styles.textColor = fw === latestFW ? fwOkCol : (fw.match(/^4\.[45]/) ? fwWarnCol : fwOldCol);
+      }
+    };
+  }
+
+  function drawFooter() {
+    const pg    = doc.internal.getCurrentPageInfo().pageNumber;
+    const total = doc.internal.getNumberOfPages();
+    doc.setFontSize(7);
+    doc.setTextColor(160,160,160);
+    doc.text('Active8 IT  \u00B7  ' + title, 14, doc.internal.pageSize.height - 6);
+    doc.text('Page ' + pg + ' of ' + total, pw - 14, doc.internal.pageSize.height - 6, { align: 'right' });
+  }
+
+  function drawTable(tableRows, startY) {
+    const body = tableRows.map(row => active.map(c => cellVal(row, c.key)));
+    doc.autoTable({
+      head, body, startY,
+      rowPageBreak: 'avoid',
+      styles: { fontSize: pdfOpts.fs, cellPadding: { top: 2.5, bottom: 2.5, left: 3, right: 3 }, lineColor: [220,220,220], lineWidth: 0.1, textColor: [30,30,30], overflow: 'ellipsize', cellWidth: 'wrap' },
+      headStyles: { fillColor: [navyR,navyG,navyB], textColor: [255,255,255], fontStyle: 'bold', fontSize: pdfOpts.fs - 1, overflow: 'ellipsize' },
+      alternateRowStyles: { fillColor: [altR,altG,altB] },
+      columnStyles: makeColStyles(),
+      didParseCell: makeParseCell(tableRows),
+      didDrawPage: drawFooter,
+    });
+  }
+
+  // ── Page 1: full table ──────────────────────────────────────────────────────
+  drawTable(rows, 34);
+
+  // ── Category sections — each on a new page ──────────────────────────────────
+  // Chips link to these pages; each section contains ONLY that category's rows.
+  const catSections = [
+    { cat: 'online',  label: 'Online Devices',      filter: r => (r[5]||'').toLowerCase() === 'online', color: [22,163,74]  },
+    { cat: 'offline', label: 'Offline Devices',      filter: r => (r[5]||'').toLowerCase() !== 'online', color: [220,38,38]  },
+    { cat: 'fwOk',    label: 'Current Firmware',     filter: r => r[7] === latestFW,                     color: [22,163,74]  },
+    { cat: 'fwOld',   label: 'Outdated Firmware',    filter: r => r[7] !== latestFW,                     color: [180,83,9]   },
+  ];
+  const sectionPage = {};
+
+  catSections.forEach(sec => {
+    const secRows = rows.filter(sec.filter);
+    if (!secRows.length) return;
+
+    doc.addPage();
+    sectionPage[sec.cat] = doc.internal.getCurrentPageInfo().pageNumber;
+
+    // Section heading bar
+    doc.setFillColor(...(mono ? [60,60,60] : sec.color));
+    doc.rect(14, 8, pw - 28, 9, 'F');
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(9);
+    doc.setTextColor(255,255,255);
+    doc.text(sec.label + '  (' + secRows.length + ' devices)', 18, 13.8);
+
+    drawTable(secRows, 20);
+  });
+
+  // ── Wire chip links to section pages ────────────────────────────────────────
+  doc.setPage(1);
+  chipAreas.forEach(area => {
+    const pg = sectionPage[area.cat];
+    if (pg) {
+      // Use #page= URL format — works in Chrome PDF viewer and Adobe
+      doc.link(area.x, area.y, area.w, area.h, { url: '#page=' + pg });
+    }
+  });
+
+  // PDF outline bookmarks
+  doc.outline.add(null, 'All Devices (' + rows.length + ')', { pageNumber: 1 });
+  catSections.forEach(sec => {
+    const pg = sectionPage[sec.cat];
+    const count = rows.filter(sec.filter).length;
+    if (pg && count) doc.outline.add(null, sec.label + ' (' + count + ')', { pageNumber: pg });
+  });
+
+  const slug = title.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  const dateStr = new Date().toISOString().slice(0,10);
+  doc.save(`${slug}_${dateStr}.pdf`);
+}
+
+</script>
+</body>
+</html>
