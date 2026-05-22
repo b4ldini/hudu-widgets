@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DMZ Setup – BT & Virgin Media Routers with Draytek</title>
+<title>ISP Router Setup for Draytek – Modem Mode & DMZ</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -61,10 +61,11 @@
     font-size: 10px; font-weight: 600;
     flex-shrink: 0;
   }
-  .num-overview { background: rgba(30,74,160,0.12); color: #1e4aa0; }
-  .num-bt       { background: rgba(0,94,184,0.14);  color: #005eb8; }
-  .num-vm       { background: rgba(186,12,47,0.14); color: #ba0c2f; }
-  .num-verify   { background: rgba(34,197,94,0.18); color: #15803d; }
+  .num-overview { background: rgba(30,74,160,0.12);  color: #1e4aa0; }
+  .num-modem    { background: rgba(34,197,94,0.18);  color: #15803d; }
+  .num-bt       { background: rgba(0,94,184,0.14);   color: #005eb8; }
+  .num-vm       { background: rgba(186,12,47,0.14);  color: #ba0c2f; }
+  .num-verify   { background: rgba(34,197,94,0.18);  color: #15803d; }
 
   /* ─── PAGE BODY ─── */
   .page-body { padding: 44px 40px 72px; }
@@ -359,11 +360,14 @@
     <a class="nav-link" href="#overview">
       <span class="nav-num num-overview">▦</span> Overview
     </a>
+    <a class="nav-link" href="#modem">
+      <span class="nav-num num-modem">★</span> Modem Mode
+    </a>
     <a class="nav-link" href="#bt">
-      <span class="nav-num num-bt">A</span> BT Hub
+      <span class="nav-num num-bt">B</span> BT Hub — DMZ
     </a>
     <a class="nav-link" href="#vm">
-      <span class="nav-num num-vm">B</span> Virgin Media
+      <span class="nav-num num-vm">C</span> VM Hub — DMZ
     </a>
     <a class="nav-link" href="#verify">
       <span class="nav-num num-verify">✓</span> Verify
@@ -378,18 +382,55 @@
 
     <div class="overview-card">
       <div class="card-label">MSP-NET-001 &middot; Network Configuration</div>
-      <p>When a Draytek router is installed behind a third-party ISP router (BT or Virgin Media), the ISP router performs NAT. This means the Draytek receives a <strong style="color:#c2e000">private IP address</strong> on its WAN port rather than the public IP — breaking inbound traffic and VPN tunnels.</p>
-      <p>The fix is a two-step process: <strong style="color:#c2e000">assign the Draytek a fixed (reserved) IP</strong> on the ISP router's LAN, then <strong style="color:#c2e000">point DMZ at that reserved IP</strong>. This forwards all unsolicited inbound traffic from the internet directly to the Draytek, which then applies its own firewall rules.</p>
+      <p>When a Draytek is installed behind a BT or Virgin Media router, the ISP router performs NAT — the Draytek gets a <strong style="color:#c2e000">private IP on its WAN port</strong> instead of the public IP, breaking inbound traffic and VPN tunnels.</p>
+      <p>There are <strong style="color:#c2e000">two ways to fix this</strong>, in order of preference: <strong style="color:#c2e000">(★) Modem Mode</strong> — switch the ISP router into a transparent passthrough so the Draytek receives the public IP directly, eliminating double-NAT entirely; or <strong style="color:#c2e000">(B/C) DMZ</strong> — keep the ISP router in router mode but reserve a fixed IP for the Draytek and forward all inbound traffic to it. Use Modem Mode where the ISP router supports it; fall back to DMZ when it does not.</p>
       <div class="pill-row">
-        <div class="pill"><div class="dot" style="background:#c2e000"></div>BT Smart Hub / Hub 2</div>
+        <div class="pill"><div class="dot" style="background:#22c55e"></div>★ Modem Mode — preferred</div>
+        <div class="pill"><div class="dot" style="background:#c2e000"></div>DMZ — fallback</div>
         <div class="pill"><div class="dot" style="background:#ba0c2f"></div>Virgin Media Hub 3 / 4 / 5</div>
-        <div class="pill"><div class="dot" style="background:#22c55e"></div>All Draytek Vigor models</div>
+        <div class="pill"><div class="dot" style="background:#005eb8"></div>BT Smart Hub / Hub 2</div>
       </div>
     </div>
 
     <!-- NETWORK DIAGRAM -->
     <div class="diagram-wrap">
-      <div class="diagram-label">Network topology — double-NAT scenario</div>
+      <div class="diagram-label">Option ★ — Modem Mode (preferred) · Draytek gets the public IP directly</div>
+      <div class="diagram-row" style="margin-bottom:20px">
+        <div class="diag-node">
+          <div class="diag-icon icon-internet">🌐</div>
+          <div class="diag-name">Internet</div>
+          <div class="diag-ip">Public IP</div>
+        </div>
+        <div class="diag-arrow">
+          <div class="arrow-line"></div>
+          <div class="arrow-tag">WAN</div>
+        </div>
+        <div class="diag-node">
+          <div class="diag-icon" style="background:rgba(34,197,94,0.13)">📡</div>
+          <div class="diag-name">VM Hub</div>
+          <div class="diag-ip">Modem Mode</div>
+        </div>
+        <div class="diag-arrow">
+          <div class="arrow-line" style="background:rgba(34,197,94,0.5)"></div>
+          <div class="arrow-tag" style="background:rgba(34,197,94,0.8)">passthrough</div>
+        </div>
+        <div class="diag-node">
+          <div class="diag-icon icon-draytek">🔷</div>
+          <div class="diag-name">Draytek WAN</div>
+          <div class="diag-ip">Public IP (direct)</div>
+        </div>
+        <div class="diag-arrow">
+          <div class="arrow-line"></div>
+          <div class="arrow-tag">LAN</div>
+        </div>
+        <div class="diag-node">
+          <div class="diag-icon icon-lan">🖥️</div>
+          <div class="diag-name">Client LAN</div>
+          <div class="diag-ip">10.x.x.x / 192.168.x.x</div>
+        </div>
+      </div>
+      <div style="height:1px;background:rgba(0,0,0,0.07);margin:4px 0 16px"></div>
+      <div class="diagram-label">Option B/C — DMZ fallback · double-NAT with Draytek on reserved private IP</div>
       <div class="diagram-row">
         <div class="diag-node">
           <div class="diag-icon icon-internet">🌐</div>
@@ -412,7 +453,7 @@
         <div class="diag-node">
           <div class="diag-icon icon-draytek">🔷</div>
           <div class="diag-name">Draytek WAN</div>
-          <div class="diag-ip">192.168.1.10 (fixed)</div>
+          <div class="diag-ip">192.168.x.10 (fixed)</div>
         </div>
         <div class="diag-arrow">
           <div class="arrow-line"></div>
@@ -432,13 +473,15 @@
         <th>ISP Router</th>
         <th>Default Admin URL</th>
         <th>Default Login</th>
-        <th>DHCP Reservation Path</th>
+        <th>Modem Mode Path</th>
+        <th>DHCP Reservation Path (DMZ)</th>
         <th>DMZ Path</th>
       </tr>
       <tr>
         <td><strong>BT Smart Hub / Hub 2</strong></td>
         <td><code>192.168.1.254</code></td>
         <td>Label on underside of hub</td>
+        <td style="color:#b45309;font-size:11px">Not available via admin UI — use DMZ</td>
         <td>Advanced → Home Network → IP Addresses</td>
         <td>Advanced → Firewall → DMZ</td>
       </tr>
@@ -446,6 +489,7 @@
         <td><strong>Virgin Media Hub 3/4/5</strong></td>
         <td><code>192.168.0.1</code></td>
         <td><code>admin</code> / label on base</td>
+        <td>Advanced → Modem Mode</td>
         <td>Advanced → DHCP → Reserved IP Addresses</td>
         <td>Advanced → Security → DMZ</td>
       </tr>
@@ -453,8 +497,104 @@
 
     <table class="callout-warning">
       <tr><td class="callout-td">
-        <strong style="display:block;font-family:'Courier New',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;color:#b45309">⚠ Before you start</strong>
-        <span style="font-size:12px;line-height:1.6">You need the Draytek's <strong>WAN-port MAC address</strong> to create the DHCP reservation. Find this by logging into the Draytek admin panel at its current LAN IP → <strong>System Status</strong> → the MAC shown next to the <em>WAN</em> interface. Note it down before touching the ISP router.</span>
+        <strong style="display:block;font-family:'Courier New',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;color:#b45309">⚠ Before you start — DMZ method only</strong>
+        <span style="font-size:12px;line-height:1.6">If using the DMZ fallback (Sections B or C), you need the Draytek's <strong>WAN-port MAC address</strong> to create the DHCP reservation. Log into the Draytek admin panel → <strong>System Status</strong> → note the MAC address next to the <em>WAN</em> interface before touching the ISP router. Not needed if using Modem Mode.</span>
+      </td></tr>
+    </table>
+
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ══════════════════════════════════════════════════════ MODEM MODE -->
+  <section id="modem">
+
+    <div class="section-heading">
+      <div class="step-badge badge-green">★</div>
+      <div>
+        <div class="step-meta">Section A &middot; Preferred Approach</div>
+        <div class="step-title">Modem Mode — Eliminate Double-NAT Entirely</div>
+      </div>
+    </div>
+
+    <table class="callout-success" style="margin-bottom:20px">
+      <tr><td class="callout-td">
+        <strong style="display:block;font-family:'Courier New',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;color:#15803d">★ Why this is better than DMZ</strong>
+        <span style="font-size:12px;line-height:1.6">In Modem Mode the ISP router stops performing NAT and becomes a transparent bridge — the Draytek receives the <strong>public IP address directly</strong> on its WAN port. No DHCP reservation needed, no DMZ rules, no double-NAT. The Draytek's own firewall handles everything. This is the cleanest solution and should be used wherever the ISP router supports it.</span>
+      </td></tr>
+    </table>
+
+    <!-- ── VIRGIN MEDIA ── -->
+    <div class="router-badge rb-vm" style="margin-bottom:16px">📡 Virgin Media Hub 3 / Hub 4 / Hub 5 &nbsp;|&nbsp; Modem Mode supported ✓</div>
+
+    <table class="step-table">
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-vm">1</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Log in to the Virgin Media Hub admin panel</span>
+          <span class="step-detail">From a device on the VM Hub's network, browse to <code>192.168.0.1</code>. Log in with username <code>admin</code> and the password on the label on the base of the hub.</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-vm">2</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Navigate to Advanced Settings → Modem Mode</span>
+          <span class="step-detail">Click <strong>Advanced Settings</strong> in the top menu. In the left sidebar select <strong>Modem Mode</strong>. On Hub 3 this may appear under the <em>Network</em> or <em>Status</em> submenu.</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-vm">3</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Enable Modem Mode and apply</span>
+          <span class="step-detail">Tick the <strong>Enable Modem Mode</strong> checkbox (or toggle) and click <strong>Apply</strong>. The hub will warn that Wi-Fi and DHCP will be disabled — this is expected. Confirm and allow the hub to reboot.</span>
+          <div class="ui-mock" style="margin-top:10px">
+            <div class="ui-mock-bar" style="background:#ba0c2f">
+              <div style="font-size:11px;color:#fff;font-weight:600">Virgin Media Hub &gt; Advanced &gt; Modem Mode</div>
+            </div>
+            <div class="ui-mock-body">
+              <div class="ui-section-head">Modem Mode</div>
+              <div class="ui-field-row">
+                <div class="ui-label">Enable Modem Mode</div>
+                <div class="ui-toggle-on">ENABLED</div>
+              </div>
+              <div style="font-size:11px;color:#b45309;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.06)">⚠ Enabling Modem Mode will disable the hub's Wi-Fi, DHCP, and firewall. The connected device (Draytek) will receive the public IP.</div>
+              <div style="margin-top:12px;display:flex;gap:8px">
+                <div style="background:#ba0c2f;color:#fff;font-size:11px;font-weight:600;padding:6px 16px;border-radius:5px;display:inline-block">Apply</div>
+              </div>
+            </div>
+          </div>
+          <table class="callout-warning" style="margin-top:6px">
+            <tr><td class="callout-td">
+              <strong style="display:block;font-family:'Courier New',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;color:#b45309">⚠ The hub's Wi-Fi will stop working</strong>
+              <span style="font-size:12px">In Modem Mode the VM Hub no longer provides Wi-Fi or DHCP — the Draytek takes over those roles. If any devices were relying on VM Hub Wi-Fi, they will need to connect to the Draytek's Wi-Fi (or a switch/AP behind it) after this change. Confirm this with the client before proceeding.</span>
+            </td></tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-vm">4</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Confirm the Draytek WAN receives the public IP</span>
+          <span class="step-detail">After the hub reboots (~60 seconds), log into the Draytek admin panel and check <strong>System Status → WAN</strong>. The WAN IP should now be a <strong>public IP address</strong> (not a <code>192.168.x.x</code> private address). Proceed to the <strong>Verify</strong> section to confirm inbound connectivity.</span>
+          <table class="callout-success" style="margin-top:8px">
+            <tr><td class="callout-td">
+              <strong style="display:block;font-family:'Courier New',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;color:#15803d">✓ Setup complete — no DMZ needed</strong>
+              <span style="font-size:12px">If the Draytek WAN shows a public IP, Modem Mode is working. Skip Sections B and C entirely and go straight to <strong>Verify</strong>.</span>
+            </td></tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+
+    <div style="height:1px;background:rgba(0,0,0,0.07);margin:28px 0 24px"></div>
+
+    <!-- ── BT HUB — MODEM MODE NOT AVAILABLE ── -->
+    <div class="router-badge rb-bt" style="margin-bottom:16px">📡 BT Smart Hub / Hub 2 &nbsp;|&nbsp; Modem Mode not available via admin UI</div>
+
+    <table class="callout-danger">
+      <tr><td class="callout-td">
+        <strong style="display:block;font-family:'Courier New',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;color:#dc2626">✗ BT Smart Hub — Modem Mode not available</strong>
+        <span style="font-size:12px;line-height:1.6">BT locks out Modem Mode / Bridge Mode on the Smart Hub and Hub 2 — there is no option in the admin panel. <strong>BT Business</strong> customers with a <em>Business Smart Hub</em> may be able to request bridge mode from BT support, but this is not standard. For residential BT or where bridge mode cannot be arranged, proceed to <strong>Section B — BT Hub DMZ</strong> below.</span>
       </td></tr>
     </table>
 
@@ -466,10 +606,10 @@
   <section id="bt">
 
     <div class="section-heading">
-      <div class="step-badge badge-bt">A</div>
+      <div class="step-badge badge-bt">B</div>
       <div>
-        <div class="step-meta">Section A &middot; ISP Router Setup</div>
-        <div class="step-title">BT Smart Hub &amp; Hub 2</div>
+        <div class="step-meta">Section B &middot; DMZ Fallback</div>
+        <div class="step-title">BT Smart Hub &amp; Hub 2 — DMZ Setup</div>
       </div>
     </div>
 
@@ -597,10 +737,10 @@
   <section id="vm">
 
     <div class="section-heading">
-      <div class="step-badge badge-vm">B</div>
+      <div class="step-badge badge-vm">C</div>
       <div>
-        <div class="step-meta">Section B &middot; ISP Router Setup</div>
-        <div class="step-title">Virgin Media Hub 3, Hub 4 &amp; Hub 5</div>
+        <div class="step-meta">Section C &middot; DMZ Fallback</div>
+        <div class="step-title">Virgin Media Hub 3, Hub 4 &amp; Hub 5 — DMZ Setup</div>
       </div>
     </div>
 
