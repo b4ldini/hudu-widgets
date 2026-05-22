@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Network Device Firmware Update Process | Active8 Managed Technologies</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --page-bg:    #f0f2f4;
+    --card-bg:    #ffffff;
+    --section-bg: #e8eaec;
+    --panel-bg:   #f7f8f9;
+    --border:     #d5d9de;
+    --text:       #333333;
+    --text-muted: #6c757d;
+    --text-dim:   #4a5568;
+    --green:         #22c55e;
+    --green-dim:     #e8f8ef;
+    --green-border:  #a3e6be;
+    --amber:         #f59e0b;
+    --amber-dim:     #fff8e1;
+    --amber-border:  #f5c518;
+    --red:           #ef4444;
+    --red-dim:       #fdf0ef;
+    --red-border:    #e05252;
+    --a8-blue:  #1e4aa0;
+    --a8-blue2: #2557b7;
+    --a8-lime:  #c2e000;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--page-bg);
+  }
+
+  /* ── Sticky nav ─────────────────────────────────── */
+  .sticky-nav {
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  }
+  .sticky-nav-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    align-items: stretch;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .sticky-nav-inner::-webkit-scrollbar { display: none; }
+  .nav-link {
+    padding: 0 13px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: #999;
+    white-space: nowrap;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+    text-decoration: none;
+    user-select: none;
+  }
+  .nav-link:hover {
+    color: var(--a8-blue);
+    background: rgba(37,87,183,0.06);
+    border-bottom-color: rgba(37,87,183,0.35);
+  }
+  .nav-link.active {
+    color: var(--a8-blue);
+    font-weight: 700;
+    border-bottom-color: var(--a8-blue);
+    background: rgba(37,87,183,0.07);
+  }
+
+  /* ── Page container ─────────────────────────────── */
+  .container { max-width: 960px; margin: 0 auto; padding: 36px 24px 0; }
+
+  /* ── Header ─────────────────────────────────────── */
+  .header { border-left: 4px solid var(--a8-blue); padding-left: 20px; margin-bottom: 32px; }
+  .header .badge {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    color: var(--a8-blue2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .header h1 { font-size: 24px; font-weight: 700; color: #111; line-height: 1.2; margin-bottom: 8px; }
+  .header h1 span { color: var(--a8-blue); }
+  .header p { font-size: 13px; color: var(--text-dim); line-height: 1.6; max-width: 680px; }
+
+  /* ── Section headings ───────────────────────────── */
+  h2 {
+    font-size: 11px;
+    font-family: 'Courier New', Consolas, monospace;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    margin-top: 44px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111;
+    margin: 20px 0 10px;
+  }
+
+  /* ── Device scope cards ─────────────────────────── */
+  .device-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 4px; }
+  .device-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--a8-blue);
+    border-radius: 0 0 6px 6px;
+    padding: 18px 20px;
+  }
+  .device-card .device-icon { font-size: 22px; margin-bottom: 10px; }
+  .device-card .device-name { font-size: 14px; font-weight: 700; color: #111; margin-bottom: 4px; }
+  .device-card .device-model { font-family: 'Courier New', Consolas, monospace; font-size: 11px; color: var(--a8-blue2); margin-bottom: 12px; }
+  .device-card table { width: 100%; border-collapse: collapse; }
+  .device-card table td { font-size: 12px; padding: 4px 0; border-bottom: 1px solid var(--section-bg); vertical-align: top; }
+  .device-card table td:first-child { color: var(--text-muted); width: 110px; }
+  .device-card table td:last-child { color: var(--text-dim); font-weight: 500; }
+  .device-card table tr:last-child td { border-bottom: none; }
+  .badge-auto { display: inline-block; background: var(--green-dim); border: 1px solid var(--green-border); color: #166534; font-size: 10px; font-family: 'Courier New', Consolas, monospace; padding: 2px 7px; border-radius: 3px; }
+  .badge-manual { display: inline-block; background: rgba(37,87,183,0.1); border: 1px solid rgba(37,87,183,0.3); color: var(--a8-blue); font-size: 10px; font-family: 'Courier New', Consolas, monospace; padding: 2px 7px; border-radius: 3px; }
+
+  /* ── Roles table ────────────────────────────────── */
+  .roles-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 4px; }
+  .roles-table th { background: var(--section-bg); padding: 10px 14px; font-size: 11px; font-family: 'Courier New', Consolas, monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); text-align: left; border-bottom: 1px solid var(--border); }
+  .roles-table td { padding: 11px 14px; font-size: 12px; color: var(--text-dim); border-bottom: 1px solid var(--section-bg); vertical-align: top; line-height: 1.5; }
+  .roles-table td:first-child { font-weight: 600; color: #111; width: 200px; white-space: nowrap; }
+  .roles-table tr:last-child td { border-bottom: none; }
+
+  /* ── SLA table ──────────────────────────────────── */
+  .sla-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 4px; }
+  .sla-table th { background: var(--section-bg); padding: 10px 14px; font-size: 11px; font-family: 'Courier New', Consolas, monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); text-align: left; border-bottom: 1px solid var(--border); }
+  .sla-table td { padding: 11px 14px; font-size: 12px; color: var(--text-dim); border-bottom: 1px solid var(--section-bg); vertical-align: top; line-height: 1.5; }
+  .sla-table tr:last-child td { border-bottom: none; }
+  .sla-table tr.sla-ok td:first-child { border-left: 3px solid var(--green); }
+  .sla-table tr.sla-warn td:first-child { border-left: 3px solid var(--amber); }
+  .sla-table tr.sla-crit td:first-child { border-left: 3px solid var(--red); }
+  .sla-badge { display: inline-block; font-size: 11px; font-weight: 700; font-family: 'Courier New', Consolas, monospace; padding: 2px 8px; border-radius: 3px; white-space: nowrap; }
+  .sla-badge.ok   { background: var(--green-dim); color: #166534; border: 1px solid var(--green-border); }
+  .sla-badge.warn { background: var(--amber-dim); color: #7a4f00; border: 1px solid var(--amber-border); }
+  .sla-badge.crit { background: var(--red-dim); color: #b03030; border: 1px solid var(--red-border); }
+
+  /* ── Wave table ─────────────────────────────────── */
+  .wave-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin: 10px 0 4px; }
+  .wave-table th { background: var(--section-bg); padding: 9px 14px; font-size: 11px; font-family: 'Courier New', Consolas, monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); text-align: left; border-bottom: 1px solid var(--border); }
+  .wave-table td { padding: 10px 14px; font-size: 12px; color: var(--text-dim); border-bottom: 1px solid var(--section-bg); vertical-align: top; }
+  .wave-table tr:last-child td { border-bottom: none; }
+  .wave-num { display: inline-block; font-family: 'Courier New', Consolas, monospace; font-size: 11px; font-weight: 700; background: rgba(37,87,183,0.1); color: var(--a8-blue); border: 1px solid rgba(37,87,183,0.25); border-radius: 3px; padding: 1px 7px; }
+
+  /* ── Step blocks ────────────────────────────────── */
+  .steps { display: flex; flex-direction: column; gap: 4px; margin-bottom: 4px; }
+  .step {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 18px;
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 14px;
+    align-items: start;
+    transition: border-color 0.15s;
+  }
+  .step:hover { border-color: #b0bcd0; }
+  .step-num {
+    width: 28px; height: 28px;
+    background: rgba(37,87,183,0.1);
+    border: 1px solid rgba(37,87,183,0.2);
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Courier New', Consolas, monospace;
+    font-weight: 600; font-size: 12px;
+    color: var(--a8-blue2); flex-shrink: 0;
+  }
+  .step-title { font-weight: 600; font-size: 13px; color: #111; margin-bottom: 4px; }
+  .step-desc { font-size: 13px; color: var(--text-dim); line-height: 1.65; }
+  .step-desc ul { margin: 6px 0 0 16px; display: flex; flex-direction: column; gap: 3px; }
+  .step-desc ul li { font-size: 12px; }
+  .step-tag {
+    display: inline-block;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 2px 6px; border-radius: 3px; margin-left: 8px;
+    vertical-align: middle; position: relative; top: -1px;
+  }
+  .step-tag.crit { background: var(--red-dim); color: var(--red); border: 1px solid var(--red-border); }
+  .step-tag.info { background: rgba(37,87,183,0.1); color: var(--a8-blue2); border: 1px solid rgba(37,87,183,0.3); }
+
+  /* ── Callouts ───────────────────────────────────── */
+  .callout {
+    border-radius: 5px; padding: 12px 15px; font-size: 13px; line-height: 1.6;
+    display: flex; gap: 10px; align-items: flex-start; margin: 12px 0;
+  }
+  .callout.warn  { background: var(--amber-dim); border: 1px solid var(--amber-border); color: #7a4f00; }
+  .callout.info  { background: rgba(37,87,183,0.07); border: 1px solid rgba(37,87,183,0.3); color: var(--a8-blue); }
+  .callout.green { background: var(--green-dim); border: 1px solid var(--green-border); color: #166534; }
+  .callout-icon  { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── Record-keeping checklist ───────────────────── */
+  .record-list { background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; padding: 16px 20px; }
+  .record-list ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  .record-list ul li { font-size: 13px; color: var(--text-dim); line-height: 1.5; display: flex; gap: 10px; align-items: flex-start; }
+  .record-list ul li::before { content: '›'; color: var(--a8-blue2); font-weight: 700; flex-shrink: 0; }
+
+  /* ── Report bullets ─────────────────────────────── */
+  .report-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; padding: 18px 20px; }
+  .report-card ul { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+  .report-card ul li { font-size: 13px; color: var(--text-dim); line-height: 1.5; display: flex; gap: 10px; align-items: flex-start; }
+  .report-card ul li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+  .report-card .report-note { font-size: 12px; color: var(--text-muted); margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--section-bg); }
+
+  /* ── Related docs ───────────────────────────────── */
+  .related-list { background: var(--card-bg); border: 1px solid var(--border); border-radius: 6px; padding: 16px 20px; }
+  .related-list ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  .related-list ul li { font-size: 13px; color: var(--text-dim); line-height: 1.5; display: flex; gap: 10px; align-items: flex-start; }
+  .related-list ul li::before { content: '—'; color: var(--text-muted); flex-shrink: 0; }
+
+  /* ── Active8 footer ─────────────────────────────── */
+  .article-footer { background: linear-gradient(135deg, var(--a8-blue) 0%, var(--a8-blue2) 60%, var(--a8-blue) 100%); padding: 22px 24px; margin-top: 40px; }
+  .article-footer-inner { max-width: 960px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .footer-brand { font-family: 'Courier New', Consolas, monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--a8-lime); font-weight: 600; }
+  .footer-text { font-size: 12px; color: rgba(255,255,255,0.7); }
+
+  code { font-family: 'Courier New', Consolas, monospace; font-size: 11px; background: var(--section-bg); border: 1px solid var(--border); border-radius: 4px; padding: 2px 6px; color: var(--a8-blue); }
+
+  @media (max-width: 600px) {
+    .device-grid { grid-template-columns: 1fr; }
+    .field-grid  { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Sticky nav -->
+<nav class="sticky-nav">
+  <div class="sticky-nav-inner">
+    <span class="nav-link" data-section="overview">Overview</span>
+    <span class="nav-link" data-section="draytek">Draytek Routers</span>
+    <span class="nav-link" data-section="unifi">Unifi Access Points</span>
+    <span class="nav-link" data-section="sla">SLA &amp; Reporting</span>
+    <span class="nav-link" data-section="exceptions">Exceptions</span>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="badge">Active8 Managed Technologies &middot; Partou UK</div>
+    <h1>Network Device<br><span>Firmware Update Process</span></h1>
+    <p>This document describes how Active8 IT manages firmware updates across the network devices maintained on behalf of Partou UK. It aligns with the Partou UK Patching and Update Policy v1.0 (April 2026).</p>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       OVERVIEW
+  ══════════════════════════════════════ -->
+  <h2 id="overview">Devices in scope</h2>
+
+  <div class="device-grid">
+    <div class="device-card">
+      <div class="device-icon">&#128241;</div>
+      <div class="device-name">Draytek Routers</div>
+      <div class="device-model">Model 2865ax &mdash; 115 nursery sites</div>
+      <table>
+        <tr><td>Management</td><td>Direct web login or ACS portal</td></tr>
+        <tr><td>Update cadence</td><td>Monthly check; deployed as required</td></tr>
+        <tr><td>Method</td><td><span class="badge-manual">Managed</span></td></tr>
+      </table>
+    </div>
+    <div class="device-card">
+      <div class="device-icon">&#128225;</div>
+      <div class="device-name">Unifi Access Points</div>
+      <div class="device-model">Various models &mdash; all nursery sites</div>
+      <table>
+        <tr><td>Management</td><td>unifi.ui.com cloud controller</td></tr>
+        <tr><td>Update cadence</td><td>Weekly (automatic)</td></tr>
+        <tr><td>Method</td><td><span class="badge-auto">Auto-update</span></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <h2 id="roles" style="margin-top:32px;">Roles &amp; responsibilities</h2>
+
+  <table class="roles-table">
+    <thead>
+      <tr>
+        <th>Role</th>
+        <th>Responsibility</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Active8 &mdash; Network Engineer</td>
+        <td>Executes firmware monitoring, testing, and deployment for Draytek routers; verifies Unifi AP update status monthly.</td>
+      </tr>
+      <tr>
+        <td>Active8 &mdash; Service Desk Lead</td>
+        <td>Maintains the firmware version log; produces and delivers the monthly compliance report to Partou UK's Infrastructure &amp; Delivery Manager.</td>
+      </tr>
+      <tr>
+        <td>Partou UK &mdash; Infrastructure &amp; Delivery Manager</td>
+        <td>Receives monthly compliance reports; signs off exceptions; escalation point for persistent non-compliance.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ══════════════════════════════════════
+       DRAYTEK ROUTERS
+  ══════════════════════════════════════ -->
+  <h2 id="draytek">Draytek 2865ax — firmware process</h2>
+
+  <h3>Monitoring</h3>
+  <p style="color:var(--text-dim);line-height:1.65;margin-bottom:14px;">Active8 IT reviews the Draytek security advisory page and firmware release notes monthly. When a new version is published, it is recorded in the firmware version log and assessed for applicability and risk before scheduling deployment.</p>
+
+  <div class="callout warn">
+    <span class="callout-icon">&#9888;</span>
+    <span><strong>Deployment timing requirement &mdash;</strong> All Draytek firmware updates are performed outside Partou UK nursery operating hours (07:00&ndash;19:00, Monday to Friday). Preferred windows: weekday evenings (19:00&ndash;23:00) or weekends.</span>
+  </div>
+
+  <h3>Pre-deployment checks</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-title">Review release notes</div>
+        <div class="step-desc">Full release notes are reviewed for known issues, breaking changes, or prerequisites before any firmware is deployed.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-title">Confirm target version per site</div>
+        <div class="step-desc">The target firmware version is checked against the current version logged for each site in the firmware version log.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-title">Identify pilot sites</div>
+        <div class="step-desc">Sites suitable for staged or pilot deployment are identified — typically lower-traffic or non-critical sites — to validate the release before wider rollout.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-title">Confirm out-of-band access</div>
+        <div class="step-desc">ACS portal or direct IP access is confirmed to be available for each target device, ensuring recovery is possible if a device requires it.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <div class="step-title">Notify Partou UK <span class="step-tag crit">Required</span></div>
+        <div class="step-desc">Partou UK's Infrastructure &amp; Delivery Manager is notified at least <strong>24 hours</strong> before any bulk deployment begins.</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:24px;">Deployment method — single site (direct web login)</h3>
+  <p style="color:var(--text-dim);line-height:1.65;margin-bottom:10px;">Used where the ACS portal is unavailable or a single site requires a targeted update.</p>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Log in to the router</div><div class="step-desc">Navigate to the router's management IP via browser and log in using the secure admin credentials held in the Active8 password vault.</div></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Initiate firmware upgrade</div><div class="step-desc">Go to <strong>System Maintenance &rarr; Firmware Upgrade</strong>. Upload the verified firmware file or select <em>Check for Update</em> if internet access is available from the router.</div></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Confirm and reboot</div><div class="step-desc">Confirm the upgrade. The router reboots automatically (typically 2&ndash;3 minutes). Verify the new firmware version is shown on the dashboard post-reboot.</div></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-body"><div class="step-title">Verify and log</div><div class="step-desc">Confirm connectivity is restored. Log the firmware version, date, and engineer in the firmware version log.</div></div></div>
+  </div>
+
+  <h3 style="margin-top:24px;">Deployment method — bulk (ACS portal)</h3>
+  <p style="color:var(--text-dim);line-height:1.65;margin-bottom:10px;">Used for remote deployment across multiple sites.</p>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Log in to the Draytek ACS portal</div><div class="step-desc">Navigate to the device list and filter for Partou UK 2865ax routers.</div></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Select target devices</div><div class="step-desc">Select devices using a rolling (wave) approach — all 115 sites are never updated simultaneously.</div></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Push the firmware update task</div><div class="step-desc">Schedule the update task for the approved out-of-hours window and initiate the push.</div></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-body"><div class="step-title">Monitor completion</div><div class="step-desc">The ACS dashboard is monitored for completion and failure status. Any failed deployments are investigated within 24 hours; retried or escalated as appropriate.</div></div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-body"><div class="step-title">Log results</div><div class="step-desc">Final firmware version and update date are logged for each site in the firmware version log.</div></div></div>
+  </div>
+
+  <h3 style="margin-top:24px;">Rolling deployment — wave approach</h3>
+  <p style="color:var(--text-dim);line-height:1.65;margin-bottom:10px;">To minimise risk across all 115 nursery sites, deployments are staged in batches. Each wave is held before proceeding to ensure stability.</p>
+
+  <table class="wave-table">
+    <thead>
+      <tr>
+        <th>Wave</th>
+        <th>Batch size</th>
+        <th>Criteria</th>
+        <th>Hold before next wave</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="wave-num">Wave 1</span> Pilot</td>
+        <td>2&ndash;3 sites</td>
+        <td>Lower-traffic or non-critical sites</td>
+        <td>48 hours</td>
+      </tr>
+      <tr>
+        <td><span class="wave-num">Wave 2</span> Main</td>
+        <td>&sim;50 sites</td>
+        <td>No issues found in Wave 1</td>
+        <td>24&ndash;48 hours</td>
+      </tr>
+      <tr>
+        <td><span class="wave-num">Wave 3</span> Final</td>
+        <td>Remaining sites</td>
+        <td>No issues found in Wave 2</td>
+        <td>N/A</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:24px;">Post-deployment verification</h3>
+  <p style="color:var(--text-dim);line-height:1.65;margin-bottom:10px;">After each wave, the following is confirmed before proceeding to the next:</p>
+  <div class="record-list">
+    <ul>
+      <li>Router management page accessible and showing the correct firmware version</li>
+      <li>WAN connectivity and site internet access functioning normally</li>
+      <li>No alerts or errors visible in the ACS portal for updated devices</li>
+      <li>Firmware version log updated with current version, date, and engineer name</li>
+    </ul>
+  </div>
+
+  <h3 style="margin-top:24px;">Record keeping — Draytek</h3>
+  <p style="color:var(--text-dim);line-height:1.65;margin-bottom:10px;">A firmware version log is maintained for all 115 Draytek routers. Each record contains:</p>
+  <div class="record-list">
+    <ul>
+      <li>Site name and location</li>
+      <li>Device serial number / management IP</li>
+      <li>Current firmware version and previous firmware version</li>
+      <li>Date of last update</li>
+      <li>Deployment method used (direct / ACS)</li>
+      <li>Engineer who performed the update</li>
+      <li>Any notes or anomalies</li>
+    </ul>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       UNIFI ACCESS POINTS
+  ══════════════════════════════════════ -->
+  <h2 id="unifi">Unifi Access Points — firmware process</h2>
+
+  <div class="callout green">
+    <span class="callout-icon">&#10003;</span>
+    <span><strong>Automatic updates enabled &mdash;</strong> All Partou UK Unifi access points are configured to auto-update within the <code>unifi.ui.com</code> cloud controller on a weekly schedule, typically during low-traffic periods. Active8 IT verifies successful deployment during the monthly compliance check.</span>
+  </div>
+
+  <h3>Monthly verification</h3>
+  <p style="color:var(--text-dim);line-height:1.65;margin-bottom:10px;">Although updates are automatic, Active8 IT performs a monthly check to confirm all access points are on current firmware:</p>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Log in to the cloud controller</div><div class="step-desc">Log in to <code>unifi.ui.com</code> and navigate to the Partou UK site group.</div></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Review firmware column</div><div class="step-desc">Check the Devices list and firmware column for all access points. Confirm no devices show <em>Update Available</em> or a firmware error.</div></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Investigate any exceptions</div><div class="step-desc">For any device not on the latest firmware: confirm auto-update is enabled, check for connectivity issues, and trigger a manual update if required.</div></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-body"><div class="step-title">Log the check</div><div class="step-desc">Record the firmware version and check date in the Unifi device log.</div></div></div>
+  </div>
+
+  <h3 style="margin-top:24px;">Manual update (exception only)</h3>
+  <p style="color:var(--text-dim);line-height:1.65;margin-bottom:10px;">If an access point has not auto-updated within the expected window, a manual update is triggered:</p>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Select the affected device(s)</div><div class="step-desc">In <code>unifi.ui.com</code>, locate and select the device(s) that have not updated.</div></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Trigger manual firmware update</div><div class="step-desc">Click <strong>Update Firmware</strong> and confirm the target version.</div></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Monitor and log</div><div class="step-desc">Monitor for successful completion and note the outcome in the compliance log.</div></div></div>
+  </div>
+
+  <h3 style="margin-top:24px;">Record keeping — Unifi APs</h3>
+  <p style="color:var(--text-dim);line-height:1.65;margin-bottom:10px;">A monthly snapshot of all AP firmware versions is retained, including:</p>
+  <div class="record-list">
+    <ul>
+      <li>AP name and site location</li>
+      <li>Current firmware version</li>
+      <li>Auto-update status (enabled / disabled)</li>
+      <li>Last seen / last updated timestamp from the controller</li>
+      <li>Any manual interventions performed</li>
+    </ul>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       SLA & REPORTING
+  ══════════════════════════════════════ -->
+  <h2 id="sla">SLA alignment &amp; compliance reporting</h2>
+
+  <h3>SLA thresholds</h3>
+  <p style="color:var(--text-dim);line-height:1.65;margin-bottom:10px;">Active8 IT operates within the SLA framework defined in the Partou UK Patching and Update Policy v1.0:</p>
+
+  <table class="sla-table">
+    <thead>
+      <tr>
+        <th>Time since release</th>
+        <th>Active8 action</th>
+        <th>Reporting</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="sla-ok">
+        <td><span class="sla-badge ok">0&ndash;14 days</span></td>
+        <td>Target: all devices updated within this window.</td>
+        <td>Included in monthly compliance report.</td>
+      </tr>
+      <tr class="sla-warn">
+        <td><span class="sla-badge warn">14&ndash;30 days</span></td>
+        <td>Device flagged; reason documented; accelerated remediation plan raised.</td>
+        <td>Highlighted in monthly report to Partou UK.</td>
+      </tr>
+      <tr class="sla-crit">
+        <td><span class="sla-badge crit">30+ days</span></td>
+        <td>Critical escalation to Partou Infrastructure &amp; Delivery Manager; isolation risk assessed.</td>
+        <td>Escalated immediately; included in monthly report with remediation timeline.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:24px;">Monthly compliance report</h3>
+  <p style="color:var(--text-dim);line-height:1.65;margin-bottom:10px;">Active8 IT produces and delivers a monthly compliance report to Partou UK's Infrastructure &amp; Delivery Manager by the <strong>last working day of each calendar month</strong>. The report covers:</p>
+
+  <div class="report-card">
+    <ul>
+      <li>Total Draytek routers in scope vs. devices updated within SLA</li>
+      <li>Total Unifi APs in scope vs. devices confirmed on current firmware</li>
+      <li>List of any devices outside SLA, with reason and remediation action</li>
+      <li>Trend comparison against the prior month</li>
+      <li>Any incidents or anomalies related to firmware updates</li>
+      <li>Narrative summary of update activity, including links to vendor release notes</li>
+    </ul>
+    <div class="report-note">Reports are delivered by the last working day of each calendar month.</div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       EXCEPTIONS & ESCALATION
+  ══════════════════════════════════════ -->
+  <h2 id="exceptions">Exceptions &amp; escalation</h2>
+
+  <p style="color:var(--text-dim);line-height:1.65;margin-bottom:14px;">Where a firmware update cannot be applied within the standard SLA (e.g., known vendor bug, site access restriction, hardware fault), the following process applies:</p>
+
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">Document the exception</div><div class="step-desc">The exception is recorded with full justification, including the reason the standard SLA cannot be met.</div></div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Notify Partou UK <span class="step-tag crit">Within 5 working days</span></div><div class="step-desc">Partou UK's Infrastructure &amp; Delivery Manager is notified within 5 working days of the exception being identified.</div></div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Agree a revised remediation target</div><div class="step-desc">A revised target date is agreed with Partou UK and tracked until the exception is resolved.</div></div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-body"><div class="step-title">Report in monthly compliance report</div><div class="step-desc">The exception and its outcome are included in the next monthly compliance report.</div></div></div>
+  </div>
+
+  <h2 id="related" style="margin-top:40px;">Related documents</h2>
+  <div class="related-list">
+    <ul>
+      <li>Partou UK Patching and Update Policy v1.0 (April 2026)</li>
+      <li>Active8 IT &mdash; Draytek Firmware Version Log (maintained in ACS portal)</li>
+      <li>Active8 IT &mdash; Unifi AP Firmware Log (maintained in Unifi cloud controller)</li>
+      <li>Active8 IT &mdash; Monthly Patch Compliance Report Template</li>
+    </ul>
+  </div>
+
+  <div style="height:8px;"></div>
+
+</div>
+
+<!-- Active8 footer -->
+<div class="article-footer">
+  <div class="article-footer-inner">
+    <div class="footer-brand">Active8 Managed Technologies &nbsp;&middot;&nbsp; IT Service Management</div>
+    <div class="footer-text">This article is maintained by the Active 8 IT team.</div>
+  </div>
+</div>
+
+<script>
+  /* ── Active nav tracking ── */
+  var navSections = ['overview', 'draytek', 'unifi', 'sla', 'exceptions'];
+  var navLinks = document.querySelectorAll('.nav-link');
+
+  function setActive(id) {
+    navLinks.forEach(function(link) {
+      link.classList.toggle('active', link.dataset.section === id);
+    });
+  }
+
+  var visible = {};
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      visible[entry.target.id] = entry.intersectionRatio;
+    });
+    var best = null, bestRatio = -1;
+    navSections.forEach(function(id) {
+      var r = visible[id] || 0;
+      if (r > bestRatio) { bestRatio = r; best = id; }
+    });
+    if (best) setActive(best);
+  }, { threshold: [0, 0.1, 0.25, 0.5, 1.0], rootMargin: '-10% 0px -60% 0px' });
+
+  navSections.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+
+  navLinks.forEach(function(link) {
+    link.addEventListener('click', function() {
+      var el = document.getElementById(link.dataset.section);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      setActive(link.dataset.section);
+    });
+  });
+</script>
+</body>
+</html>
