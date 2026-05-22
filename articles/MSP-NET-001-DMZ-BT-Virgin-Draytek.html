@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DMZ Setup – BT & Virgin Media Routers with Draytek</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background: #f7f9fc;
+  }
+
+  /* ─── STICKY NAV ─── */
+  .sticky-nav {
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  }
+  .sticky-nav-inner {
+    padding: 0 40px;
+    display: flex;
+    align-items: stretch;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .sticky-nav-inner::-webkit-scrollbar { display: none; }
+  .nav-link {
+    padding: 0 14px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #888;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+  }
+  .nav-link:hover {
+    color: #1a3a8f;
+    background: rgba(37,87,183,0.06);
+    border-bottom-color: #2557b7;
+  }
+  .nav-num {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .num-overview { background: rgba(30,74,160,0.12); color: #1e4aa0; }
+  .num-bt       { background: rgba(0,94,184,0.14);  color: #005eb8; }
+  .num-vm       { background: rgba(186,12,47,0.14); color: #ba0c2f; }
+  .num-verify   { background: rgba(34,197,94,0.18); color: #15803d; }
+
+  /* ─── PAGE BODY ─── */
+  .page-body { padding: 44px 40px 72px; }
+
+  /* ─── OVERVIEW CARD ─── */
+  .overview-card {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
+    border-radius: 12px;
+    padding: 30px 34px;
+    margin-bottom: 40px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .overview-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 60% 0%, rgba(194,224,0,0.13) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .card-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(255,255,255,0.38); margin-bottom: 12px; position: relative;
+  }
+  .overview-card p {
+    color: rgba(255,255,255,0.82); font-size: 14px; line-height: 1.75;
+    margin-bottom: 10px; position: relative;
+  }
+  .pill-row { display: flex; gap: 8px; flex-wrap: wrap; position: relative; margin-top: 18px; }
+  .pill {
+    padding: 4px 12px;
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 20px;
+    font-size: 12px; font-weight: 500;
+    color: rgba(255,255,255,0.7);
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ─── NETWORK DIAGRAM ─── */
+  .diagram-wrap {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    padding: 28px 24px;
+    margin-bottom: 40px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  }
+  .diagram-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: #999; margin-bottom: 20px;
+  }
+  .diagram-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0; flex-wrap: wrap;
+  }
+  .diag-node {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 6px; text-align: center; min-width: 90px;
+  }
+  .diag-icon {
+    width: 56px; height: 56px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+  }
+  .icon-internet { background: rgba(30,74,160,0.1); }
+  .icon-isp      { background: rgba(245,158,11,0.13); }
+  .icon-draytek  { background: rgba(34,197,94,0.13); }
+  .icon-lan      { background: rgba(30,74,160,0.08); }
+  .diag-name {
+    font-size: 11px; font-weight: 600; color: #1a1a1a;
+    font-family: 'Courier New', Consolas, monospace;
+    letter-spacing: 0.04em;
+  }
+  .diag-ip {
+    font-size: 10px; color: #888;
+    font-family: 'Courier New', Consolas, monospace;
+  }
+  .diag-arrow {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 0 8px; position: relative; min-width: 60px;
+  }
+  .arrow-line {
+    height: 2px; width: 100%; background: rgba(0,0,0,0.12);
+    position: relative; margin-bottom: 4px;
+  }
+  .arrow-line::after {
+    content: '▶';
+    position: absolute; right: -6px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px; color: rgba(0,0,0,0.25);
+  }
+  .arrow-tag {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: #c2e000;
+    background: rgba(30,74,160,0.8);
+    padding: 1px 6px; border-radius: 3px; white-space: nowrap;
+  }
+
+  /* ─── SECTION HEADING ─── */
+  .section-heading {
+    display: flex; align-items: flex-start; gap: 16px;
+    margin-bottom: 22px; margin-top: 48px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+  .section-heading:first-of-type { margin-top: 0; }
+  .step-badge {
+    flex-shrink: 0; width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 22px; color: white;
+  }
+  .badge-blue  { background: #2557b7; }
+  .badge-bt    { background: #005eb8; }
+  .badge-vm    { background: #ba0c2f; }
+  .badge-green { background: #15803d; }
+  .step-meta {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: #999; margin-bottom: 4px;
+  }
+  .step-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 22px; font-weight: 400; color: #1a1a1a; line-height: 1.2;
+  }
+
+  /* ─── STEP ROWS ─── */
+  .step-table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+  .step-table td { vertical-align: top; padding: 0; }
+  .step-num-cell { width: 44px; padding-right: 14px; padding-bottom: 18px; }
+  .step-circle {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 12px; font-weight: 700;
+    color: #fff; flex-shrink: 0; margin-top: 2px;
+  }
+  .sc-blue { background: #2557b7; }
+  .sc-bt   { background: #005eb8; }
+  .sc-vm   { background: #ba0c2f; }
+  .sc-green{ background: #15803d; }
+  .step-content-cell { padding-bottom: 18px; }
+  .step-strong { display: block; font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 3px; }
+  .step-detail { font-size: 12px; color: #555; line-height: 1.6; }
+
+  /* ─── CALLOUT TABLES ─── */
+  .callout-warning {
+    width: 100%; border-collapse: collapse; margin: 14px 0;
+    background: rgba(245,158,11,0.12);
+    border-left: 3px solid #f59e0b; border-radius: 6px;
+  }
+  .callout-info {
+    width: 100%; border-collapse: collapse; margin: 14px 0;
+    background: rgba(59,130,246,0.1);
+    border-left: 3px solid #3b82f6; border-radius: 6px;
+  }
+  .callout-danger {
+    width: 100%; border-collapse: collapse; margin: 14px 0;
+    background: rgba(239,68,68,0.1);
+    border-left: 3px solid #ef4444; border-radius: 6px;
+  }
+  .callout-success {
+    width: 100%; border-collapse: collapse; margin: 14px 0;
+    background: rgba(34,197,94,0.1);
+    border-left: 3px solid #22c55e; border-radius: 6px;
+  }
+  .callout-td { padding: 11px 16px; }
+
+  /* ─── UI MOCK ─── */
+  .ui-mock {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 14px 0 18px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  .ui-mock-bar {
+    height: 32px; padding: 0 14px;
+    display: flex; align-items: center; gap: 7px;
+    border-bottom: 1px solid rgba(0,0,0,0.09);
+  }
+  .ui-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .ui-mock-url {
+    flex: 1; background: rgba(0,0,0,0.05); border-radius: 4px;
+    height: 18px; padding: 0 8px;
+    display: flex; align-items: center;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; color: #666;
+  }
+  .ui-mock-body { padding: 18px 20px; }
+  .ui-field-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  .ui-field-row:last-child { border-bottom: none; }
+  .ui-label {
+    font-size: 11px; font-weight: 600; color: #555;
+    min-width: 170px; flex-shrink: 0;
+  }
+  .ui-value {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 12px; color: #1a1a1a;
+    background: rgba(59,130,246,0.08);
+    border: 1px solid rgba(59,130,246,0.2);
+    padding: 2px 8px; border-radius: 4px;
+  }
+  .ui-value-highlight {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 12px; color: #fff;
+    background: #2557b7;
+    padding: 2px 10px; border-radius: 4px; font-weight: 600;
+  }
+  .ui-section-head {
+    font-size: 11px; font-weight: 700; color: #1a1a1a;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 10px 0 6px; border-bottom: 2px solid rgba(0,0,0,0.1);
+    margin-bottom: 4px;
+  }
+  .ui-toggle-on {
+    display: inline-block;
+    background: #22c55e; color: #fff;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; font-weight: 700;
+    padding: 2px 10px; border-radius: 10px;
+  }
+  .ui-toggle-off {
+    display: inline-block;
+    background: #d1d5db; color: #555;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; font-weight: 700;
+    padding: 2px 10px; border-radius: 10px;
+  }
+
+  /* ─── DATA TABLE ─── */
+  .data-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 12px; }
+  .data-table th {
+    background: rgba(128,128,128,0.12);
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: #555; padding: 8px 12px;
+    border: 1px solid rgba(128,128,128,0.25); text-align: left; font-weight: 600;
+  }
+  .data-table td { padding: 8px 12px; border: 1px solid rgba(128,128,128,0.2); }
+  .data-table tr:nth-child(even) td { background: rgba(128,128,128,0.04); }
+
+  /* ─── CODE ─── */
+  code {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 12px;
+    background: rgba(128,128,128,0.12);
+    border: 1px solid rgba(128,128,128,0.25);
+    padding: 1px 5px; border-radius: 3px;
+  }
+
+  /* ─── DIVIDER ─── */
+  .section-divider {
+    height: 1px; background: rgba(0,0,0,0.07); margin: 40px 0;
+  }
+
+  /* ─── ROUTER BADGE ─── */
+  .router-badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 5px 13px; border-radius: 20px;
+    font-size: 12px; font-weight: 600;
+    margin-bottom: 20px;
+  }
+  .rb-bt  { background: rgba(0,94,184,0.1); color: #005eb8; border: 1px solid rgba(0,94,184,0.25); }
+  .rb-vm  { background: rgba(186,12,47,0.1); color: #ba0c2f; border: 1px solid rgba(186,12,47,0.25); }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 60%, #1e4aa0 100%);
+    border-top: 1px solid rgba(194,224,0,0.2);
+    padding: 18px 40px; text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- STICKY NAV -->
+<nav class="sticky-nav">
+  <div class="sticky-nav-inner">
+    <a class="nav-link" href="#overview">
+      <span class="nav-num num-overview">▦</span> Overview
+    </a>
+    <a class="nav-link" href="#bt">
+      <span class="nav-num num-bt">A</span> BT Hub
+    </a>
+    <a class="nav-link" href="#vm">
+      <span class="nav-num num-vm">B</span> Virgin Media
+    </a>
+    <a class="nav-link" href="#verify">
+      <span class="nav-num num-verify">✓</span> Verify
+    </a>
+  </div>
+</nav>
+
+<main class="page-body">
+
+  <!-- ══════════════════════════════════════════════════════ OVERVIEW -->
+  <section id="overview">
+
+    <div class="overview-card">
+      <div class="card-label">MSP-NET-001 &middot; Network Configuration</div>
+      <p>When a Draytek router is installed behind a third-party ISP router (BT or Virgin Media), the ISP router performs NAT. This means the Draytek receives a <strong style="color:#c2e000">private IP address</strong> on its WAN port rather than the public IP — breaking inbound traffic and VPN tunnels.</p>
+      <p>The fix is a two-step process: <strong style="color:#c2e000">assign the Draytek a fixed (reserved) IP</strong> on the ISP router's LAN, then <strong style="color:#c2e000">point DMZ at that reserved IP</strong>. This forwards all unsolicited inbound traffic from the internet directly to the Draytek, which then applies its own firewall rules.</p>
+      <div class="pill-row">
+        <div class="pill"><div class="dot" style="background:#c2e000"></div>BT Smart Hub / Hub 2</div>
+        <div class="pill"><div class="dot" style="background:#ba0c2f"></div>Virgin Media Hub 3 / 4 / 5</div>
+        <div class="pill"><div class="dot" style="background:#22c55e"></div>All Draytek Vigor models</div>
+      </div>
+    </div>
+
+    <!-- NETWORK DIAGRAM -->
+    <div class="diagram-wrap">
+      <div class="diagram-label">Network topology — double-NAT scenario</div>
+      <div class="diagram-row">
+        <div class="diag-node">
+          <div class="diag-icon icon-internet">🌐</div>
+          <div class="diag-name">Internet</div>
+          <div class="diag-ip">Public IP</div>
+        </div>
+        <div class="diag-arrow">
+          <div class="arrow-line"></div>
+          <div class="arrow-tag">WAN</div>
+        </div>
+        <div class="diag-node">
+          <div class="diag-icon icon-isp">📡</div>
+          <div class="diag-name">BT / VM Hub</div>
+          <div class="diag-ip">192.168.1.1</div>
+        </div>
+        <div class="diag-arrow">
+          <div class="arrow-line"></div>
+          <div class="arrow-tag">DMZ →</div>
+        </div>
+        <div class="diag-node">
+          <div class="diag-icon icon-draytek">🔷</div>
+          <div class="diag-name">Draytek WAN</div>
+          <div class="diag-ip">192.168.1.10 (fixed)</div>
+        </div>
+        <div class="diag-arrow">
+          <div class="arrow-line"></div>
+          <div class="arrow-tag">LAN</div>
+        </div>
+        <div class="diag-node">
+          <div class="diag-icon icon-lan">🖥️</div>
+          <div class="diag-name">Client LAN</div>
+          <div class="diag-ip">10.x.x.x / 192.168.x.x</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUICK REFERENCE TABLE -->
+    <table class="data-table" style="margin-bottom:8px">
+      <tr>
+        <th>ISP Router</th>
+        <th>Default Admin URL</th>
+        <th>Default Login</th>
+        <th>DHCP Reservation Path</th>
+        <th>DMZ Path</th>
+      </tr>
+      <tr>
+        <td><strong>BT Smart Hub / Hub 2</strong></td>
+        <td><code>192.168.1.254</code></td>
+        <td>Label on underside of hub</td>
+        <td>Advanced → Home Network → IP Addresses</td>
+        <td>Advanced → Firewall → DMZ</td>
+      </tr>
+      <tr>
+        <td><strong>Virgin Media Hub 3/4/5</strong></td>
+        <td><code>192.168.100.1</code></td>
+        <td><code>admin</code> / label on base</td>
+        <td>Advanced → DHCP → Reserved IP Addresses</td>
+        <td>Advanced → Security → DMZ</td>
+      </tr>
+    </table>
+
+    <table class="callout-warning">
+      <tr><td class="callout-td">
+        <strong style="display:block;font-family:'Courier New',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;color:#b45309">⚠ Before you start</strong>
+        <span style="font-size:12px;line-height:1.6">You need the Draytek's <strong>WAN-port MAC address</strong> to create the DHCP reservation. Find this by logging into the Draytek admin panel at its current LAN IP → <strong>System Status</strong> → the MAC shown next to the <em>WAN</em> interface. Note it down before touching the ISP router.</span>
+      </td></tr>
+    </table>
+
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ══════════════════════════════════════════════════════ BT HUB -->
+  <section id="bt">
+
+    <div class="section-heading">
+      <div class="step-badge badge-bt">A</div>
+      <div>
+        <div class="step-meta">Section A &middot; ISP Router Setup</div>
+        <div class="step-title">BT Smart Hub &amp; Hub 2</div>
+      </div>
+    </div>
+
+    <div class="router-badge rb-bt">📡 BT Smart Hub &nbsp;|&nbsp; BT Hub 2 &nbsp;|&nbsp; Admin: <code style="background:none;border:none;padding:0">192.168.1.254</code></div>
+
+    <!-- STEP A1 -->
+    <table class="step-table">
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-bt">1</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Log in to the BT Hub admin panel</span>
+          <span class="step-detail">Open a browser on a device connected to the BT Hub's network. Navigate to <code>192.168.1.254</code>. Click <strong>Advanced Settings</strong> and enter the admin password printed on the label on the underside of the hub.</span>
+          <div class="ui-mock" style="margin-top:10px">
+            <div class="ui-mock-bar" style="background:#f0f2f5">
+              <div class="ui-dot" style="background:#ff5f57"></div>
+              <div class="ui-dot" style="background:#ffbd2e"></div>
+              <div class="ui-dot" style="background:#28c840"></div>
+              <div class="ui-mock-url">🔒 192.168.1.254</div>
+            </div>
+            <div class="ui-mock-body" style="background:#f8faff;text-align:center;padding:22px">
+              <div style="font-size:22px;margin-bottom:8px">📡</div>
+              <div style="font-size:15px;font-weight:700;color:#005eb8;margin-bottom:4px">BT Smart Hub</div>
+              <div style="font-size:11px;color:#888;margin-bottom:16px">Advanced Settings → Admin Password Required</div>
+              <div style="display:inline-block;background:#005eb8;color:#fff;font-size:12px;font-weight:600;padding:7px 20px;border-radius:6px">Sign in</div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-bt">2</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Navigate to Home Network → IP Addresses</span>
+          <span class="step-detail">In the left sidebar (or top menu) go to <strong>Advanced → Home Network → IP Addresses</strong>. Scroll down to the <strong>MAC Address Allocation</strong> or <strong>Always allocate the same IP address</strong> section.</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-bt">3</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Create a DHCP reservation for the Draytek</span>
+          <span class="step-detail">Click <strong>Add</strong> or <strong>Allocate</strong>. Enter the Draytek's WAN MAC address and assign it a fixed IP address outside the active DHCP pool. A safe choice is <code>192.168.1.10</code> if the hub's pool ends before that, or confirm the pool range and pick an address above it.</span>
+          <div class="ui-mock" style="margin-top:10px">
+            <div class="ui-mock-bar" style="background:#005eb8">
+              <div style="font-size:11px;color:#fff;font-weight:600">BT Hub &gt; Advanced &gt; Home Network &gt; IP Addresses</div>
+            </div>
+            <div class="ui-mock-body">
+              <div class="ui-section-head">Always assign this IP address to this device</div>
+              <div class="ui-field-row">
+                <div class="ui-label">Device name</div>
+                <div class="ui-value">Draytek-WAN</div>
+              </div>
+              <div class="ui-field-row">
+                <div class="ui-label">MAC address</div>
+                <div class="ui-value">AA:BB:CC:DD:EE:FF</div>
+              </div>
+              <div class="ui-field-row">
+                <div class="ui-label">IP address to assign</div>
+                <div class="ui-value-highlight">192.168.1.10</div>
+              </div>
+              <div style="margin-top:12px;display:flex;gap:8px">
+                <div style="background:#005eb8;color:#fff;font-size:11px;font-weight:600;padding:6px 16px;border-radius:5px;display:inline-block">Save</div>
+              </div>
+            </div>
+          </div>
+          <table class="callout-info" style="margin-top:6px">
+            <tr><td class="callout-td">
+              <strong style="display:block;font-family:'Courier New',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;color:#2563eb">ℹ Tip</strong>
+              <span style="font-size:12px">The BT Hub's default DHCP pool is typically <code>192.168.1.64</code>–<code>192.168.1.253</code>. To keep the Draytek's reserved IP clean and predictable, pick <code>192.168.1.10</code>–<code>192.168.1.20</code> — these are below the pool and won't conflict.</span>
+            </td></tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-bt">4</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Reboot the Draytek to pick up the reserved IP</span>
+          <span class="step-detail">Power-cycle the Draytek (or release/renew its WAN DHCP lease from the Draytek admin). Confirm it now shows <code>192.168.1.10</code> on its WAN status page before proceeding to the DMZ step.</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-bt">5</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Navigate to Advanced → Firewall → DMZ</span>
+          <span class="step-detail">Back in the BT Hub admin panel, go to <strong>Advanced → Firewall → DMZ</strong>. You will see a single DMZ IP address field.</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-bt">6</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Enable DMZ and point it at the Draytek's reserved IP</span>
+          <span class="step-detail">Enable the DMZ toggle, then enter the Draytek's reserved IP address in the host field. Click <strong>Apply</strong> or <strong>Save</strong>.</span>
+          <div class="ui-mock" style="margin-top:10px">
+            <div class="ui-mock-bar" style="background:#005eb8">
+              <div style="font-size:11px;color:#fff;font-weight:600">BT Hub &gt; Advanced &gt; Firewall &gt; DMZ</div>
+            </div>
+            <div class="ui-mock-body">
+              <div class="ui-section-head">DMZ (De-Militarised Zone)</div>
+              <div class="ui-field-row">
+                <div class="ui-label">DMZ enabled</div>
+                <div class="ui-toggle-on">ON</div>
+              </div>
+              <div class="ui-field-row">
+                <div class="ui-label">DMZ host IP address</div>
+                <div class="ui-value-highlight">192.168.1.10</div>
+              </div>
+              <div style="margin-top:12px;display:flex;gap:8px">
+                <div style="background:#005eb8;color:#fff;font-size:11px;font-weight:600;padding:6px 16px;border-radius:5px;display:inline-block">Apply</div>
+              </div>
+            </div>
+          </div>
+          <table class="callout-danger" style="margin-top:6px">
+            <tr><td class="callout-td">
+              <strong style="display:block;font-family:'Courier New',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;color:#dc2626">⚠ Important</strong>
+              <span style="font-size:12px">DMZ forwards <em>all</em> inbound ports to the Draytek. This is intentional — the Draytek's own firewall takes over. Ensure the Draytek has its firewall properly configured before enabling DMZ.</span>
+            </td></tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ══════════════════════════════════════════════════════ VIRGIN MEDIA -->
+  <section id="vm">
+
+    <div class="section-heading">
+      <div class="step-badge badge-vm">B</div>
+      <div>
+        <div class="step-meta">Section B &middot; ISP Router Setup</div>
+        <div class="step-title">Virgin Media Hub 3, Hub 4 &amp; Hub 5</div>
+      </div>
+    </div>
+
+    <div class="router-badge rb-vm">📡 Virgin Media Hub 3 / Hub 4 / Hub 5 &nbsp;|&nbsp; Admin: <code style="background:none;border:none;padding:0">192.168.100.1</code></div>
+
+    <table class="callout-info" style="margin-bottom:16px">
+      <tr><td class="callout-td">
+        <strong style="display:block;font-family:'Courier New',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;color:#2563eb">ℹ Virgin Media DHCP range</strong>
+        <span style="font-size:12px">The VM Hub uses the <code>192.168.100.0/24</code> subnet by default. The hub itself is at <code>192.168.100.1</code>. A safe reserved IP for the Draytek is <code>192.168.100.10</code>. Verify the active DHCP pool range in the hub UI (typically <code>.2</code>–<code>.254</code>) and pick an address outside it, or reduce the pool ceiling first.</span>
+      </td></tr>
+    </table>
+
+    <!-- STEP B1 -->
+    <table class="step-table">
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-vm">1</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Log in to the Virgin Media Hub admin panel</span>
+          <span class="step-detail">From a device on the VM Hub's network, open a browser and go to <code>192.168.100.1</code>. Log in with username <code>admin</code> and the password printed on the label on the base of the hub (or the default <code>changeme</code> if never changed).</span>
+          <div class="ui-mock" style="margin-top:10px">
+            <div class="ui-mock-bar" style="background:#f0f2f5">
+              <div class="ui-dot" style="background:#ff5f57"></div>
+              <div class="ui-dot" style="background:#ffbd2e"></div>
+              <div class="ui-dot" style="background:#28c840"></div>
+              <div class="ui-mock-url">🔒 192.168.100.1</div>
+            </div>
+            <div class="ui-mock-body" style="background:#fdf8f8;text-align:center;padding:22px">
+              <div style="font-size:22px;margin-bottom:8px">📡</div>
+              <div style="font-size:15px;font-weight:700;color:#ba0c2f;margin-bottom:4px">Virgin Media Hub</div>
+              <div style="font-size:11px;color:#888;margin-bottom:16px">Username: admin &nbsp;|&nbsp; Password: (label on base)</div>
+              <div style="display:inline-block;background:#ba0c2f;color:#fff;font-size:12px;font-weight:600;padding:7px 20px;border-radius:6px">Sign in</div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-vm">2</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Navigate to Advanced → DHCP → Reserved IP Addresses</span>
+          <span class="step-detail">Click <strong>Advanced Settings</strong> in the top menu. Then select <strong>DHCP</strong> from the left sidebar. Click the <strong>Reserved IP Addresses</strong> tab (sometimes labelled <em>Static Leases</em> or <em>Always assign</em>).</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-vm">3</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Add a reservation for the Draytek's MAC address</span>
+          <span class="step-detail">Click <strong>Add</strong>. Enter the Draytek's WAN MAC address and the fixed IP you want to assign. Click <strong>Save</strong>.</span>
+          <div class="ui-mock" style="margin-top:10px">
+            <div class="ui-mock-bar" style="background:#ba0c2f">
+              <div style="font-size:11px;color:#fff;font-weight:600">Virgin Media Hub &gt; Advanced &gt; DHCP &gt; Reserved IP Addresses</div>
+            </div>
+            <div class="ui-mock-body">
+              <div class="ui-section-head">Add Reserved IP Address</div>
+              <div class="ui-field-row">
+                <div class="ui-label">Description</div>
+                <div class="ui-value">Draytek-WAN</div>
+              </div>
+              <div class="ui-field-row">
+                <div class="ui-label">MAC address</div>
+                <div class="ui-value">AA:BB:CC:DD:EE:FF</div>
+              </div>
+              <div class="ui-field-row">
+                <div class="ui-label">Reserved IP address</div>
+                <div class="ui-value-highlight" style="background:#ba0c2f">192.168.100.10</div>
+              </div>
+              <div style="margin-top:12px;display:flex;gap:8px">
+                <div style="background:#ba0c2f;color:#fff;font-size:11px;font-weight:600;padding:6px 16px;border-radius:5px;display:inline-block">Save</div>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-vm">4</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Reboot the Draytek to pick up the reserved IP</span>
+          <span class="step-detail">Power-cycle the Draytek (or release/renew its WAN DHCP lease). Confirm the Draytek WAN status page now shows <code>192.168.100.10</code> before setting up DMZ.</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-vm">5</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Navigate to Advanced → Security → DMZ</span>
+          <span class="step-detail">In the VM Hub admin panel, go to <strong>Advanced → Security → DMZ</strong>. On Hub 3 this is under the <em>Firewall</em> submenu; on Hub 4/5 it is directly under <em>Security</em>.</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-vm">6</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Enable DMZ and enter the Draytek's reserved IP</span>
+          <span class="step-detail">Toggle DMZ <strong>Enabled</strong>. In the <em>DMZ Host IP Address</em> field, enter the Draytek's reserved IP. Click <strong>Apply</strong>.</span>
+          <div class="ui-mock" style="margin-top:10px">
+            <div class="ui-mock-bar" style="background:#ba0c2f">
+              <div style="font-size:11px;color:#fff;font-weight:600">Virgin Media Hub &gt; Advanced &gt; Security &gt; DMZ</div>
+            </div>
+            <div class="ui-mock-body">
+              <div class="ui-section-head">DMZ Host</div>
+              <div class="ui-field-row">
+                <div class="ui-label">DMZ</div>
+                <div class="ui-toggle-on">ENABLED</div>
+              </div>
+              <div class="ui-field-row">
+                <div class="ui-label">DMZ Host IP Address</div>
+                <div class="ui-value-highlight" style="background:#ba0c2f">192.168.100.10</div>
+              </div>
+              <div style="margin-top:12px;display:flex;gap:8px">
+                <div style="background:#ba0c2f;color:#fff;font-size:11px;font-weight:600;padding:6px 16px;border-radius:5px;display:inline-block">Apply</div>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ══════════════════════════════════════════════════════ VERIFY -->
+  <section id="verify">
+
+    <div class="section-heading">
+      <div class="step-badge badge-green">✓</div>
+      <div>
+        <div class="step-meta">Section C &middot; Verification</div>
+        <div class="step-title">Confirming the DMZ is Working</div>
+      </div>
+    </div>
+
+    <table class="step-table">
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-green">1</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Confirm the Draytek WAN IP matches the reservation</span>
+          <span class="step-detail">Log into the Draytek admin panel. Go to <strong>System Status</strong> or <strong>WAN Status</strong>. The WAN IP shown should match the reserved IP you set in the ISP router (<code>192.168.1.10</code> for BT, <code>192.168.100.10</code> for Virgin Media).</span>
+          <table class="callout-success" style="margin-top:8px">
+            <tr><td class="callout-td">
+              <strong style="display:block;font-family:'Courier New',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;color:#15803d">✓ Good sign</strong>
+              <span style="font-size:12px">If the WAN IP on the Draytek matches exactly, the DHCP reservation is working.</span>
+            </td></tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-green">2</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Check the Draytek's WAN gateway</span>
+          <span class="step-detail">Still in Draytek WAN Status, the <strong>Gateway</strong> IP should be the ISP router's address — <code>192.168.1.254</code> (BT) or <code>192.168.100.1</code> (Virgin Media). If it is blank or wrong, release and renew the WAN DHCP lease.</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-green">3</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Test an inbound port from outside the network</span>
+          <span class="step-detail">Use a mobile phone on 4G/5G (not connected to the Wi-Fi) or a remote tool like <a href="https://www.whatismyip.com/port-scanner/" target="_blank" style="color:#2557b7">Port Scanner</a> to probe a port that the Draytek should be listening on (e.g. HTTPS <code>443</code>, or the SSL VPN port). It should show as <strong>open</strong> if the Draytek's firewall permits it.</span>
+        </td>
+      </tr>
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-green">4</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Test VPN connectivity (if applicable)</span>
+          <span class="step-detail">If the site uses an IPsec or SSL VPN on the Draytek, attempt to connect from an external location. A successful tunnel handshake confirms DMZ is passing traffic correctly.</span>
+        </td>
+      </tr>
+    </table>
+
+    <!-- TROUBLESHOOTING TABLE -->
+    <div style="margin-top:28px;margin-bottom:8px;font-family:'Courier New',Consolas,monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#999">Troubleshooting reference</div>
+    <table class="data-table">
+      <tr>
+        <th>Symptom</th>
+        <th>Likely cause</th>
+        <th>Fix</th>
+      </tr>
+      <tr>
+        <td>Draytek WAN IP is still a random DHCP address</td>
+        <td>Reservation not saved, or Draytek not yet rebooted</td>
+        <td>Re-save reservation; release &amp; renew WAN DHCP on Draytek</td>
+      </tr>
+      <tr>
+        <td>Inbound ports still blocked after DMZ enabled</td>
+        <td>Draytek firewall blocking the port</td>
+        <td>Check Draytek Firewall → Filter Rules; add an allow rule for the port</td>
+      </tr>
+      <tr>
+        <td>DMZ field missing in ISP router UI</td>
+        <td>ISP router in modem-only / bridge mode already</td>
+        <td>No DMZ needed — Draytek will receive the public IP directly; verify WAN IP is public</td>
+      </tr>
+      <tr>
+        <td>BT Hub shows "DMZ not available"</td>
+        <td>Hub in modem mode or advanced features restricted by BT</td>
+        <td>Check BT account for "Extra" tier; or contact BT business support</td>
+      </tr>
+      <tr>
+        <td>Virgin Media Hub 3 — DMZ option greyed out</td>
+        <td>Hub not fully in router mode</td>
+        <td>Confirm Firewall → Security Level is not set to "Custom high"; reset to medium, then enable DMZ</td>
+      </tr>
+    </table>
+
+    <table class="callout-warning" style="margin-top:18px">
+      <tr><td class="callout-td">
+        <strong style="display:block;font-family:'Courier New',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;color:#b45309">⚠ ISP Router in Modem-Only Mode</strong>
+        <span style="font-size:12px">If the ISP has placed the BT or Virgin Media hub into <em>bridge / modem-only mode</em>, the Draytek receives the public IP directly on its WAN port and double-NAT does not occur. In that scenario, <strong>no DHCP reservation or DMZ configuration is needed</strong> — the Draytek's own port-forwarding and firewall rules apply directly.</span>
+      </td></tr>
+    </table>
+
+  </section>
+
+</main>
+
+<footer>
+  <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">Prepared by <span style="color:rgba(255,255,255,0.85)">Active8 Managed Technologies Limited</span> &middot; IT Service Management</div>
+  <div style="font-family:'Courier New',Consolas,monospace;font-size:10px;color:rgba(255,255,255,0.32);margin-top:5px;">v1.0 &middot; May 2025 &middot; This article is maintained by the Active 8 IT team.</div>
+</footer>
+
+<script>
+  // Active nav highlighting on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-link');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(l => l.style.borderBottomColor = 'transparent');
+        navLinks.forEach(l => { if (l.getAttribute('href') === '#' + e.target.id) l.style.borderBottomColor = '#2557b7'; });
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
