@@ -797,6 +797,45 @@
           </table>
         </td>
       </tr>
+      <tr>
+        <td class="step-num-cell"><div class="step-circle sc-green">6</div></td>
+        <td class="step-content-cell">
+          <span class="step-strong">Record the external IP and Draytek credentials in Hudu</span>
+          <span class="step-detail">Open the Hudu asset record for this site's Draytek router and update the following two fields before closing the job:</span>
+          <div class="ui-mock" style="margin-top:10px">
+            <div class="ui-mock-bar" style="background:#1e4aa0">
+              <div style="font-size:11px;color:#fff;font-weight:600">Hudu — Asset: Draytek Vigor (site name)</div>
+            </div>
+            <div class="ui-mock-body">
+              <div class="ui-section-head">Fields to update</div>
+              <div class="ui-field-row">
+                <div class="ui-label">External / WAN IP address</div>
+                <div class="ui-value">&lt;public IP confirmed in step 5&gt;</div>
+              </div>
+              <div class="ui-field-row">
+                <div class="ui-label">Admin URL</div>
+                <div class="ui-value">https://&lt;external-ip&gt;:8443</div>
+              </div>
+              <div class="ui-field-row" style="border-bottom:none">
+                <div class="ui-label">Admin password</div>
+                <div class="ui-value">&lt;password printed on router label&gt;</div>
+              </div>
+            </div>
+          </div>
+          <table class="callout-info" style="margin-top:6px">
+            <tr><td class="callout-td">
+              <strong style="display:block;font-family:'Courier New',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;color:#2563eb">ℹ Where to find the label password</strong>
+              <span style="font-size:12px">The Draytek's default admin password is printed on a sticker on the <strong>underside or rear</strong> of the router — look for a field labelled <em>Admin Password</em>, <em>Password</em>, or <em>Wi-Fi Password</em> (on some models the admin and Wi-Fi password are the same by default). Enter it into Hudu as a <strong>Password asset</strong> linked to the Draytek device record, not as a plain-text field, so it is stored encrypted.</span>
+            </td></tr>
+          </table>
+          <table class="callout-warning" style="margin-top:4px">
+            <tr><td class="callout-td">
+              <strong style="display:block;font-family:'Courier New',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;color:#b45309">⚠ If the default password has not been changed</strong>
+              <span style="font-size:12px">Record it in Hudu now, then change it immediately in the Draytek admin panel (<strong>System Maintenance → Administration Password</strong>) and update the Hudu record with the new password. Leaving the factory-default password active on an internet-exposed management port is a critical security risk.</span>
+            </td></tr>
+          </table>
+        </td>
+      </tr>
     </table>
 
     <!-- TROUBLESHOOTING TABLE -->
