@@ -744,9 +744,9 @@
             <p>Available during support hours — refer to your SLA for out-of-hours cover</p>
           </div>
           <div class="contact-strip-actions">
-            <a href="mailto:ITSupport@a8mt.co.uk" class="contact-btn primary">
+            <a href="mailto:voipsupport@a8mt.co.uk" class="contact-btn primary">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-              ITSupport@a8mt.co.uk
+              voipsupport@a8mt.co.uk
             </a>
             <a href="tel:03339997355" class="contact-btn secondary">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.4 2 2 0 0 1 3.6 1.2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.76a16 16 0 0 0 6 6l1.1-1.1a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.7 16a2 2 0 0 1 .22.92z"/></svg>
@@ -1237,7 +1237,7 @@
             </tr>
             <tr>
               <td><span class="trigger-badge t3">T3</span>ISP fault confirmed with significant lead time</td>
-              <td>Deploy a mobile hotspot to bridge connectivity in the interim. Notify the client clearly that this is a temporary measure with performance caveats. If phones are also affected, work with the VoIP provider to re-register handsets over the interim connection where possible.</td>
+              <td>Deploy a mobile hotspot to bridge connectivity in the interim. Notify the client clearly that this is a temporary measure with performance caveats. If phones are also affected, work with the VoIP provider to re-register handsets over the interim connection where possible.<br><br><span style="display:inline-block;background:rgba(255,180,0,0.13);border:1px solid rgba(255,180,0,0.35);color:#b87c00;border-radius:5px;padding:5px 10px;font-size:11.5px;font-weight:600;">⚠ TO DEFINE — What constitutes a "significant" lead time? Agree a specific threshold (e.g. &gt;4 hours, next business day) with the service manager and update this trigger.</span></td>
             </tr>
             <tr>
               <td><span class="trigger-badge t4">T4</span>Site attendance finds no internal fault — provider fault still unresolved</td>
@@ -1566,12 +1566,12 @@ function generateEmail() {
     '',
     notes ? ('ADDITIONAL NOTES\n────────────────\n' + notes + '\n\n') : '',
     'Raise this ticket with the Active8 service desk:',
-    'Email: ITSupport@a8mt.co.uk | Phone: 0333 999 7355',
+    'Email: voipsupport@a8mt.co.uk | Phone: 0333 999 7355',
   ].join('\n');
 
   const sub = encodeURIComponent('[' + fmt('f-partou') + '] Connectivity Escalation — ' + fmt('f-site'));
   const bodyEnc = encodeURIComponent(body);
-  window.open('mailto:ITSupport@a8mt.co.uk?subject=' + sub + '&body=' + bodyEnc, '_blank');
+  window.open('mailto:voipsupport@a8mt.co.uk?subject=' + sub + '&body=' + bodyEnc, '_blank');
 }
 </script>
 
