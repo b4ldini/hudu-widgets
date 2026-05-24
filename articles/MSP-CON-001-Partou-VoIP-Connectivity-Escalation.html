@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partou VoIP / Connectivity Escalation Process</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background: #f7f9fc;
+  }
+
+  /* ── STICKY NAV ───────────────────────────────────────── */
+  .sticky-nav {
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  }
+
+  .sticky-nav-inner {
+    padding: 0 40px;
+    display: flex;
+    align-items: stretch;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .sticky-nav-inner::-webkit-scrollbar { display: none; }
+
+  .nav-tab {
+    padding: 0 18px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #888;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    border-radius: 0;
+    background: transparent;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+  .nav-tab:hover { color: #1e4aa0; background: rgba(30,74,160,0.05); border-bottom-color: #2557b7; }
+  .nav-tab.active { color: #1e4aa0; border-bottom-color: #2557b7; font-weight: 600; }
+
+  .nav-pill {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .pill-blue  { background: rgba(30,74,160,0.12); color: #1e4aa0; }
+  .pill-amber { background: rgba(194,130,0,0.12); color: #b85c00; }
+  .pill-green { background: rgba(30,122,74,0.12); color: #1a7a4a; }
+
+  /* ── PAGE BODY ────────────────────────────────────────── */
+  .page-body { padding: 36px 40px 72px; }
+
+  /* ── PANEL TABS ───────────────────────────────────────── */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── OVERVIEW CARD ────────────────────────────────────── */
+  .overview-card {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 60%, #1e4aa0 100%);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 32px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .overview-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 60% 0%, rgba(194,224,0,0.1) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .card-eyebrow {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(194,224,0,0.8);
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .card-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 10px;
+    position: relative;
+    line-height: 1.3;
+  }
+  .overview-card p {
+    color: rgba(255,255,255,0.78);
+    font-size: 13.5px;
+    line-height: 1.65;
+    position: relative;
+  }
+  .pill-row { display: flex; gap: 8px; flex-wrap: wrap; position: relative; margin-top: 16px; }
+  .pill {
+    padding: 4px 12px;
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 20px;
+    font-size: 11px; font-weight: 500;
+    color: rgba(255,255,255,0.7);
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── SECTION CARD ─────────────────────────────────────── */
+  .section-card {
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,0.09);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .section-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  .section-icon {
+    width: 36px; height: 36px;
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .icon-blue  { background: rgba(30,74,160,0.1);  color: #1e4aa0; }
+  .icon-amber { background: rgba(194,130,0,0.1);  color: #b85c00; }
+  .icon-red   { background: rgba(192,57,43,0.1);  color: #c0392b; }
+  .icon-green { background: rgba(30,122,74,0.1);  color: #1a7a4a; }
+  .icon-lime  { background: rgba(138,170,0,0.15); color: #6b8500; }
+  .section-title { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+  .section-subtitle { font-size: 12px; color: #888; margin-top: 2px; }
+  .section-body { padding: 18px 22px; }
+
+  /* ── CHECKLIST ────────────────────────────────────────── */
+  .checklist { list-style: none; }
+  .checklist li {
+    display: flex; gap: 10px;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    font-size: 13.5px; align-items: flex-start;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .check-bullet {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(30,74,160,0.3);
+    background: rgba(30,74,160,0.08);
+    flex-shrink: 0; margin-top: 1px;
+    display: flex; align-items: center; justify-content: center;
+    color: #1e4aa0;
+  }
+  .check-label { flex: 1; }
+  .check-label strong { font-weight: 600; display: block; color: #1a1a1a; }
+  .check-label span { font-size: 12.5px; color: #666; }
+
+  /* ── CALLOUT ──────────────────────────────────────────── */
+  .callout {
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    display: flex; gap: 10px;
+    align-items: flex-start;
+    margin-top: 14px;
+  }
+  .callout.info   { background: rgba(30,74,160,0.08);  border: 1px solid rgba(30,74,160,0.25);  color: #1e4aa0; }
+  .callout.warn   { background: rgba(194,130,0,0.09);  border: 1px solid rgba(194,130,0,0.3);   color: #b85c00; }
+  .callout.danger { background: rgba(192,57,43,0.08);  border: 1px solid rgba(192,57,43,0.25);  color: #c0392b; }
+  .callout.lime   { background: rgba(138,170,0,0.1);   border: 1px solid rgba(138,170,0,0.35);  color: #5a7000; }
+  .callout svg { flex-shrink: 0; margin-top: 1px; }
+  .callout p { margin: 0; line-height: 1.5; }
+  .callout strong { font-weight: 600; }
+
+  /* ── STEPS (numbered) ────────────────────────────────── */
+  .step-list { list-style: none; }
+  .step-list li {
+    display: flex; gap: 12px;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    align-items: flex-start;
+  }
+  .step-list li:last-child { border-bottom: none; }
+  .step-num {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #2557b7; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    flex-shrink: 0; margin-top: 1px;
+    font-family: 'Courier New', Consolas, monospace;
+  }
+  .step-content { font-size: 13.5px; }
+  .step-content strong { font-weight: 600; display: block; margin-bottom: 2px; color: #1a1a1a; }
+  .step-content span { color: #555; font-size: 13px; }
+
+  /* ── CONTACT STRIP ────────────────────────────────────── */
+  .contact-strip {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
+    border-radius: 10px;
+    padding: 18px 22px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; flex-wrap: wrap;
+  }
+  .contact-strip-text { color: #fff; font-size: 14px; font-weight: 500; }
+  .contact-strip-text p { color: rgba(255,255,255,0.6); font-size: 12px; margin-top: 2px; }
+  .contact-strip-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .contact-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px;
+    border-radius: 7px;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; text-decoration: none;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    border: none;
+  }
+  .contact-btn.primary { background: #c2e000; color: #1a2800; }
+  .contact-btn.secondary { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+
+  /* ── TRIAGE DEVICE BLOCKS ─────────────────────────────── */
+  .triage-device-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 20px;
+    background: rgba(0,0,0,0.025);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    cursor: pointer;
+    user-select: none;
+  }
+  .triage-device-header:hover { background: rgba(0,0,0,0.04); }
+  .device-icon {
+    width: 32px; height: 32px;
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .device-icon.router { background: rgba(30,74,160,0.1);  color: #1e4aa0; }
+  .device-icon.switch { background: rgba(30,122,74,0.1);  color: #1a7a4a; }
+  .device-icon.phone  { background: rgba(138,170,0,0.15); color: #6b8500; }
+  .device-icon.power  { background: rgba(107,63,212,0.1); color: #6b3fd4; }
+  .device-label { flex: 1; }
+  .device-label strong { font-size: 13.5px; font-weight: 600; display: block; color: #1a1a1a; }
+  .device-label span { font-size: 11.5px; color: #888; }
+  .device-badge {
+    font-size: 11px;
+    font-family: 'Courier New', Consolas, monospace;
+    padding: 2px 8px; border-radius: 4px; font-weight: 600;
+    background: rgba(0,0,0,0.06); color: #666;
+  }
+  .triage-steps-list { list-style: none; }
+  .triage-step {
+    display: flex; gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    align-items: flex-start;
+  }
+  .triage-step:last-child { border-bottom: none; }
+  .triage-step-num {
+    min-width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #1e4aa0; color: #fff;
+    font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+    font-family: 'Courier New', Consolas, monospace;
+  }
+  .triage-step-content { flex: 1; }
+  .triage-step-content strong { font-size: 13.5px; font-weight: 600; display: block; margin-bottom: 3px; color: #1a1a1a; }
+  .triage-step-content p { font-size: 13px; color: #555; margin: 0; line-height: 1.5; }
+  .step-note {
+    display: block;
+    font-size: 12px; color: #888;
+    margin-top: 6px; font-style: italic;
+  }
+
+  /* ── LED STATUS TABLE ─────────────────────────────────── */
+  .led-table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 10px; }
+  .led-table th {
+    text-align: left; padding: 6px 10px;
+    background: rgba(0,0,0,0.04);
+    font-size: 10.5px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.07em;
+    color: #888; font-family: 'Courier New', Consolas, monospace;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+  .led-table td { padding: 7px 10px; border-bottom: 1px solid rgba(0,0,0,0.04); vertical-align: middle; }
+  .led-table tr:last-child td { border-bottom: none; }
+  .led-dot {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 500;
+  }
+  .led-dot::before {
+    content: ''; display: inline-block;
+    width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
+  }
+  .led-dot.green::before  { background: #1a7a4a; box-shadow: 0 0 4px rgba(26,122,74,0.4); }
+  .led-dot.amber::before  { background: #d4830a; box-shadow: 0 0 4px rgba(212,131,10,0.4); }
+  .led-dot.red::before    { background: #c0392b; box-shadow: 0 0 4px rgba(192,57,43,0.4); }
+  .led-dot.blue::before   { background: #1e4aa0; box-shadow: 0 0 4px rgba(30,74,160,0.4); }
+  .led-dot.white::before  { background: #ccc; border: 1px solid #bbb; }
+  .led-dot.off::before    { background: #c8c8c8; border: 1px solid #aaa; }
+  .led-action { color: #c0392b; font-weight: 600; font-size: 12px; }
+  .led-ok     { color: #1a7a4a; font-weight: 600; font-size: 12px; }
+  .led-meaning { color: #555; }
+
+  /* ── ESCALATION TRIGGER TABLE ─────────────────────────── */
+  .trigger-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  .trigger-table thead tr { background: linear-gradient(90deg, #1e4aa0, #2557b7); }
+  .trigger-table thead th {
+    text-align: left; padding: 10px 14px;
+    color: #fff; font-weight: 600;
+    font-size: 11px; letter-spacing: 0.07em;
+    text-transform: uppercase;
+    font-family: 'Courier New', Consolas, monospace;
+  }
+  .trigger-table thead th:first-child { border-radius: 8px 0 0 0; }
+  .trigger-table thead th:last-child  { border-radius: 0 8px 0 0; }
+  .trigger-table tbody tr { border-bottom: 1px solid rgba(0,0,0,0.06); }
+  .trigger-table tbody tr:last-child { border-bottom: none; }
+  .trigger-table tbody tr:nth-child(even) { background: rgba(0,0,0,0.02); }
+  .trigger-table td { padding: 12px 14px; vertical-align: top; }
+  .trigger-table td:first-child {
+    font-weight: 600; color: #1a1a1a; width: 38%;
+    border-right: 1px solid rgba(0,0,0,0.06);
+  }
+  .trigger-table td:last-child { color: #555; }
+  .trigger-badge {
+    display: inline-block;
+    font-size: 10.5px;
+    font-family: 'Courier New', Consolas, monospace;
+    font-weight: 700;
+    padding: 2px 7px; border-radius: 4px;
+    margin-right: 7px; vertical-align: middle;
+  }
+  .t1 { background: rgba(30,74,160,0.12); color: #1e4aa0; }
+  .t2 { background: rgba(194,130,0,0.12); color: #b85c00; }
+  .t3 { background: rgba(192,57,43,0.12); color: #c0392b; }
+  .t4 { background: rgba(30,122,74,0.12); color: #1a7a4a; }
+
+  /* ── GUIDELINES ───────────────────────────────────────── */
+  .guideline-group { margin-bottom: 20px; }
+  .guideline-group:last-child { margin-bottom: 0; }
+  .guideline-heading {
+    font-size: 10.5px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    color: #888; margin-bottom: 8px;
+    font-family: 'Courier New', Consolas, monospace;
+    padding-bottom: 5px;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+  .guideline-list { list-style: none; }
+  .guideline-list li {
+    font-size: 13px; color: #444;
+    padding: 5px 0 5px 18px;
+    position: relative;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+    line-height: 1.5;
+  }
+  .guideline-list li:last-child { border-bottom: none; }
+  .guideline-list li::before {
+    content: '';
+    position: absolute; left: 0; top: 0.85rem;
+    width: 5px; height: 5px; border-radius: 50%;
+    background: #2557b7; opacity: 0.6;
+  }
+
+  /* ── DOC INFO GRID ────────────────────────────────────── */
+  .doc-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+  }
+  .doc-info-cell {
+    background: rgba(0,0,0,0.03);
+    border-radius: 7px;
+    padding: 10px 14px;
+    font-size: 12px;
+    border: 1px solid rgba(0,0,0,0.06);
+  }
+  .doc-info-cell .label { color: #888; margin-bottom: 3px; font-size: 11px; font-family: 'Courier New', Consolas, monospace; text-transform: uppercase; letter-spacing: 0.07em; }
+  .doc-info-cell .value { font-weight: 600; color: #1a1a1a; font-size: 13px; }
+
+  /* ── ESCALATION FORM ──────────────────────────────────── */
+  .esc-step-block { margin-bottom: 22px; }
+  .esc-step-block:last-child { margin-bottom: 0; }
+  .esc-step-heading {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; font-weight: 600; color: #1a1a1a;
+    margin-bottom: 12px;
+  }
+  .esc-step-num-pill {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #1e4aa0; color: #fff;
+    font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-family: 'Courier New', Consolas, monospace;
+  }
+  .issue-type-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .issue-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 8px 14px;
+    border-radius: 7px;
+    border: 1.5px solid rgba(0,0,0,0.12);
+    background: #fff; color: #555;
+    font-size: 13px; font-weight: 500;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    cursor: pointer;
+    transition: all 0.12s ease;
+  }
+  .issue-btn:hover { background: rgba(0,0,0,0.03); color: #1a1a1a; border-color: rgba(0,0,0,0.2); }
+  .issue-btn.selected { background: #1e4aa0; color: #fff; border-color: #1e4aa0; }
+
+  /* Tickable checklist */
+  .tick-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .tick-item:last-child { border-bottom: none; }
+  .tick-item:hover { background: rgba(0,0,0,0.02); }
+  .tick-item.checked { background: rgba(30,122,74,0.06); }
+  .tick-box {
+    width: 18px; height: 18px; min-width: 18px;
+    border-radius: 4px;
+    border: 1.5px solid rgba(0,0,0,0.2);
+    background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+    transition: all 0.12s;
+  }
+  .tick-item.checked .tick-box { background: #1a7a4a; border-color: #1a7a4a; }
+  .tick-item.checked .tick-box svg { display: block; }
+  .tick-box svg { display: none; color: #fff; }
+  .tick-label { font-size: 13px; color: #333; line-height: 1.45; }
+  .tick-item.checked .tick-label { color: #888; }
+
+  /* Form fields */
+  .esc-field-group { display: flex; gap: 12px; margin-bottom: 10px; }
+  .esc-field-group.two-col .esc-field { flex: 1; min-width: 0; }
+  .esc-field { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+  .esc-label { font-size: 11.5px; font-weight: 600; color: #666; }
+  .req-star { color: #c0392b; }
+  .esc-input {
+    border: 1px solid rgba(0,0,0,0.15);
+    border-radius: 7px;
+    padding: 7px 11px;
+    font-size: 13px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: #1a1a1a;
+    background: #fff;
+    width: 100%;
+    transition: border-color 0.12s;
+  }
+  .esc-input:focus { outline: none; border-color: #2557b7; box-shadow: 0 0 0 2px rgba(37,87,183,0.12); }
+  .esc-textarea { resize: vertical; min-height: 60px; }
+
+  .esc-generate-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    margin-top: 14px;
+    padding: 10px 22px;
+    background: #1e4aa0; color: #fff;
+    border: none; border-radius: 7px;
+    font-size: 13.5px; font-weight: 600;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .esc-generate-btn:hover { opacity: 0.88; }
+
+  /* ── CHANGELOG ────────────────────────────────────────── */
+  .changelog-toggle {
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer; user-select: none;
+    padding: 18px 22px 14px; border-bottom: 1px solid rgba(0,0,0,0.06);
+  }
+  .changelog-toggle:hover { background: rgba(0,0,0,0.01); }
+
+  /* ── FOOTER ───────────────────────────────────────────── */
+  .article-footer {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 60%, #1e4aa0 100%);
+    border-top: 1px solid rgba(194,224,0,0.2);
+    padding: 18px 40px;
+    text-align: center;
+    margin-top: 16px;
+  }
+  .footer-line1 {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 12px; color: rgba(255,255,255,0.5);
+  }
+  .footer-line2 {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; color: rgba(255,255,255,0.3);
+    margin-top: 4px;
+  }
+
+  @media (max-width: 640px) {
+    .page-body { padding: 24px 20px 60px; }
+    .sticky-nav-inner { padding: 0 16px; }
+    .esc-field-group.two-col { flex-direction: column; }
+    .issue-type-grid { flex-direction: column; }
+    .issue-btn { width: 100%; }
+    .contact-strip { flex-direction: column; align-items: flex-start; }
+    .trigger-table td:first-child { width: 42%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── STICKY NAV ─────────────────────────────────── -->
+<div class="sticky-nav">
+  <div class="sticky-nav-inner">
+    <button class="nav-tab active" id="nav-client" onclick="switchTab('client')">
+      <span class="nav-pill pill-blue">1</span>
+      Partou Staff
+    </button>
+    <button class="nav-tab" id="nav-triage" onclick="switchTab('triage')">
+      <span class="nav-pill pill-amber">2</span>
+      1st Line Triage
+    </button>
+    <button class="nav-tab" id="nav-engineer" onclick="switchTab('engineer')">
+      <span class="nav-pill pill-green">3</span>
+      Engineer View
+    </button>
+  </div>
+</div>
+
+<!-- ── PAGE BODY ───────────────────────────────────── -->
+<div class="page-body">
+
+  <!-- ════════════════════════════════════════════════
+       PANEL 1 — PARTOU STAFF / CLIENT VIEW
+       ════════════════════════════════════════════════ -->
+  <div class="panel active" id="panel-client">
+
+    <div class="overview-card">
+      <div class="card-eyebrow">Active8 Managed Technologies &middot; Partou Process Guide</div>
+      <div class="card-title">Partou VoIP / Connectivity Escalation Process</div>
+      <p>This document defines the process for reporting internet and VoIP connectivity issues at Partou sites to the Active8 service desk. It covers what information to gather before raising a fault, what to expect from us during an active outage, and how the escalation process works from investigation through to resolution.</p>
+      <div class="pill-row">
+        <span class="pill"><span class="dot" style="background:#c2e000"></span>Process Guide</span>
+        <span class="pill"><span class="dot" style="background:rgba(255,255,255,0.4)"></span>Audience: Partou IT &amp; Active8 Engineers</span>
+        <span class="pill"><span class="dot" style="background:rgba(255,255,255,0.4)"></span>Last reviewed: May 2026</span>
+      </div>
+    </div>
+
+    <!-- What to report -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-icon icon-blue">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div>
+          <div class="section-title">What to include when raising a fault</div>
+          <div class="section-subtitle">Have this information ready before contacting the service desk</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <p style="font-size:13.5px;color:#555;margin-bottom:14px;">The more complete your fault report, the faster we can act — particularly when engaging an ISP or VoIP provider, or arranging an engineer visit. As a minimum, please provide the following:</p>
+        <ul class="checklist">
+          <li>
+            <div class="check-bullet"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="check-label">
+              <strong>Site name and full address</strong>
+              <span>Including postcode — required for ISP fault logging and engineer dispatch</span>
+            </div>
+          </li>
+          <li>
+            <div class="check-bullet"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="check-label">
+              <strong>Nature of the fault</strong>
+              <span>Full internet outage, intermittent drops, slow speeds, VoIP only, Wi-Fi only — be specific</span>
+            </div>
+          </li>
+          <li>
+            <div class="check-bullet"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="check-label">
+              <strong>Time the fault was first noticed</strong>
+              <span>And any preceding events — e.g. power cut, router reboot, area maintenance works</span>
+            </div>
+          </li>
+          <li>
+            <div class="check-bullet"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="check-label">
+              <strong>Number of users / devices affected</strong>
+              <span>Whether this is a full-site outage or partial (e.g. one floor, one VLAN, one phone)</span>
+            </div>
+          </li>
+          <li>
+            <div class="check-bullet"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="check-label">
+              <strong>Phone / VoIP status</strong>
+              <span>Are desk phones showing "No Service" or "Unregistered"? Are calls dropping mid-call? One-way audio?</span>
+            </div>
+          </li>
+          <li>
+            <div class="check-bullet"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="check-label">
+              <strong>Triage steps already completed</strong>
+              <span>e.g. router rebooted, phones rebooted, cables checked, cabinet power cycled</span>
+            </div>
+          </li>
+          <li>
+            <div class="check-bullet"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="check-label">
+              <strong>Call forwarding number (if phones are affected)</strong>
+              <span>A mobile or alternative number to redirect inbound calls to while the fault is active</span>
+            </div>
+          </li>
+          <li>
+            <div class="check-bullet"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="check-label">
+              <strong>On-site contact name and direct number</strong>
+              <span>Required if an engineer visit may be needed — this person must be able to provide site access</span>
+            </div>
+          </li>
+        </ul>
+        <div class="callout info">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <p>Incomplete information won't prevent us opening an investigation, but it may delay ISP/VoIP provider engagement or engineer dispatch. We will request anything missing before proceeding to those steps.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- What happens next -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-icon icon-amber">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div>
+          <div class="section-title">What happens next</div>
+          <div class="section-subtitle">What to expect from Active8 once a fault is raised</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <ol class="step-list">
+          <li>
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <strong>Ticket opened and provider engaged</strong>
+              <span>We raise a fault with your ISP and/or VoIP provider and begin chasing for a root cause and next steps. You will receive ticket updates every 30–60 minutes until the provider has confirmed the cause and their plan of action.</span>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <strong>VoIP call forwarding activated (if phones are down)</strong>
+              <span>If your phone system is affected, we will work with you to arrange call forwarding to a mobile or alternative number as soon as possible so the site remains contactable. Please have a forwarding number ready when you raise the fault.</span>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <strong>Site visit (if required)</strong>
+              <span>If the ISP reports no fault on the line, or if internal investigation is needed, we will attend site — bringing a replacement router from your backup stock where applicable. Stock availability is visible live in the asset register.</span>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <strong>Interim connectivity bridge</strong>
+              <span>Where an ISP fault is confirmed with a significant lead time for resolution, we will deploy a mobile hotspot to restore interim connectivity. This is a temporary measure — performance will differ from your main connection.</span>
+            </div>
+          </li>
+          <li>
+            <div class="step-num">5</div>
+            <div class="step-content">
+              <strong>Priority escalation</strong>
+              <span>If site attendance confirms no internal fault and the provider fault remains unresolved, we escalate to priority/critical status with a named contact and a written ETA.</span>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Contact -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-icon icon-blue">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.4 2 2 0 0 1 3.6 1.2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.76a16 16 0 0 0 6 6l1.1-1.1a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.7 16a2 2 0 0 1 .22.92z"/></svg>
+        </div>
+        <div>
+          <div class="section-title">Contact the service desk</div>
+          <div class="section-subtitle">How to reach Active8 to report a connectivity or VoIP fault</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="contact-strip">
+          <div class="contact-strip-text">
+            Report a fault or check on a ticket in progress
+            <p>Available during support hours — refer to your SLA for out-of-hours cover</p>
+          </div>
+          <div class="contact-strip-actions">
+            <a href="mailto:ITSupport@a8mt.co.uk" class="contact-btn primary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              ITSupport@a8mt.co.uk
+            </a>
+            <a href="tel:03339997355" class="contact-btn secondary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.4 2 2 0 0 1 3.6 1.2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.76a16 16 0 0 0 6 6l1.1-1.1a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.7 16a2 2 0 0 1 .22.92z"/></svg>
+              0333 999 7355
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /panel-client -->
+
+
+  <!-- ════════════════════════════════════════════════
+       PANEL 2 — 1ST LINE TRIAGE
+       ════════════════════════════════════════════════ -->
+  <div class="panel" id="panel-triage">
+
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-icon icon-red">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div>
+          <div class="section-title">Complete all steps below before escalating</div>
+          <div class="section-subtitle">Only raise with the Active8 service desk once all applicable checks are done and documented</div>
+        </div>
+      </div>
+      <div class="section-body" style="padding:14px 22px;">
+        <div class="callout danger" style="margin-top:0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <p><strong>Do not escalate until all triage steps are complete.</strong> Active8 only handles confirmed outages where on-site checks have already been performed. Incomplete escalations will be returned for triage before investigation begins.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- DRAYTEK -->
+    <div class="section-card">
+      <div class="triage-device-header" onclick="toggleDevice('draytek', this)">
+        <div class="device-icon router">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="14" width="20" height="6" rx="1"/><path d="M6 14V9a6 6 0 0 1 12 0v5"/><circle cx="12" cy="17" r="1" fill="currentColor"/></svg>
+        </div>
+        <div class="device-label">
+          <strong>DrayTek Vigor 2865ax — Router / WAN Gateway</strong>
+          <span>Check this first — all other devices depend on the router for connectivity</span>
+        </div>
+        <span class="device-badge">3 checks</span>
+      </div>
+      <div id="draytek">
+        <ul class="triage-steps-list">
+          <li class="triage-step">
+            <div class="triage-step-num">1</div>
+            <div class="triage-step-content">
+              <strong>Check the ACT LED — is the router powered on and running?</strong>
+              <p>The ACT (Activity) LED should be <strong>blinking green</strong> during normal operation.</p>
+              <table class="led-table">
+                <thead><tr><th>ACT LED</th><th>Meaning</th><th>Action</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="led-dot green">Blinking green</span></td><td class="led-meaning">Powered on, normal operation</td><td class="led-ok">Fine — continue checks</td></tr>
+                  <tr><td><span class="led-dot off">Off</span></td><td class="led-meaning">Router is powered off or not running</td><td class="led-action">Check power — proceed to cabinet reboot</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </li>
+          <li class="triage-step">
+            <div class="triage-step-num">2</div>
+            <div class="triage-step-content">
+              <strong>Check the DSL and WAN LEDs — is there a line signal and internet connection?</strong>
+              <p>These are the two most important LEDs for diagnosing a connectivity outage on the 2865ax.</p>
+              <table class="led-table">
+                <thead><tr><th>LED</th><th>State</th><th>Meaning</th><th>Action</th></tr></thead>
+                <tbody>
+                  <tr><td><strong>DSL</strong></td><td><span class="led-dot green">Solid green</span></td><td class="led-meaning">DSL line synchronised</td><td class="led-ok">Line is up — check WAN</td></tr>
+                  <tr><td><strong>DSL</strong></td><td><span class="led-dot green">Slow blink</span></td><td class="led-meaning">Detecting DSL line</td><td class="led-action">Wait — starting up</td></tr>
+                  <tr><td><strong>DSL</strong></td><td><span class="led-dot green">Fast blink</span></td><td class="led-meaning">DSL establishing</td><td class="led-action">Wait — in progress</td></tr>
+                  <tr><td><strong>DSL</strong></td><td><span class="led-dot off">Off</span></td><td class="led-meaning">No DSL signal detected</td><td class="led-action">Check cable — likely ISP line fault</td></tr>
+                  <tr><td><strong>WAN</strong></td><td><span class="led-dot green">Solid / blinking</span></td><td class="led-meaning">Internet connection active</td><td class="led-ok">WAN up — check routing/DNS</td></tr>
+                  <tr><td><strong>WAN</strong></td><td><span class="led-dot off">Off</span></td><td class="led-meaning">No internet connection</td><td class="led-action">Check cable and ISP status</td></tr>
+                </tbody>
+              </table>
+              <span class="step-note">Record the exact state of both LEDs before escalating — this is the first thing we will ask for.</span>
+            </div>
+          </li>
+          <li class="triage-step">
+            <div class="triage-step-num">3</div>
+            <div class="triage-step-content">
+              <strong>Check all physical cable connections</strong>
+              <p>Confirm the DSL or ethernet WAN cable from the master socket or ONT is fully seated in the correct port on the DrayTek. Check the LAN cable to the switch is secure at both ends. Look for any visibly damaged or dislodged cables.</p>
+              <span class="step-note">On an Openreach master socket, remove the lower half of the faceplate to access the test socket. Plugging directly into the test socket rules out internal wiring faults.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- UNIFI SWITCHES -->
+    <div class="section-card">
+      <div class="triage-device-header" onclick="toggleDevice('switches', this)">
+        <div class="device-icon switch">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="8" width="20" height="8" rx="1"/><circle cx="6" cy="12" r="1" fill="currentColor"/><circle cx="10" cy="12" r="1" fill="currentColor"/><circle cx="14" cy="12" r="1" fill="currentColor"/><circle cx="18" cy="12" r="1" fill="currentColor"/></svg>
+        </div>
+        <div class="device-label">
+          <strong>Unifi Switches</strong>
+          <span>Check after confirming the router is functioning</span>
+        </div>
+        <span class="device-badge">4 checks</span>
+      </div>
+      <div id="switches">
+        <ul class="triage-steps-list">
+          <li class="triage-step">
+            <div class="triage-step-num">1</div>
+            <div class="triage-step-content">
+              <strong>Check power and status LED on each switch</strong>
+              <p>Each Unifi switch has a status LED on the front. It should be solid white when operating normally.</p>
+              <table class="led-table">
+                <thead><tr><th>LED state</th><th>Meaning</th><th>Action</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="led-dot white">Solid white</span></td><td class="led-meaning">Normal operation</td><td class="led-ok">Fine — continue</td></tr>
+                  <tr><td><span class="led-dot blue">Flashing blue</span></td><td class="led-meaning">Adoption pending (no controller)</td><td class="led-action">Note — may indicate controller issue</td></tr>
+                  <tr><td><span class="led-dot amber">Flashing amber</span></td><td class="led-meaning">Firmware upgrading or fault</td><td class="led-action">Wait 5 min — do not power off</td></tr>
+                  <tr><td><span class="led-dot off">Off</span></td><td class="led-meaning">No power</td><td class="led-action">Check PDU — proceed to cabinet reboot</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </li>
+          <li class="triage-step">
+            <div class="triage-step-num">2</div>
+            <div class="triage-step-content">
+              <strong>Check the uplink port from switch to router</strong>
+              <p>Identify which port connects the switch to the DrayTek. The port LED should be solid (green or white depending on model). An unlit uplink port means no physical link — re-seat the cable at both ends.</p>
+            </div>
+          </li>
+          <li class="triage-step">
+            <div class="triage-step-num">3</div>
+            <div class="triage-step-content">
+              <strong>Check AP ports for active connections</strong>
+              <p>The AP LEDs on Unifi access points are disabled at Partou sites, so the switch port LED is the only visual indicator. Each active AP port should show a solid LED. An unlit port on a known AP connection means that AP has no link — check the cable at both the switch port and the wall or ceiling end.</p>
+            </div>
+          </li>
+          <li class="triage-step">
+            <div class="triage-step-num">4</div>
+            <div class="triage-step-content">
+              <strong>Check the Unifi Network Controller and capture screenshots for the escalation ticket</strong>
+              <p>Open the Unifi Network app and navigate to the site. Capture two screenshots before escalating:</p>
+              <p style="margin-top:8px;"><strong>Screenshot 1 — Device list:</strong> Go to the <strong>Devices</strong> view. A green dot means connected; grey means disconnected. Screenshot the full list.</p>
+              <p style="margin-top:6px;"><strong>Screenshot 2 — Insights tab:</strong> Click on the switch to open its detail panel. Select the <strong>Insights / Statistics tab</strong> (bar chart icon). Screenshot the full panel including the usage graph.</p>
+              <span class="step-note">Both screenshots must be attached to the escalation ticket. If the controller is cloud-hosted and unavailable due to the outage, note this and rely on physical LED states instead.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- CABINET / PDU REBOOT -->
+    <div class="section-card">
+      <div class="triage-device-header" onclick="toggleDevice('pdu', this)">
+        <div class="device-icon power">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><circle cx="12" cy="14" r="1" fill="currentColor"/></svg>
+        </div>
+        <div class="device-label">
+          <strong>Cabinet / PDU — Full Power Cycle</strong>
+          <span>Only perform this after completing visual LED checks and noting all states</span>
+        </div>
+        <span class="device-badge">4 steps</span>
+      </div>
+      <div id="pdu">
+        <ul class="triage-steps-list">
+          <li class="triage-step">
+            <div class="triage-step-num">1</div>
+            <div class="triage-step-content">
+              <strong>Switch off power to the PDU / cabinet</strong>
+              <p>All network equipment is on a single PDU in the cabinet. Switch it off at the PDU switch or at the wall socket feeding it. This will power down the DrayTek, all Unifi switches, and all APs simultaneously.</p>
+            </div>
+          </li>
+          <li class="triage-step">
+            <div class="triage-step-num">2</div>
+            <div class="triage-step-content">
+              <strong>Confirm all lights have gone off</strong>
+              <p>Visually check the cabinet — every LED on the router, switches, and APs should be off. If any device is still lit, it may be on a separate power feed. Do not start the 60-second wait until all lights are confirmed off.</p>
+            </div>
+          </li>
+          <li class="triage-step">
+            <div class="triage-step-num">3</div>
+            <div class="triage-step-content">
+              <strong>Wait a full 60 seconds from the point all lights went off</strong>
+              <p>This allows all capacitors to discharge and devices to fully reset. Do not shorten this — 60 seconds from confirmed power-off, not from when you flipped the switch.</p>
+            </div>
+          </li>
+          <li class="triage-step">
+            <div class="triage-step-num">4</div>
+            <div class="triage-step-content">
+              <strong>Restore power and allow 5 minutes for everything to come back up</strong>
+              <p>Turn the PDU back on. The DrayTek will take the longest to boot — allow up to 5 minutes for DSL sync, WAN negotiation, and switches/APs to reconnect before testing connectivity. Re-check the DrayTek ACT, DSL, and WAN LEDs after this period.</p>
+              <span class="step-note">If connectivity is restored after the reboot — no escalation needed. If the DSL or WAN LED is still off, record the LED states and escalate.</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- PHONES / VOIP -->
+    <div class="section-card">
+      <div class="triage-device-header" onclick="toggleDevice('voip', this)">
+        <div class="device-icon phone">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.4 2 2 0 0 1 3.6 1.2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.76a16 16 0 0 0 6 6l1.1-1.1a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.7 16a2 2 0 0 1 .22.92z"/></svg>
+        </div>
+        <div class="device-label">
+          <strong>Phones / VoIP</strong>
+          <span>Check registration status — helps confirm whether this is a WAN or QoS/routing fault</span>
+        </div>
+        <span class="device-badge">3 checks</span>
+      </div>
+      <div id="voip">
+        <ul class="triage-steps-list">
+          <li class="triage-step">
+            <div class="triage-step-num">1</div>
+            <div class="triage-step-content">
+              <strong>Check phone registration status</strong>
+              <p>VoIP phones show "No Service", "Unregistered", or a similar error on-screen when they cannot reach the hosted PBX. This typically confirms the WAN is down or the SIP trunk is unreachable. If phones are working but computers have no internet, the issue may be routing or VLAN-specific.</p>
+              <div class="callout lime" style="margin-top:10px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <p><strong>VoIP-only fault?</strong> If internet connectivity is fine but phones are still unregistered after a router reboot, the issue is likely with the SIP trunk, hosted PBX, or a firewall rule change. Note this clearly in the escalation ticket — it changes the provider we engage with.</p>
+              </div>
+            </div>
+          </li>
+          <li class="triage-step">
+            <div class="triage-step-num">2</div>
+            <div class="triage-step-content">
+              <strong>Reboot the affected phones</strong>
+              <p>Power-cycle any unregistered desk phones by unplugging them from PoE for 30 seconds, then reconnecting. After 60 seconds, check whether they register. If some phones register and others do not, note the specific extension numbers or device locations of those still unregistered.</p>
+            </div>
+          </li>
+          <li class="triage-step">
+            <div class="triage-step-num">3</div>
+            <div class="triage-step-content">
+              <strong>Set up call forwarding if phones remain down</strong>
+              <p>If the phone system cannot be restored quickly, arrange call forwarding to a mobile number before escalating. Include this forwarding number in the escalation ticket — it is required to ensure the site remains contactable during the outage.</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ESCALATION FORM -->
+    <div class="section-card" id="esc-form-card">
+      <div class="section-header">
+        <div class="section-icon icon-green">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div>
+          <div class="section-title">Raise an escalation</div>
+          <div class="section-subtitle">Select the issue type, confirm triage steps, fill in details, then generate your escalation email</div>
+        </div>
+      </div>
+      <div class="section-body">
+
+        <!-- STEP 1 -->
+        <div class="esc-step-block">
+          <div class="esc-step-heading">
+            <span class="esc-step-num-pill">1</span>
+            Select issue type
+          </div>
+          <div class="issue-type-grid" id="issue-type-grid">
+            <button class="issue-btn" data-type="full" onclick="selectIssue('full',this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+              Full internet outage
+            </button>
+            <button class="issue-btn" data-type="intermittent" onclick="selectIssue('intermittent',this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Intermittent / dropping
+            </button>
+            <button class="issue-btn" data-type="slow" onclick="selectIssue('slow',this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              Slow speeds
+            </button>
+            <button class="issue-btn" data-type="wifi" onclick="selectIssue('wifi',this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/></svg>
+              Wi-Fi only affected
+            </button>
+            <button class="issue-btn" data-type="voip" onclick="selectIssue('voip',this)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.63 3.4 2 2 0 0 1 3.6 1.2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.76a16 16 0 0 0 6 6l1.1-1.1a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.7 16a2 2 0 0 1 .22.92z"/></svg>
+              Phones / VoIP only
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="esc-step-block" id="step-checklist" style="display:none;">
+          <div class="esc-step-heading">
+            <span class="esc-step-num-pill">2</span>
+            Confirm triage steps completed
+            <span id="check-progress" style="margin-left:auto;font-size:11.5px;color:#888;font-family:'Courier New',Consolas,monospace;font-weight:400;"></span>
+          </div>
+          <div id="checklist-items" style="border:1px solid rgba(0,0,0,0.08);border-radius:8px;overflow:hidden;"></div>
+          <div class="callout warn" style="margin-top:10px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <p>All items should be ticked before escalating. If a step cannot be completed, note the reason in the Additional Notes field.</p>
+          </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="esc-step-block" id="step-details" style="display:none;">
+          <div class="esc-step-heading">
+            <span class="esc-step-num-pill">3</span>
+            Escalation details
+          </div>
+
+          <div class="esc-field-group">
+            <div class="esc-field">
+              <label class="esc-label">Partou ticket reference <span class="req-star">*</span></label>
+              <input type="text" id="f-partou" class="esc-input" placeholder="e.g. PT-12345" oninput="updateProgress()">
+            </div>
+          </div>
+
+          <div class="esc-field-group two-col">
+            <div class="esc-field">
+              <label class="esc-label">Site name <span class="req-star">*</span></label>
+              <input type="text" id="f-site" class="esc-input" placeholder="e.g. Kingsway" oninput="updateProgress()">
+            </div>
+            <div class="esc-field">
+              <label class="esc-label">Site address <span class="req-star">*</span></label>
+              <input type="text" id="f-address" class="esc-input" placeholder="Full address including postcode" oninput="updateProgress()">
+            </div>
+          </div>
+
+          <div class="esc-field-group two-col">
+            <div class="esc-field">
+              <label class="esc-label">Time fault first noticed <span class="req-star">*</span></label>
+              <input type="datetime-local" id="f-time" class="esc-input" oninput="updateProgress()">
+            </div>
+            <div class="esc-field">
+              <label class="esc-label">Preceding events</label>
+              <input type="text" id="f-preceding" class="esc-input" placeholder="e.g. power cut, router reboot, ISP works">
+            </div>
+          </div>
+
+          <div class="esc-field-group">
+            <div class="esc-field">
+              <label class="esc-label">Symptoms observed <span class="req-star">*</span></label>
+              <textarea id="f-symptoms" class="esc-input esc-textarea" rows="2" placeholder="Full internet outage / intermittent drops / VoIP unregistered / one-way audio / slow speeds — describe what users are experiencing" oninput="updateProgress()"></textarea>
+            </div>
+          </div>
+
+          <div class="esc-field-group two-col">
+            <div class="esc-field">
+              <label class="esc-label">Number of users affected <span class="req-star">*</span></label>
+              <input type="text" id="f-users" class="esc-input" placeholder="e.g. All site (approx. 40)" oninput="updateProgress()">
+            </div>
+            <div class="esc-field">
+              <label class="esc-label">Any single device with connectivity? <span class="req-star">*</span></label>
+              <select id="f-device" class="esc-input" oninput="updateProgress()">
+                <option value="">— select —</option>
+                <option>No — all devices affected</option>
+                <option>Yes — wired device has connectivity</option>
+                <option>Yes — Wi-Fi works but wired does not</option>
+                <option>Yes — some devices affected, others not</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="esc-field-group two-col">
+            <div class="esc-field">
+              <label class="esc-label">DrayTek DSL LED state</label>
+              <select id="f-dsl" class="esc-input">
+                <option value="">— select —</option>
+                <option>Solid green — synchronised</option>
+                <option>Slow blink — detecting line</option>
+                <option>Fast blink — establishing</option>
+                <option>Off — no signal</option>
+              </select>
+            </div>
+            <div class="esc-field">
+              <label class="esc-label">DrayTek WAN LED state</label>
+              <select id="f-wan" class="esc-input">
+                <option value="">— select —</option>
+                <option>Solid / blinking green — internet up</option>
+                <option>Off — no internet connection</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="esc-field-group two-col">
+            <div class="esc-field">
+              <label class="esc-label">Phone / VoIP status</label>
+              <select id="f-phones" class="esc-input">
+                <option value="">— select —</option>
+                <option>Registered and working normally</option>
+                <option>Unregistered / showing No Service</option>
+                <option>Partially affected — some phones down</option>
+                <option>One-way audio / poor call quality only</option>
+                <option>Not applicable</option>
+              </select>
+            </div>
+            <div class="esc-field">
+              <label class="esc-label">Call forwarding number</label>
+              <input type="tel" id="f-fwd" class="esc-input" placeholder="Required if phones are affected">
+            </div>
+          </div>
+
+          <div class="esc-field-group two-col">
+            <div class="esc-field">
+              <label class="esc-label">Unifi Controller accessible?</label>
+              <select id="f-unifi" class="esc-input">
+                <option value="">— select —</option>
+                <option>Yes — screenshots attached to ticket</option>
+                <option>No — cloud-hosted, unavailable due to outage</option>
+                <option>No — other reason</option>
+              </select>
+            </div>
+            <div class="esc-field">
+              <label class="esc-label">Cabinet / PDU reboot completed?</label>
+              <select id="f-pdu" class="esc-input">
+                <option value="">— select —</option>
+                <option>Yes — fault persists after reboot</option>
+                <option>No — not yet completed</option>
+                <option>Not applicable for this issue type</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="esc-field-group two-col">
+            <div class="esc-field">
+              <label class="esc-label">On-site contact name <span class="req-star">*</span></label>
+              <input type="text" id="f-contact-name" class="esc-input" placeholder="Full name" oninput="updateProgress()">
+            </div>
+            <div class="esc-field">
+              <label class="esc-label">On-site contact number <span class="req-star">*</span></label>
+              <input type="tel" id="f-contact-num" class="esc-input" placeholder="Direct mobile or site number" oninput="updateProgress()">
+            </div>
+          </div>
+
+          <div class="esc-field-group">
+            <div class="esc-field">
+              <label class="esc-label">Additional notes</label>
+              <textarea id="f-notes" class="esc-input esc-textarea" rows="2" placeholder="Error messages, recent changes, partial fixes attempted, ISP reference numbers, etc."></textarea>
+            </div>
+          </div>
+
+          <div id="validation-msg" style="display:none;" class="callout danger" style="margin-top:8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <p id="validation-text">Please complete all required fields before generating the email.</p>
+          </div>
+
+          <button class="esc-generate-btn" onclick="generateEmail()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Generate escalation email
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /panel-triage -->
+
+
+  <!-- ════════════════════════════════════════════════
+       PANEL 3 — ENGINEER VIEW
+       ════════════════════════════════════════════════ -->
+  <div class="panel" id="panel-engineer">
+
+    <!-- Escalation trigger points -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-icon icon-blue">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </div>
+        <div>
+          <div class="section-title">Escalation trigger points</div>
+          <div class="section-subtitle">Apply in sequence — confirm each trigger condition before progressing to the next</div>
+        </div>
+      </div>
+      <div class="section-body" style="padding:0;">
+        <table class="trigger-table">
+          <thead>
+            <tr>
+              <th>Trigger</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="trigger-badge t1">T1</span>Outage confirmed — ISP / VoIP provider ticket raised</td>
+              <td>Monitor and chase the provider for an ETA. Update the client ticket every 30–60 minutes until the provider confirms the root cause and next steps. Log the provider fault reference number against the ticket immediately on receipt.</td>
+            </tr>
+            <tr>
+              <td><span class="trigger-badge t2">T2</span>ISP reports no fault on the line</td>
+              <td>Attend site with a replacement router from the client's backup stock. Confirm stock availability in the asset register before committing during the call. If phones are the only symptom, check QoS settings and SIP ALG on the DrayTek before attending site.</td>
+            </tr>
+            <tr>
+              <td><span class="trigger-badge t3">T3</span>ISP fault confirmed with significant lead time</td>
+              <td>Deploy a mobile hotspot to bridge connectivity in the interim. Notify the client clearly that this is a temporary measure with performance caveats. If phones are also affected, work with the VoIP provider to re-register handsets over the interim connection where possible.</td>
+            </tr>
+            <tr>
+              <td><span class="trigger-badge t4">T4</span>Site attendance finds no internal fault — provider fault still unresolved</td>
+              <td>Escalate to the ISP / VoIP provider as a priority or critical fault. Request a named escalation contact, an updated ETA, and confirmation in writing (email or ticket update). Document all steps taken to this point in the ticket.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Handling guidelines -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-icon icon-amber">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        </div>
+        <div>
+          <div class="section-title">Handling guidelines</div>
+          <div class="section-subtitle">Comms, VoIP-specific handling, ISP escalation, and backup router procedures</div>
+        </div>
+      </div>
+      <div class="section-body">
+
+        <div class="guideline-group">
+          <div class="guideline-heading">Client communication</div>
+          <ul class="guideline-list">
+            <li>Update the client ticket every 30–60 minutes until the provider confirms the root cause and next steps — not just an ETA.</li>
+            <li>Once a provider engineer is arranged to attend and investigate the fault, downgrade the ticket from P1. At this point the fault is outside our direct control and the priority classification should reflect that.</li>
+            <li>If dispatching a site visit, confirm the estimated arrival time with the on-site contact before attending.</li>
+            <li>Where a mobile hotspot bridge is deployed, document this clearly as a temporary measure and set expectations on performance differences versus the main connection.</li>
+            <li>If the phone system is also affected, confirm the call forwarding number is active before closing the initial call with the client.</li>
+          </ul>
+        </div>
+
+        <div class="guideline-group">
+          <div class="guideline-heading">VoIP-specific checks</div>
+          <ul class="guideline-list">
+            <li>If internet is up but VoIP phones remain unregistered, check SIP ALG on the DrayTek — it must be disabled for hosted VoIP to function correctly. Go to Firewall &rarr; General Setup and confirm SIP ALG is off.</li>
+            <li>Check QoS rules on the DrayTek — if SIP/RTP traffic is not prioritised, it may be starved during high-bandwidth periods, causing drops and one-way audio without a full outage.</li>
+            <li>Where only some handsets are affected, check whether they share a common switch port, VLAN, or PoE budget limit — this narrows the fault to a network segment rather than the trunk.</li>
+            <li>If re-registering phones over the mobile hotspot during a line fault, confirm the hotspot NAT does not block SIP — use a direct SIM hotspot (not tethering through an existing device's firewall) where possible.</li>
+            <li>Log which extension numbers or physical handsets are affected, not just "some phones" — this detail is required by the VoIP provider for provisioning investigation.</li>
+          </ul>
+        </div>
+
+        <div class="guideline-group">
+          <div class="guideline-heading">ISP escalation</div>
+          <ul class="guideline-list">
+            <li>Always obtain a provider fault reference number at ticket creation and log it against the client ticket.</li>
+            <li>If the ISP reports no fault on the line but the outage persists, arrange site attendance before re-engaging — this prevents repeated "no fault found" closures.</li>
+            <li>When escalating to priority/critical, request a named escalation contact, an updated ETA, and confirmation in writing.</li>
+            <li>Note the specific ISP and circuit type in the ticket — response SLAs differ between BT Openreach, Virgin, ITS, and others.</li>
+          </ul>
+        </div>
+
+        <div class="guideline-group">
+          <div class="guideline-heading">Backup router deployment</div>
+          <ul class="guideline-list">
+            <li>Confirm stock availability in the asset register before committing to a deployment during a call with the client.</li>
+            <li>Log the serial number of any deployed backup router against both the client ticket and the asset register.</li>
+            <li>Ensure the original router is returned to base and assessed for fault following resolution — do not leave faulty hardware on site.</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Document information -->
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-icon icon-green">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <div>
+          <div class="section-title">Document information</div>
+          <div class="section-subtitle">Version, ownership, and review schedule</div>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="doc-info-grid">
+          <div class="doc-info-cell"><div class="label">Article ID</div><div class="value">MSP-CON-001</div></div>
+          <div class="doc-info-cell"><div class="label">Version</div><div class="value">1.0</div></div>
+          <div class="doc-info-cell"><div class="label">Status</div><div class="value">Active</div></div>
+          <div class="doc-info-cell"><div class="label">Owner</div><div class="value">IT Service Manager</div></div>
+          <div class="doc-info-cell"><div class="label">Last Reviewed</div><div class="value">May 2026</div></div>
+          <div class="doc-info-cell"><div class="label">Next Review</div><div class="value">November 2026</div></div>
+          <div class="doc-info-cell"><div class="label">Audience</div><div class="value">Partou IT / Active8 IT</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Changelog -->
+    <div class="section-card">
+      <div class="changelog-toggle" onclick="toggleChangelog()">
+        <div class="section-icon icon-blue">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div style="flex:1;">
+          <div class="section-title">Changelog</div>
+          <div class="section-subtitle">Summary of changes between versions</div>
+        </div>
+        <svg id="changelog-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#aaa;transition:transform 0.2s;flex-shrink:0;"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div id="changelog-body" style="display:none;">
+        <table class="trigger-table">
+          <thead>
+            <tr>
+              <th style="width:70px;">Version</th>
+              <th style="width:110px;">Date</th>
+              <th style="width:160px;">Author</th>
+              <th>Summary of changes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1.0</td>
+              <td>May 2026</td>
+              <td>IT Service Manager</td>
+              <td>Initial document created</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /panel-engineer -->
+
+</div><!-- /page-body -->
+
+<!-- ── FOOTER ──────────────────────────────────────── -->
+<div class="article-footer">
+  <div class="footer-line1">Prepared by <span style="color:rgba(255,255,255,0.85);">Active8 Managed Technologies Limited</span> &middot; IT Service Management</div>
+  <div class="footer-line2">MSP-CON-001 &middot; v1.0 &middot; May 2026 &middot; This article is maintained by the Active 8 IT team.</div>
+</div>
+
+
+<script>
+/* ── TAB SWITCHING ─────────────────────────────── */
+function switchTab(tab) {
+  ['client','triage','engineer'].forEach(t => {
+    document.getElementById('panel-' + t).classList.remove('active');
+    document.getElementById('nav-' + t).classList.remove('active');
+  });
+  document.getElementById('panel-' + tab).classList.add('active');
+  document.getElementById('nav-' + tab).classList.add('active');
+}
+
+/* ── DEVICE TOGGLES ────────────────────────────── */
+function toggleDevice(id, header) {
+  const el = document.getElementById(id);
+  const open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : '';
+}
+
+/* ── CHANGELOG ─────────────────────────────────── */
+function toggleChangelog() {
+  const body = document.getElementById('changelog-body');
+  const chevron = document.getElementById('changelog-chevron');
+  const open = body.style.display === 'none';
+  body.style.display = open ? '' : 'none';
+  chevron.style.transform = open ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+
+/* ── ESCALATION FORM ───────────────────────────── */
+const CHECKS = {
+  full: [
+    { id:'act',   text:'DrayTek ACT LED confirmed blinking green (router is on and running)' },
+    { id:'dsl',   text:'DrayTek DSL LED state noted and recorded' },
+    { id:'wan',   text:'DrayTek WAN LED state noted and recorded' },
+    { id:'cable', text:'All physical cables checked and re-seated (DSL/WAN line, LAN to switch)' },
+    { id:'wired', text:'Wired ethernet device tested — no internet confirmed' },
+    { id:'sw',    text:'Unifi switch status LEDs checked and states noted' },
+    { id:'pdu',   text:'Cabinet / PDU power cycle completed — all lights off, 60 seconds waited, 5 minutes recovery' },
+    { id:'post',  text:'DrayTek DSL and WAN LEDs re-checked after reboot — still no connection' },
+    { id:'udev',  text:'Unifi Controller device list screenshot taken' },
+    { id:'uins',  text:'Unifi Controller Insights tab screenshot taken for the switch' },
+    { id:'ph',    text:'Phone registration status checked and noted' },
+    { id:'fwd',   text:'Call forwarding number arranged (if phones also affected)' },
+  ],
+  intermittent: [
+    { id:'dsl',   text:'DrayTek DSL LED state noted (watching for drops)' },
+    { id:'wan',   text:'DrayTek WAN LED state noted during a drop event' },
+    { id:'cable', text:'All physical cables checked and re-seated' },
+    { id:'udev',  text:'Unifi Controller device list screenshot taken' },
+    { id:'uins',  text:'Unifi Controller Insights tab screenshot showing drop pattern' },
+    { id:'ph',    text:'Phone system checked — noting if calls drop at the same time as internet' },
+  ],
+  slow: [
+    { id:'speed', text:'Speed test run and result noted (download/upload/ping)' },
+    { id:'wired', text:'Speed test performed on a directly wired device (not Wi-Fi)' },
+    { id:'sw',    text:'Unifi switch port utilisation checked for saturation' },
+    { id:'uins',  text:'Unifi Controller Insights tab screenshot taken' },
+    { id:'ph',    text:'Phone call quality checked — noting if there is one-way audio or echo' },
+  ],
+  wifi: [
+    { id:'act',   text:'DrayTek ACT LED confirmed blinking green' },
+    { id:'wired', text:'Wired ethernet device tested — confirms internet is up on the wired side' },
+    { id:'sw',    text:'Unifi switch port for the AP confirmed lit (AP has a link)' },
+    { id:'udev',  text:'Unifi Controller device list screenshot taken — AP status visible' },
+  ],
+  voip: [
+    { id:'inet',  text:'Internet connectivity confirmed working (wired device can browse)' },
+    { id:'ph',    text:'Phone registration status checked — extension numbers of affected handsets noted' },
+    { id:'reboot',text:'Affected phones rebooted (PoE removed 30 seconds) — still unregistered' },
+    { id:'sip',   text:'SIP ALG on DrayTek confirmed disabled (Firewall → General Setup)' },
+    { id:'qos',   text:'QoS rules on DrayTek checked — SIP/RTP traffic is prioritised' },
+    { id:'fwd',   text:'Call forwarding number arranged to ensure site remains contactable' },
+  ],
+};
+
+let checkedItems = {};
+let selectedType = null;
+
+function selectIssue(type, btn) {
+  selectedType = type;
+  document.querySelectorAll('.issue-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+
+  checkedItems = {};
+  const container = document.getElementById('checklist-items');
+  container.innerHTML = '';
+  (CHECKS[type] || []).forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'tick-item';
+    el.id = 'tick-' + item.id;
+    el.onclick = () => toggleTick(item.id);
+    el.innerHTML = `
+      <div class="tick-box">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <span class="tick-label">${item.text}</span>`;
+    container.appendChild(el);
+  });
+
+  document.getElementById('step-checklist').style.display = '';
+  document.getElementById('step-details').style.display = '';
+  updateProgress();
+}
+
+function toggleTick(id) {
+  checkedItems[id] = !checkedItems[id];
+  const el = document.getElementById('tick-' + id);
+  if (checkedItems[id]) el.classList.add('checked');
+  else el.classList.remove('checked');
+  updateProgress();
+}
+
+function updateProgress() {
+  if (!selectedType) return;
+  const total = (CHECKS[selectedType] || []).length;
+  const done = Object.values(checkedItems).filter(Boolean).length;
+  document.getElementById('check-progress').textContent = done + ' / ' + total + ' complete';
+}
+
+function generateEmail() {
+  const reqFields = ['f-partou','f-site','f-address','f-time','f-symptoms','f-users','f-device','f-contact-name','f-contact-num'];
+  const missing = reqFields.filter(id => {
+    const el = document.getElementById(id);
+    return !el || !el.value.trim();
+  });
+  if (missing.length > 0) {
+    const msg = document.getElementById('validation-msg');
+    document.getElementById('validation-text').textContent = 'Please complete all required fields (*) before generating the email.';
+    msg.style.display = 'flex';
+    return;
+  }
+  document.getElementById('validation-msg').style.display = 'none';
+
+  const typeLabels = { full:'Full internet outage', intermittent:'Intermittent connectivity', slow:'Slow speeds', wifi:'Wi-Fi fault', voip:'VoIP / phone fault' };
+  const fmt = (id) => (document.getElementById(id)?.value?.trim() || '—');
+
+  let dtRaw = fmt('f-time');
+  let dtFmt = dtRaw;
+  try { dtFmt = new Date(dtRaw).toLocaleString('en-GB', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); } catch(e){}
+
+  const checks = (CHECKS[selectedType] || []).map(item => {
+    const done = checkedItems[item.id];
+    return (done ? '✓' : '✗') + ' ' + item.text;
+  }).join('\n');
+
+  const dsl    = fmt('f-dsl');
+  const wan    = fmt('f-wan');
+  const unifi  = fmt('f-unifi');
+  const phones = fmt('f-phones');
+  const pdu    = fmt('f-pdu');
+  const fwd    = fmt('f-fwd');
+  const notes  = fmt('f-notes');
+
+  const body = [
+    'PARTOU / ACTIVE8 CONNECTIVITY ESCALATION',
+    '═══════════════════════════════════════',
+    '',
+    'Partou Ticket Ref : ' + fmt('f-partou'),
+    'Issue Type        : ' + (typeLabels[selectedType] || selectedType),
+    '',
+    'SITE DETAILS',
+    '─────────────',
+    'Site Name    : ' + fmt('f-site'),
+    'Address      : ' + fmt('f-address'),
+    'Fault Onset  : ' + dtFmt,
+    'Preceding    : ' + fmt('f-preceding'),
+    '',
+    'FAULT DESCRIPTION',
+    '──────────────────',
+    'Symptoms     : ' + fmt('f-symptoms'),
+    'Users affected: ' + fmt('f-users'),
+    'Any device online: ' + fmt('f-device'),
+    '',
+    'DEVICE STATES',
+    '──────────────',
+    'DrayTek DSL  : ' + dsl,
+    'DrayTek WAN  : ' + wan,
+    'Unifi ctrl   : ' + unifi,
+    'Phone status : ' + phones,
+    'Call fwd no  : ' + (fwd || 'N/A'),
+    'PDU reboot   : ' + pdu,
+    '',
+    'TRIAGE COMPLETED',
+    '─────────────────',
+    checks,
+    '',
+    'ON-SITE CONTACT',
+    '────────────────',
+    'Name   : ' + fmt('f-contact-name'),
+    'Number : ' + fmt('f-contact-num'),
+    '',
+    notes ? ('ADDITIONAL NOTES\n────────────────\n' + notes + '\n\n') : '',
+    'Raise this ticket with the Active8 service desk:',
+    'Email: ITSupport@a8mt.co.uk | Phone: 0333 999 7355',
+  ].join('\n');
+
+  const sub = encodeURIComponent('[' + fmt('f-partou') + '] Connectivity Escalation — ' + fmt('f-site'));
+  const bodyEnc = encodeURIComponent(body);
+  window.open('mailto:ITSupport@a8mt.co.uk?subject=' + sub + '&body=' + bodyEnc, '_blank');
+}
+</script>
+
+</body>
+</html>
