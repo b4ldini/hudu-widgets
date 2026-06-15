@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MSP-MIG-001 — File Server to SharePoint Migration</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.6;background:#f5f7fa;color:#1a1a2e;max-width:100%;overflow-x:hidden}
+
+/* ── NAV ── */
+.sticky-nav{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);border-bottom:3px solid #c2e000;display:flex;align-items:center;padding:0 16px;gap:2px}
+.nav-tab{padding:12px 16px;font-size:12px;font-weight:600;letter-spacing:0.04em;color:rgba(255,255,255,0.6);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-3px;transition:color 0.15s,border-color 0.15s;white-space:nowrap;border:none;background:none;text-transform:uppercase}
+.nav-tab:hover{color:rgba(255,255,255,0.85)}
+.nav-tab.active{color:#fff;border-bottom:3px solid #c2e000}
+.nav-badge{display:inline-block;margin-left:6px;background:rgba(194,224,0,0.2);color:#c2e000;border-radius:10px;font-size:10px;font-weight:700;padding:1px 6px}
+
+/* ── PAGE ── */
+.page-body{padding:20px 24px;max-width:960px}
+.panel{display:none}.panel.active{display:block}
+
+/* ── SECTION CARDS ── */
+.section-card{background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;margin-bottom:16px;overflow:hidden}
+.section-header{display:flex;align-items:center;gap:12px;padding:14px 18px;background:#fff;cursor:pointer;user-select:none}
+.section-header.static{cursor:default}
+.section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.icon-blue{background:rgba(37,87,183,0.12);color:#2557b7}
+.icon-lime{background:rgba(138,170,0,0.15);color:#8aaa00}
+.icon-amber{background:rgba(245,158,11,0.12);color:#d97706}
+.icon-green{background:rgba(34,197,94,0.12);color:#16a34a}
+.icon-purple{background:rgba(168,85,247,0.12);color:#a855f7}
+.section-title{font-size:14px;font-weight:700;color:#1a1a2e}
+.section-subtitle{font-size:12px;color:rgba(0,0,0,0.5);margin-top:1px}
+.section-body{padding:0 18px 18px 18px}
+
+/* ── PHASE CARDS (runbook) ── */
+.phase-card{background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;margin-bottom:12px;overflow:hidden}
+.phase-header{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;user-select:none;transition:background 0.1s}
+.phase-header:hover{background:rgba(0,0,0,0.02)}
+.phase-badge{font-family:'Courier New',Consolas,monospace;font-size:11px;font-weight:700;padding:3px 9px;border-radius:4px;color:#fff;flex-shrink:0;min-width:36px;text-align:center}
+.p0{background:#6b7280}.p1{background:#8b5cf6}.p2{background:#2557b7}.p3{background:#0891b2}
+.p4{background:#d97706}.p5{background:#f59e0b}.p6{background:#16a34a}.p7{background:#dc2626}
+.p8{background:#0e7490}.p9{background:#1e4aa0}
+.phase-title{font-size:14px;font-weight:700;flex:1;color:#1a1a2e}
+.phase-goal{font-size:12px;color:rgba(0,0,0,0.5);margin-left:auto;flex-shrink:0;font-style:italic}
+.phase-body{display:none;padding:0 18px 18px 18px;border-top:1px solid rgba(0,0,0,0.06)}
+.phase-body.open{display:block}
+.chevron{color:#aaa;transition:transform 0.2s;flex-shrink:0}
+.chevron.open{transform:rotate(180deg)}
+
+/* ── STEPS ── */
+.step-list{list-style:none;margin-top:14px}
+.step-list li{display:flex;gap:10px;margin-bottom:10px;font-size:13px;line-height:1.5}
+.step-dot{width:6px;height:6px;border-radius:50%;background:#2557b7;flex-shrink:0;margin-top:7px}
+
+/* ── CALLOUTS ── */
+.callout{border-radius:6px;padding:11px 14px;margin:12px 0;font-size:13px;line-height:1.5}
+.callout-amber{background:rgba(245,158,11,0.1);border-left:4px solid #f59e0b;color:inherit}
+.callout-green{background:rgba(34,197,94,0.1);border-left:4px solid #22c55e;color:inherit}
+.callout-blue{background:rgba(59,130,246,0.1);border-left:4px solid #3b82f6;color:inherit}
+.callout-red{background:rgba(239,68,68,0.1);border-left:4px solid #ef4444;color:inherit}
+.callout strong{color:inherit}
+
+/* ── INLINE CODE ── */
+code{font-family:'Courier New',Consolas,monospace;font-size:12px;background:rgba(128,128,128,0.12);border:1px solid rgba(128,128,128,0.25);padding:1px 5px;border-radius:3px}
+
+/* ── TABLES ── */
+.data-table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+.data-table th{background:rgba(128,128,128,0.12);font-family:'Courier New',Consolas,monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;opacity:0.75;padding:8px 12px;border:1px solid rgba(128,128,128,0.25);text-align:left;font-weight:600}
+.data-table td{padding:8px 12px;border:1px solid rgba(128,128,128,0.2);vertical-align:top}
+.data-table tr:nth-child(even) td{background:rgba(128,128,128,0.04)}
+.data-table td strong{color:#1a1a2e}
+
+/* ── PHASE MAP ── */
+.phase-map{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-top:14px}
+.phase-map-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(128,128,128,0.05);border:1px solid rgba(128,128,128,0.15);border-radius:8px;cursor:pointer;transition:background 0.1s}
+.phase-map-item:hover{background:rgba(128,128,128,0.09)}
+.phase-map-item.done{background:rgba(34,197,94,0.07);border-color:rgba(34,197,94,0.3)}
+.map-check{width:20px;height:20px;border-radius:50%;border:2px solid rgba(128,128,128,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.15s,border-color 0.15s}
+.map-check svg{display:none;color:#fff}
+.phase-map-item.done .map-check{background:#22c55e;border-color:#22c55e}
+.phase-map-item.done .map-check svg{display:block}
+.map-label{font-size:12px;font-weight:600;flex:1;line-height:1.3}
+.map-sub{font-size:11px;opacity:0.55;font-weight:400}
+.progress-bar-wrap{background:rgba(128,128,128,0.12);border-radius:99px;height:6px;margin:10px 0 4px 0;overflow:hidden}
+.progress-bar{height:6px;border-radius:99px;background:linear-gradient(90deg,#8aaa00,#c2e000);transition:width 0.3s}
+.progress-label{font-size:12px;opacity:0.6}
+
+/* ── SCRIPT CARDS ── */
+.script-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-top:14px}
+.script-card{background:rgba(128,128,128,0.04);border:1px solid rgba(128,128,128,0.15);border-radius:8px;padding:12px 14px}
+.script-phase{font-family:'Courier New',Consolas,monospace;font-size:10px;font-weight:700;color:#8aaa00;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px}
+.script-name{font-family:'Courier New',Consolas,monospace;font-size:13px;font-weight:700;color:#2557b7;margin-bottom:4px}
+.script-desc{font-size:12px;opacity:0.7;line-height:1.4}
+
+/* ── DEFINITION LIST ── */
+.def-list{margin-top:12px}
+.def-row{display:flex;gap:8px;margin-bottom:8px;font-size:13px}
+.def-key{font-weight:600;min-width:180px;flex-shrink:0;opacity:0.75}
+.def-val{flex:1}
+
+@media(max-width:680px){
+  .page-body{padding:16px}
+  .phase-goal{display:none}
+  .phase-map{grid-template-columns:1fr}
+  .script-grid{grid-template-columns:1fr}
+  .data-table{font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── STICKY NAV ── -->
+<nav class="sticky-nav">
+  <button class="nav-tab active" id="nav-map"    onclick="switchTab('map')">Phase Map</button>
+  <button class="nav-tab"        id="nav-runbook" onclick="switchTab('runbook')">Runbook</button>
+  <button class="nav-tab"        id="nav-scripts" onclick="switchTab('scripts')">Scripts &amp; Tools</button>
+</nav>
+
+<div class="page-body">
+
+<!-- ══════════════════════════════════════════
+     PANEL 1 — PHASE MAP
+══════════════════════════════════════════ -->
+<div class="panel active" id="panel-map">
+
+  <!-- Before you start -->
+  <div class="section-card" style="margin-bottom:16px">
+    <div class="section-header static">
+      <div class="section-icon icon-green">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <div>
+        <div class="section-title">Before you start</div>
+        <div class="section-subtitle">Prerequisites for every migration engagement</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="callout callout-green" style="margin-top:0">
+        Always run destructive scripts in <strong>preview</strong> mode first. <code>PnP.PowerShell</code> requires PowerShell 7 and an Entra app registration for interactive login.
+      </div>
+      <ul class="step-list">
+        <li><div class="step-dot"></div><span>PowerShell 7 installed and <code>PnP.PowerShell</code> module available.</span></li>
+        <li><div class="step-dot"></div><span>Entra app registration in place with the required Graph and SharePoint API permissions.</span></li>
+        <li><div class="step-dot"></div><span>Customer sign-off on the folder structure and destination SharePoint site obtained before Phase 1.</span></li>
+        <li><div class="step-dot"></div><span>Antivirus exclusion for <code>E:\</code> (or the source drive) confirmed on the Migration Manager agent box.</span></li>
+        <li><div class="step-dot"></div><span>Out-of-hours change window agreed if the file server is in active daily use.</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Progress tracker -->
+  <div class="section-card">
+    <div class="section-header static">
+      <div class="section-icon icon-lime">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+      </div>
+      <div>
+        <div class="section-title">Migration progress tracker</div>
+        <div class="section-subtitle">Tick off each phase as you complete it — resets on page reload</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="progress-bar-wrap"><div class="progress-bar" id="prog-bar" style="width:0%"></div></div>
+      <div class="progress-label" id="prog-label">0 of 10 phases complete</div>
+      <div class="phase-map" id="phase-map-grid">
+        <!-- built by JS -->
+      </div>
+    </div>
+  </div>
+
+</div><!-- /panel-map -->
+
+
+<!-- ══════════════════════════════════════════
+     PANEL 2 — RUNBOOK
+══════════════════════════════════════════ -->
+<div class="panel" id="panel-runbook">
+
+  <!-- Phase 0 -->
+  <div class="phase-card">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <span class="phase-badge p0">P0</span>
+      <span class="phase-title">Discovery &amp; Remediation</span>
+      <span class="phase-goal">Establish a clean baseline</span>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="phase-body">
+      <ul class="step-list">
+        <li><div class="step-dot"></div><span>Scan the source for size, file/folder counts, and residual issues (zero-byte files, illegal characters, long paths). Lock a baseline. <code>Phase0-Scan.ps1</code></span></li>
+        <li><div class="step-dot"></div><span>Quarantine junk (<code>Thumbs.db</code>, <code>desktop.ini</code>, temp files); park long-path and suspected-backup files separately for later review.</span></li>
+        <li><div class="step-dot"></div><span>Record anything moved or quarantined for customer notification before Phase 1 sign-off.</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Phase 1 -->
+  <div class="phase-card">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <span class="phase-badge p1">P1</span>
+      <span class="phase-title">Target Preparation</span>
+      <span class="phase-goal">Destination ready and unambiguous</span>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="phase-body">
+      <ul class="step-list">
+        <li><div class="step-dot"></div><span>Create or confirm the SharePoint site and document library. Agree the destination folder structure with the customer, mirroring the source.</span></li>
+        <li><div class="step-dot"></div><span>Set versioning on the library (major versions only is typical; discuss with customer).</span></li>
+      </ul>
+      <div class="callout callout-amber">
+        <strong>Confirm the real library.</strong> The default library is internally named <code>Shared Documents</code> even when displayed as "Documents". Watch for redundant empty libraries and bind migration tasks to the correct one.
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 2 -->
+  <div class="phase-card">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <span class="phase-badge p2">P2</span>
+      <span class="phase-title">Migration</span>
+      <span class="phase-goal">Move the data reliably</span>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="phase-body">
+      <ul class="step-list">
+        <li><div class="step-dot"></div><span>Use <strong>Microsoft Migration Manager</strong> — agent on the file server, cloud-orchestrated, so it survives RMM/session logout. Avoid session-tied tools.</span></li>
+        <li><div class="step-dot"></div><span>Exclude <code>E:\</code> (source drive) from antivirus on the agent box to prevent file-lock loops during transfer.</span></li>
+        <li><div class="step-dot"></div><span>Add tasks via bulk CSV — one task per subfolder. Settings: replace invalid chars → <code>_</code>; exclude hidden files; Entra ID lookup <strong>ON</strong>; date/extension filters <strong>OFF</strong>.</span></li>
+      </ul>
+      <div class="callout callout-amber">
+        Bind tasks to the existing library <strong>plus a subfolder</strong> — never the library root. Binding to the root attempts to create a list and will fail.
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 3 -->
+  <div class="phase-card">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <span class="phase-badge p3">P3</span>
+      <span class="phase-title">Reconciliation</span>
+      <span class="phase-goal">Prove every file arrived</span>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="phase-body">
+      <ul class="step-list">
+        <li><div class="step-dot"></div><span>Compare <strong>visible (non-hidden) file counts</strong> per folder, source vs SharePoint. <code>Reconcile-Fast.ps1</code> is paged and timeout-proof.</span></li>
+        <li><div class="step-dot"></div><span>For any shortfall, list the exact missing files by name. <code>Find-MissingFiles.ps1</code></span></li>
+      </ul>
+      <div class="callout callout-amber">
+        Raw counts mislead because hidden files are excluded by design. <strong>Always reconcile on visible counts</strong>, not totals from Explorer or the Migration Manager summary.
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 4 -->
+  <div class="phase-card">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <span class="phase-badge p4">P4</span>
+      <span class="phase-title">Remediation of Misses</span>
+      <span class="phase-goal">Resolve genuine gaps</span>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="phase-body" style="padding-top:14px">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width:160px">Issue</th>
+            <th>Resolution</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Long paths</strong></td>
+            <td>Windows MAX_PATH (260) and SharePoint (~400) are different limits. Shorten parent folder names; use the <code>\\?\</code> prefix to reach files Explorer can't open.</td>
+          </tr>
+          <tr>
+            <td><strong>Reserved names &amp; emoji</strong></td>
+            <td>Reserved names ("Forms") and emoji in filenames must be renamed at source before re-running the migration task.</td>
+          </tr>
+          <tr>
+            <td><strong>Root files / coverage gaps</strong></td>
+            <td>Per-subfolder tasks miss loose files in a folder root — add a dedicated task for that folder root, or upload manually.</td>
+          </tr>
+          <tr>
+            <td><strong>Junk / hidden items</strong></td>
+            <td>Confirm items like <code>.git</code> internals and hidden folders are excluded by design, not genuinely lost.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Phase 5 -->
+  <div class="phase-card">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <span class="phase-badge p5">P5</span>
+      <span class="phase-title">Final Delta Sync</span>
+      <span class="phase-goal">Catch last-minute changes before cutover</span>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="phase-body">
+      <ul class="step-list">
+        <li><div class="step-dot"></div><span>Scan files changed or created during the cutover window. <code>Final-DeltaSync.ps1</code></span></li>
+        <li><div class="step-dot"></div><span>Re-run the affected Migration Manager tasks (incremental mode), then verify each changed file replicated with its new version using <code>-Verify</code>.</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Phase 6 -->
+  <div class="phase-card">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <span class="phase-badge p6">P6</span>
+      <span class="phase-title">Security Model</span>
+      <span class="phase-goal">Folder-level access via groups</span>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="phase-body">
+      <ul class="step-list">
+        <li><div class="step-dot"></div><span>Read source NTFS permissions; expand groups to individual people. <code>Get-FolderPermissions.ps1</code></span></li>
+        <li><div class="step-dot"></div><span>If the tenant is <strong>not AD-synced</strong>, match users to Entra <strong>by display name</strong> against an export of licensed users — never trust username or UPN consistency. Keep only enabled, SharePoint-licensed users; flag the rest for manual review.</span></li>
+        <li><div class="step-dot"></div><span>Create <code>SP_&lt;FOLDER&gt;_RW</code> (Edit) and <code>SP_&lt;FOLDER&gt;_RO</code> (Read) security groups in Entra. Grant each on its folder via <code>Set-PnPListItemPermission</code> by list-item ID — this breaks inheritance on that folder.</span></li>
+        <li><div class="step-dot"></div><span>Add members with <code>Add-GroupMembers.ps1</code>.</span></li>
+        <li><div class="step-dot"></div><span>Add a <strong>view-only verification group</strong> so the customer can spot-check content access before go-live.</span></li>
+      </ul>
+      <div class="callout callout-amber">
+        <strong>Deactivate</strong> the "Limited-access user permission lockdown mode" site feature — required for folder-level sharing to work. Allow <strong>15–60 minutes</strong> for new security groups to become usable in SharePoint after creation.
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 7 -->
+  <div class="phase-card">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <span class="phase-badge p7">P7</span>
+      <span class="phase-title">Offboarding Leavers</span>
+      <span class="phase-goal">Remove departed staff cleanly</span>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="phase-body">
+      <p style="font-size:13px;margin:12px 0 8px">Per leaver: block sign-in → archive mailbox (convert to <strong>Shared</strong> — retains mail, no licence required) → remove all licences. <code>Decommission-Users.ps1</code></p>
+      <div class="callout callout-green">
+        Unlicensed users are auto-excluded from SharePoint access groups — no manual group cleanup is required after licence removal.
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 8 -->
+  <div class="phase-card">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <span class="phase-badge p8">P8</span>
+      <span class="phase-title">End-User Rollout</span>
+      <span class="phase-goal">Easy, safe access for staff</span>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="phase-body">
+      <ul class="step-list">
+        <li><div class="step-dot"></div><span><strong>Hide the Sync button</strong> on large libraries (<code>ExcludeFromOfflineClient = $true</code>) to prevent full-library syncs. Do <strong>not</strong> auto-mount libraries over ~5,000 items.</span></li>
+        <li><div class="step-dot"></div><span>Roll out <strong>Add shortcut to OneDrive</strong> via a short staff guide — files-on-demand, per-folder. This is the recommended access method for end users.</span></li>
+        <li><div class="step-dot"></div><span>Run a short walkthrough with super users / key contacts at the site before marking rollout complete.</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Phase 9 -->
+  <div class="phase-card">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <span class="phase-badge p9">P9</span>
+      <span class="phase-title">Decommission &amp; Cleanup</span>
+      <span class="phase-goal">Close out securely</span>
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div class="phase-body">
+      <ul class="step-list">
+        <li><div class="step-dot"></div><span>Reconcile once more (final count check); obtain written <strong>customer sign-off</strong> before decommissioning the source.</span></li>
+        <li><div class="step-dot"></div><span>Retire the source file server per agreed procedure.</span></li>
+        <li><div class="step-dot"></div><span>Remove any redundant or empty SharePoint libraries created during target preparation.</span></li>
+      </ul>
+      <div class="callout callout-red">
+        <strong>Delete any interim cloud staging</strong> (e.g. abandoned blob storage, staging containers) to remove the copied data <em>and</em> any live access keys. Leaving staging in place is a standing security and cost liability.
+      </div>
+    </div>
+  </div>
+
+</div><!-- /panel-runbook -->
+
+
+<!-- ══════════════════════════════════════════
+     PANEL 3 — SCRIPTS & TOOLS
+══════════════════════════════════════════ -->
+<div class="panel" id="panel-scripts">
+
+  <!-- Script reference -->
+  <div class="section-card">
+    <div class="section-header static">
+      <div class="section-icon icon-blue">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      </div>
+      <div>
+        <div class="section-title">Script reference</div>
+        <div class="section-subtitle">All scripts used across the migration phases</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="script-grid">
+        <div class="script-card">
+          <div class="script-phase">Phase 0</div>
+          <div class="script-name">Phase0-Scan.ps1</div>
+          <div class="script-desc">Baseline scan: source size, file/folder counts, zero-byte files, illegal characters, long paths.</div>
+        </div>
+        <div class="script-card">
+          <div class="script-phase">Phase 3</div>
+          <div class="script-name">Reconcile-Fast.ps1</div>
+          <div class="script-desc">Paged, timeout-proof visible-count comparison between source and SharePoint per folder.</div>
+        </div>
+        <div class="script-card">
+          <div class="script-phase">Phase 3</div>
+          <div class="script-name">Find-MissingFiles.ps1</div>
+          <div class="script-desc">Lists exact missing filenames by name for any folder showing a count shortfall.</div>
+        </div>
+        <div class="script-card">
+          <div class="script-phase">Phase 5</div>
+          <div class="script-name">Final-DeltaSync.ps1</div>
+          <div class="script-desc">Scans files changed/created in the cutover window; supports <code>-Verify</code> flag for version confirmation.</div>
+        </div>
+        <div class="script-card">
+          <div class="script-phase">Phase 6</div>
+          <div class="script-name">Get-FolderPermissions.ps1</div>
+          <div class="script-desc">Reads source NTFS permissions and expands group memberships to individual user accounts.</div>
+        </div>
+        <div class="script-card">
+          <div class="script-phase">Phase 6</div>
+          <div class="script-name">Add-GroupMembers.ps1</div>
+          <div class="script-desc">Populates the <code>SP_&lt;FOLDER&gt;_RW</code> and <code>SP_&lt;FOLDER&gt;_RO</code> security groups with matched users.</div>
+        </div>
+        <div class="script-card">
+          <div class="script-phase">Phase 7</div>
+          <div class="script-name">Decommission-Users.ps1</div>
+          <div class="script-desc">Blocks sign-in, converts mailbox to Shared, strips all licences for departed staff.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tooling notes -->
+  <div class="section-card">
+    <div class="section-header static">
+      <div class="section-icon icon-amber">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+      </div>
+      <div>
+        <div class="section-title">Tooling notes</div>
+        <div class="section-subtitle">Module requirements and known dependency locations</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <ul class="step-list">
+        <li><div class="step-dot"></div><span><code>PnP.PowerShell</code> requires PowerShell 7. Register an Entra app with the appropriate SharePoint and Graph permissions for interactive login.</span></li>
+        <li><div class="step-dot"></div><span><strong>Microsoft Graph licence cmdlets</strong> live in <code>Microsoft.Graph.Users.Actions</code>; directory and SKU cmdlets live in <code>Microsoft.Graph.Identity.DirectoryManagement</code>.</span></li>
+        <li><div class="step-dot"></div><span>Always run destructive scripts in <strong>preview / WhatIf</strong> mode first and review the output before committing.</span></li>
+        <li><div class="step-dot"></div><span>Security group propagation in SharePoint can take <strong>15–60 minutes</strong> — do not test access immediately after group creation.</span></li>
+      </ul>
+      <div class="callout callout-blue" style="margin-top:14px">
+        <strong>Migration Manager agent tip:</strong> Install the agent directly on the file server and exclude the source drive from antivirus. Session-tied migration tools (RoboCopy over RDP, etc.) will fail if the session drops — Migration Manager is cloud-orchestrated and survives disconnection.
+      </div>
+    </div>
+  </div>
+
+  <!-- Security group naming -->
+  <div class="section-card">
+    <div class="section-header static">
+      <div class="section-icon icon-purple">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div>
+        <div class="section-title">Security group naming convention</div>
+        <div class="section-subtitle">Standard pattern for all SharePoint folder-level groups</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="def-list">
+        <div class="def-row"><span class="def-key"><code>SP_&lt;FOLDER&gt;_RW</code></span><span class="def-val"><strong>Edit</strong> permission — read, write, create, delete. Maps to NTFS Modify.</span></div>
+        <div class="def-row"><span class="def-key"><code>SP_&lt;FOLDER&gt;_RO</code></span><span class="def-val"><strong>Read</strong> permission — read-only. Maps to NTFS Read.</span></div>
+        <div class="def-row"><span class="def-key"><code>SP_&lt;FOLDER&gt;_VERIFY</code></span><span class="def-val">View-only customer verification group — added before go-live; removed after sign-off if not ongoing.</span></div>
+      </div>
+      <div class="callout callout-amber" style="margin-top:10px">
+        Permissions are applied at folder level by breaking inheritance via <code>Set-PnPListItemPermission</code> using the SharePoint list-item ID of the folder — not by display name or URL.
+      </div>
+    </div>
+  </div>
+
+  <!-- Changelog -->
+  <div class="section-card">
+    <div class="section-header" onclick="toggleChangelog()">
+      <div class="section-icon icon-blue">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div>
+        <div class="section-title">Version history</div>
+        <div class="section-subtitle">Summary of changes between versions</div>
+      </div>
+      <svg id="cl-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#aaa;transition:transform 0.2s;flex-shrink:0;margin-left:auto"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div id="cl-body" style="display:none;padding:0 18px 18px">
+      <table class="data-table">
+        <thead><tr><th style="width:70px">Version</th><th style="width:100px">Date</th><th style="width:150px">Author</th><th>Summary</th></tr></thead>
+        <tbody>
+          <tr><td>1.0</td><td>June 2026</td><td>IT Service Manager</td><td>Initial document created</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /panel-scripts -->
+
+</div><!-- /page-body -->
+
+<!-- ── FOOTER ── -->
+<div style="background:linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);color:rgba(255,255,255,0.7);font-size:11px;text-align:center;padding:14px 20px;margin-top:8px;line-height:1.7">
+  <div>Prepared by <span style="color:rgba(255,255,255,0.88)">Active8 Managed Technologies Limited</span> &middot; IT Service Management</div>
+  <div>MSP-MIG-001 &middot; v1.0 &middot; June 2026 &middot; This article is maintained by the Active 8 IT team.</div>
+</div>
+
+<script>
+/* ── TAB SWITCHING ── */
+function switchTab(tab) {
+  ['map','runbook','scripts'].forEach(t => {
+    document.getElementById('panel-' + t).classList.remove('active');
+    document.getElementById('nav-' + t).classList.remove('active');
+  });
+  document.getElementById('panel-' + tab).classList.add('active');
+  document.getElementById('nav-' + tab).classList.add('active');
+}
+
+/* ── PHASE ACCORDION ── */
+function togglePhase(header) {
+  const body = header.nextElementSibling;
+  const chev = header.querySelector('.chevron');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  chev.classList.toggle('open', !isOpen);
+}
+
+/* ── CHANGELOG ── */
+function toggleChangelog() {
+  const body = document.getElementById('cl-body');
+  const chev = document.getElementById('cl-chevron');
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  chev.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+
+/* ── PHASE MAP ── */
+const PHASES = [
+  { id:'p0', badge:'P0', label:'Discovery & Remediation',   sub:'Baseline + quarantine' },
+  { id:'p1', badge:'P1', label:'Target Preparation',         sub:'SharePoint site + library' },
+  { id:'p2', badge:'P2', label:'Migration',                  sub:'Migration Manager tasks' },
+  { id:'p3', badge:'P3', label:'Reconciliation',             sub:'Visible count comparison' },
+  { id:'p4', badge:'P4', label:'Remediation of Misses',      sub:'Long paths, reserved names' },
+  { id:'p5', badge:'P5', label:'Final Delta Sync',           sub:'Cutover window changes' },
+  { id:'p6', badge:'P6', label:'Security Model',             sub:'RW / RO groups per folder' },
+  { id:'p7', badge:'P7', label:'Offboarding Leavers',        sub:'Block, archive, delicense' },
+  { id:'p8', badge:'P8', label:'End-User Rollout',           sub:'OneDrive shortcuts + guide' },
+  { id:'p9', badge:'P9', label:'Decommission & Cleanup',     sub:'Sign-off + server retire' },
+];
+const done = {};
+const grid = document.getElementById('phase-map-grid');
+
+PHASES.forEach(p => {
+  const el = document.createElement('div');
+  el.className = 'phase-map-item';
+  el.id = 'map-' + p.id;
+  el.onclick = () => toggleMapItem(p.id);
+  el.innerHTML = `
+    <div class="map-check" id="check-${p.id}">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="map-label">${p.label}<br><span class="map-sub">${p.sub}</span></div>`;
+  grid.appendChild(el);
+});
+
+function toggleMapItem(id) {
+  done[id] = !done[id];
+  document.getElementById('map-' + id).classList.toggle('done', done[id]);
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = PHASES.length;
+  const n = Object.values(done).filter(Boolean).length;
+  document.getElementById('prog-bar').style.width = (n / total * 100) + '%';
+  document.getElementById('prog-label').textContent = n + ' of ' + total + ' phases complete';
+}
+</script>
+
+</body>
+</html>
