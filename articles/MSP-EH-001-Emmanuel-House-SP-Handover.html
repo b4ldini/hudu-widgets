@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MSP-EH-001 — Emmanuel House SharePoint Handover</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.6;background:#f5f7fa;color:#1a1a2e;max-width:100%;overflow-x:hidden}
+
+/* ── NAV ── */
+.sticky-nav{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);border-bottom:3px solid #c2e000;display:flex;align-items:center;padding:0 16px;gap:2px}
+.nav-tab{padding:12px 16px;font-size:12px;font-weight:600;letter-spacing:0.04em;color:rgba(255,255,255,0.6);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-3px;transition:color 0.15s,border-color 0.15s;white-space:nowrap;border:none;background:none;text-transform:uppercase}
+.nav-tab:hover{color:rgba(255,255,255,0.85)}
+.nav-tab.active{color:#fff;border-bottom:3px solid #c2e000}
+
+/* ── PAGE ── */
+.page-body{padding:20px 24px;max-width:960px}
+.panel{display:none}.panel.active{display:block}
+
+/* ── SECTION CARDS ── */
+.section-card{background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:10px;margin-bottom:16px;overflow:hidden}
+.section-header{display:flex;align-items:center;gap:12px;padding:14px 18px}
+.section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.icon-blue{background:rgba(37,87,183,0.12);color:#2557b7}
+.icon-lime{background:rgba(138,170,0,0.15);color:#8aaa00}
+.icon-amber{background:rgba(245,158,11,0.12);color:#d97706}
+.icon-green{background:rgba(34,197,94,0.12);color:#16a34a}
+.icon-purple{background:rgba(168,85,247,0.12);color:#a855f7}
+.icon-red{background:rgba(239,68,68,0.12);color:#dc2626}
+.section-title{font-size:14px;font-weight:700;color:#1a1a2e}
+.section-subtitle{font-size:12px;color:rgba(0,0,0,0.5);margin-top:1px}
+.section-body{padding:0 18px 18px 18px}
+
+/* ── DATA TABLES ── */
+.data-table{width:100%;border-collapse:collapse;font-size:13px;margin:4px 0}
+.data-table th{background:rgba(128,128,128,0.12);font-family:'Courier New',Consolas,monospace;font-size:10px;letter-spacing:0.08em;text-transform:uppercase;opacity:0.75;padding:8px 12px;border:1px solid rgba(128,128,128,0.2);text-align:left;font-weight:600}
+.data-table td{padding:9px 12px;border:1px solid rgba(128,128,128,0.15);vertical-align:top;line-height:1.5}
+.data-table tr:nth-child(even) td{background:rgba(128,128,128,0.04)}
+
+/* ── CALLOUTS ── */
+.callout{border-radius:6px;padding:11px 14px;margin:12px 0;font-size:13px;line-height:1.55}
+.callout-amber{background:rgba(245,158,11,0.1);border-left:4px solid #f59e0b}
+.callout-green{background:rgba(34,197,94,0.1);border-left:4px solid #22c55e}
+.callout-blue{background:rgba(59,130,246,0.1);border-left:4px solid #3b82f6}
+.callout-red{background:rgba(239,68,68,0.1);border-left:4px solid #ef4444}
+
+/* ── CODE BLOCK ── */
+.code-block{background:#1e1e2e;color:#cdd6f4;padding:13px 16px;border-radius:6px;font-family:'Courier New',Consolas,monospace;font-size:13px;line-height:1.8;margin:10px 0;overflow-x:auto}
+code{font-family:'Courier New',Consolas,monospace;font-size:12px;background:rgba(128,128,128,0.12);border:1px solid rgba(128,128,128,0.25);padding:1px 5px;border-radius:3px}
+
+/* ── STEP LIST ── */
+.step-list{list-style:none;margin:10px 0}
+.step-list li{display:flex;gap:10px;margin-bottom:9px;font-size:13px;line-height:1.5}
+.step-dot{width:6px;height:6px;border-radius:50%;background:#2557b7;flex-shrink:0;margin-top:7px}
+
+/* ── NUMBERED STEPS TABLE ── */
+.num-steps{border-collapse:collapse;margin:10px 0;width:100%}
+.num-steps td{padding:0 0 12px 0;vertical-align:top}
+.num-circle{width:26px;height:26px;border-radius:50%;background:#2557b7;color:#fff;font-family:'Courier New',Consolas,monospace;font-size:11px;font-weight:700;text-align:center;line-height:26px;flex-shrink:0;display:block}
+.num-col{width:40px}
+
+/* ── KEY FACTS GRID ── */
+.kf-grid{display:grid;grid-template-columns:160px 1fr;gap:0;margin-top:4px}
+.kf-row{display:contents}
+.kf-key{padding:9px 12px;font-size:12px;font-weight:600;background:rgba(128,128,128,0.06);border:1px solid rgba(128,128,128,0.14);border-bottom:none;opacity:0.75}
+.kf-val{padding:9px 12px;font-size:13px;border:1px solid rgba(128,128,128,0.14);border-left:none;border-bottom:none;line-height:1.5}
+.kf-key:last-of-type,.kf-val:last-of-type{border-bottom:1px solid rgba(128,128,128,0.14)}
+.kf-key:first-of-type{border-radius:6px 0 0 0}
+.kf-val:first-of-type{border-radius:0 6px 0 0}
+
+/* ── GROUP BADGES ── */
+.grp-rw{display:inline-block;font-family:'Courier New',Consolas,monospace;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(37,87,183,0.12);border:1px solid rgba(37,87,183,0.3);color:#2557b7;white-space:nowrap}
+.grp-ro{display:inline-block;font-family:'Courier New',Consolas,monospace;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(128,128,128,0.1);border:1px solid rgba(128,128,128,0.3);color:inherit;white-space:nowrap;opacity:0.75}
+.grp-special{display:inline-block;font-family:'Courier New',Consolas,monospace;font-size:11px;font-weight:700;padding:2px 7px;border-radius:4px;background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.3);color:#a855f7;white-space:nowrap}
+
+/* ── TASK PILL ── */
+.task-pill{display:inline-block;font-family:'Courier New',Consolas,monospace;font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;letter-spacing:0.05em;text-transform:uppercase;vertical-align:middle}
+.pill-add{background:rgba(34,197,94,0.15);border:1px solid #22c55e;color:#16a34a}
+.pill-remove{background:rgba(239,68,68,0.12);border:1px solid #ef4444;color:#dc2626}
+.pill-starter{background:rgba(59,130,246,0.12);border:1px solid #3b82f6;color:#2557b7}
+.pill-leaver{background:rgba(245,158,11,0.12);border:1px solid #f59e0b;color:#d97706}
+.pill-bulk{background:rgba(168,85,247,0.12);border:1px solid #a855f7;color:#a855f7}
+
+/* ── STATUS BANNER ── */
+.status-banner{display:flex;align-items:flex-start;gap:12px;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.3);border-radius:8px;padding:13px 16px;margin-bottom:16px}
+.status-dot{width:10px;height:10px;border-radius:50%;background:#22c55e;flex-shrink:0;margin-top:5px}
+
+@media(max-width:680px){
+  .page-body{padding:14px}
+  .kf-grid{grid-template-columns:1fr}
+  .kf-key{border-radius:6px 6px 0 0;border-right:1px solid rgba(128,128,128,0.14)}
+  .kf-val{border-left:1px solid rgba(128,128,128,0.14);border-top:none}
+  .data-table{font-size:12px}
+  .code-block{font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── STICKY NAV ── -->
+<nav class="sticky-nav">
+  <button class="nav-tab active" id="nav-overview" onclick="switchTab('overview')">Overview</button>
+  <button class="nav-tab"        id="nav-groups"   onclick="switchTab('groups')">Groups &amp; Access</button>
+  <button class="nav-tab"        id="nav-ref"      onclick="switchTab('ref')">Support Reference</button>
+</nav>
+
+<div class="page-body">
+
+<!-- ══════════════════════════════════════════
+     PANEL 1 — OVERVIEW
+══════════════════════════════════════════ -->
+<div class="panel active" id="panel-overview">
+
+  <!-- Status -->
+  <div class="status-banner">
+    <div class="status-dot"></div>
+    <div style="font-size:13px;line-height:1.55">
+      <strong>Migration complete.</strong> File server (EH-RDP1, <code>E:\</code>) migrated to SharePoint Online, verified, no data loss. Access model live; 23 leavers decommissioned; staff rolling out to OneDrive shortcuts.
+    </div>
+  </div>
+
+  <!-- Key Facts -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-icon icon-blue">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      </div>
+      <div>
+        <div class="section-title">Key facts</div>
+        <div class="section-subtitle">Environment identifiers and configuration</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <table class="data-table">
+        <thead><tr><th style="width:160px">Item</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td><strong>SharePoint site</strong></td><td><code>https://emmanuelhouseorg.sharepoint.com/sites/emmanuel-files</code></td></tr>
+          <tr><td><strong>Library</strong></td><td><strong>Shared Documents</strong> — both the URL name and display name. The redundant empty "Documents" library was removed.</td></tr>
+          <tr><td><strong>Admin centre</strong></td><td><code>https://emmanuelhouseorg-admin.sharepoint.com</code></td></tr>
+          <tr><td><strong>Source server</strong></td><td>EH-RDP1 &nbsp;·&nbsp; domain <code>ad.emmanuelhouse.org.uk</code> &nbsp;·&nbsp; data on <code>E:\</code></td></tr>
+          <tr><td><strong>Tenant identity</strong></td><td><strong>Cloud-only — NOT synced to on-prem AD.</strong> Always match users by display name, not username or UPN.</td></tr>
+          <tr><td><strong>Migration tool</strong></td><td>Microsoft Migration Manager (agent installed on EH-RDP1)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- How the access model works -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-icon icon-purple">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <div>
+        <div class="section-title">How the access model works</div>
+        <div class="section-subtitle">One rule covers everything — group membership = access</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <p style="font-size:13px;margin-bottom:10px">Each top-level folder is controlled by two Entra <strong>security groups</strong>. Permissions are set <strong>per folder</strong> (inheritance is broken at folder level), so adding someone to a group is the only thing that grants access. There is no direct sharing, no site-level role assignment.</p>
+      <div class="code-block">SP_&lt;FOLDER&gt;_RW &nbsp; → &nbsp; Edit (read / write / delete)<br>SP_&lt;FOLDER&gt;_RO &nbsp; → &nbsp; Read-only (view / open only)</div>
+      <ul class="step-list" style="margin-top:10px">
+        <li><div class="step-dot"></div><span><code>SP_</code> prefix marks it as a SharePoint folder-access group.</span></li>
+        <li><div class="step-dot"></div><span><code>&lt;FOLDER&gt;</code> is the folder name in CAPITALS with no spaces or punctuation (e.g. <code>VOLADMIN</code> not <code>VolAdministrations</code>).</span></li>
+        <li><div class="step-dot"></div><span><code>_RW</code> = add, edit, delete files. &nbsp;<code>_RO</code> = view and open only.</span></li>
+        <li><div class="step-dot"></div><span>Users must hold a <strong>SharePoint licence</strong> before group membership will grant access.</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Important settings -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-icon icon-amber">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div>
+        <div class="section-title">Site settings — do not change</div>
+        <div class="section-subtitle">Two settings are off by design; reversing either breaks access</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="callout callout-red" style="margin-top:0">
+        <strong>Do not re-enable</strong> the "Limited-access user permission lockdown mode" site feature — it is <strong>OFF by design</strong>. This feature is required to be off for folder-level sharing to work. Turning it back on will break all folder-group permissions.
+      </div>
+      <div class="callout callout-amber">
+        The library <strong>Sync button is hidden</strong> (<code>ExcludeFromOfflineClient = $true</code>). Staff access files via <strong>Add shortcut to OneDrive</strong> — do not re-enable the Sync button or auto-mount the full library.
+      </div>
+    </div>
+  </div>
+
+</div><!-- /panel-overview -->
+
+
+<!-- ══════════════════════════════════════════
+     PANEL 2 — GROUPS & ACCESS
+══════════════════════════════════════════ -->
+<div class="panel" id="panel-groups">
+
+  <!-- The Groups -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-icon icon-blue">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div>
+        <div class="section-title">The groups</div>
+        <div class="section-subtitle">All Entra security groups and the folders they control</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width:130px">Folder</th>
+            <th style="width:195px">Edit group (RW)</th>
+            <th>View-only group (RO)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Finance</strong></td>
+            <td><span class="grp-rw">SP_FINANCE_RW</span></td>
+            <td><span class="grp-ro">SP_FINANCE_RO</span></td>
+          </tr>
+          <tr>
+            <td><strong>Funding</strong></td>
+            <td><span class="grp-rw">SP_FUNDING_RW</span></td>
+            <td><span class="grp-ro">SP_FUNDING_RO</span></td>
+          </tr>
+          <tr>
+            <td><strong>HR</strong></td>
+            <td><span class="grp-rw">SP_HR_RW</span></td>
+            <td><span class="grp-ro">SP_HR_RO</span></td>
+          </tr>
+          <tr>
+            <td><strong>Management</strong></td>
+            <td><span class="grp-rw">SP_MANAGEMENT_RW</span></td>
+            <td><span class="grp-ro">SP_MANAGEMENT_RO</span></td>
+          </tr>
+          <tr>
+            <td><strong>Marketing</strong></td>
+            <td><span class="grp-rw">SP_MARKETING_RW</span></td>
+            <td><span class="grp-ro">SP_MARKETING_RO</span></td>
+          </tr>
+          <tr>
+            <td><strong>Operations</strong></td>
+            <td><span class="grp-rw">SP_OPERATIONS_RW</span></td>
+            <td><span class="grp-ro">SP_OPERATIONS_RO</span></td>
+          </tr>
+          <tr>
+            <td><strong>VolAdministrations</strong></td>
+            <td><span class="grp-rw">SP_VOLADMIN_RW</span></td>
+            <td><span class="grp-ro">SP_VOLADMIN_RO</span></td>
+          </tr>
+          <tr>
+            <td><strong>_Recovered</strong><br><span style="font-size:11px;opacity:0.55">(quarantine)</span></td>
+            <td><span class="grp-rw">SP_RECOVERED_RW</span></td>
+            <td><span class="grp-ro">SP_RECOVERED_RO</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout callout-amber" style="margin-top:12px">
+        <strong>VolAdministrations</strong> is abbreviated to <strong>VOLADMIN</strong> in the group name. <code>_Recovered</code> groups exist but are kept <strong>empty by design</strong> — it is a quarantine folder holding recovered and long-path files that were not migrated into the main structure.
+      </div>
+    </div>
+  </div>
+
+  <!-- Special cases -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-icon icon-purple">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </div>
+      <div>
+        <div class="section-title">Special cases</div>
+        <div class="section-subtitle">Groups that behave differently from the standard pattern</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <table class="data-table">
+        <thead><tr><th style="width:200px">Group / folder</th><th>Behaviour</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Public</strong></td>
+            <td>No access group — open to all staff as before. Nothing to assign.</td>
+          </tr>
+          <tr>
+            <td><span class="grp-rw">SP_VOLADMIN_RW</span></td>
+            <td>Managed manually — 5 named people only. Do not add anyone outside that list without checking with the manager.</td>
+          </tr>
+          <tr>
+            <td><span class="grp-special">SP_Migration_Verification</span></td>
+            <td>View-only access across <strong>all folders</strong>. Created for migration sign-off (members: Isabella Harriss, Alastair Paylor). Do not use this for normal day-to-day access.</td>
+          </tr>
+          <tr>
+            <td><strong>Support Staff</strong> (mail-enabled group)</td>
+            <td>A mail-enabled security group that <strong>also grants Operations RW</strong>. Members get Operations access automatically because it is nested into <span class="grp-rw">SP_OPERATIONS_RW</span>. For Operations access, you can add to either group — the result is the same.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Steps to assign access -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-icon icon-green">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <div>
+        <div class="section-title">How to assign folder access</div>
+        <div class="section-subtitle">Three steps — takes under a minute</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <table class="num-steps">
+        <tr>
+          <td class="num-col"><span class="num-circle">1</span></td>
+          <td>Go to <strong>Entra admin centre</strong> (<code>entra.microsoft.com</code>) → <strong>Groups</strong> → search for the group, e.g. <code>SP_HR_RW</code>, and open it.</td>
+        </tr>
+        <tr>
+          <td class="num-col"><span class="num-circle">2</span></td>
+          <td><strong>Members → Add members</strong> → search for the person by display name → <strong>Add</strong>. Confirm they hold a SharePoint licence first.</td>
+        </tr>
+        <tr>
+          <td class="num-col"><span class="num-circle">3</span></td>
+          <td>Access applies within a few minutes. They reach the folder via the SharePoint site URL or their OneDrive shortcut. For a new shortcut, share the <strong>Add shortcut to OneDrive</strong> staff guide.</td>
+        </tr>
+      </table>
+      <div class="callout callout-amber">
+        <strong>New Entra security groups</strong> take 15–60 minutes to become usable in SharePoint after creation (replication delay). This does not apply to adding members to existing groups, which is near-instant.
+      </div>
+    </div>
+  </div>
+
+</div><!-- /panel-groups -->
+
+
+<!-- ══════════════════════════════════════════
+     PANEL 3 — SUPPORT REFERENCE
+══════════════════════════════════════════ -->
+<div class="panel" id="panel-ref">
+
+  <!-- Common Tasks -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-icon icon-blue">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      </div>
+      <div>
+        <div class="section-title">Common support tasks</div>
+        <div class="section-subtitle">Day-to-day access management actions</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <table class="data-table">
+        <thead><tr><th style="width:160px">Task</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="task-pill pill-add">Add access</span></td>
+            <td>Add their Entra account to <code>SP_&lt;FOLDER&gt;_RW</code> (edit) or <code>SP_&lt;FOLDER&gt;_RO</code> (view). User must hold a SharePoint licence.</td>
+          </tr>
+          <tr>
+            <td><span class="task-pill pill-remove">Remove access</span></td>
+            <td>Remove them from the relevant group in Entra. No other steps needed.</td>
+          </tr>
+          <tr>
+            <td><span class="task-pill pill-starter">New starter</span></td>
+            <td>Once licensed, add to the relevant <code>SP_*</code> groups. Share the OneDrive shortcut guide so they can set up their own access point.</td>
+          </tr>
+          <tr>
+            <td><span class="task-pill pill-leaver">Leaver</span></td>
+            <td>Block sign-in → convert mailbox to Shared (retains mail, no licence) → remove all licences. Unlicensed users are auto-excluded from SharePoint groups — no manual group cleanup needed. Script: <code>Decommission-Users.ps1</code></td>
+          </tr>
+          <tr>
+            <td><span class="task-pill pill-bulk">Bulk change</span></td>
+            <td><code>Add-GroupMembers.ps1</code> reads a Group + UPN CSV and adds members in bulk. Update the CSV; run in preview first.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Gotchas -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-icon icon-amber">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div>
+        <div class="section-title">Gotchas</div>
+        <div class="section-subtitle">Known quirks to be aware of before troubleshooting</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="callout callout-amber" style="margin-top:0">
+        <ul style="margin:0;padding-left:16px;font-size:13px">
+          <li style="margin-bottom:7px">New Entra security groups take <strong>~15–60 minutes</strong> to become usable in SharePoint after creation — this is a replication delay, not an error.</li>
+          <li style="margin-bottom:7px">Folder permissions are granted by <strong>list-item ID</strong> (via <code>Set-PnPListItemPermission</code>), not by folder display name. Renaming a folder does not break permissions.</li>
+          <li style="margin-bottom:7px">SharePoint rejects the reserved folder name <strong>"Forms"</strong> and filenames containing <strong>emoji</strong> — these must be renamed at source; the invalid-character replacement setting does not cover them.</li>
+          <li style="margin-bottom:0"><code>PnP.PowerShell</code> requires <strong>PowerShell 7</strong>. Graph licence cmdlets are in <code>Microsoft.Graph.Users.Actions</code>; directory and SKU cmdlets are in <code>Microsoft.Graph.Identity.DirectoryManagement</code>.</li>
+        </ul>
+      </div>
+      <div class="callout callout-red">
+        <strong>Tenant is cloud-only.</strong> There is no AD sync. When looking up a user in Entra or running scripts, always match by <strong>display name</strong> — usernames and UPNs are not consistent with the on-prem AD accounts that were used on the file server.
+      </div>
+    </div>
+  </div>
+
+  <!-- Key files -->
+  <div class="section-card">
+    <div class="section-header">
+      <div class="section-icon icon-lime">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div>
+        <div class="section-title">Key files in the project folder</div>
+        <div class="section-subtitle">Scripts, data files, and documentation produced during the migration</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <table class="data-table">
+        <thead><tr><th style="width:80px">Type</th><th>Files</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Scripts</strong></td>
+            <td>
+              <code>Add-GroupMembers.ps1</code>&nbsp; <code>Decommission-Users.ps1</code>&nbsp; <code>New-SPFolderSecurity.ps1</code>&nbsp; <code>New-SPVerificationGroup.ps1</code>&nbsp; <code>Reconcile-Fast.ps1</code>&nbsp; <code>Final-DeltaSync.ps1</code>&nbsp; <code>Remove-MigrationAzureStorage.ps1</code>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Data</strong></td>
+            <td><code>UserMap.csv</code>&nbsp; <code>Group-Membership-Preview.csv</code>&nbsp; <code>RedUsers.csv</code>&nbsp; <code>ProposedGroups.csv</code></td>
+          </tr>
+          <tr>
+            <td><strong>Docs</strong></td>
+            <td>Completion Report (customer-facing) &nbsp;·&nbsp; Internal Project Report &nbsp;·&nbsp; Membership Preview &nbsp;·&nbsp; Staff OneDrive shortcut guide &nbsp;·&nbsp; <code>Outstanding-Tasks.md</code></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout callout-green" style="margin-top:12px">
+        <strong>Project closeout:</strong> any remaining project-level items are tracked in <code>Outstanding-Tasks.md</code> — that is the single source of truth and is not duplicated here.
+      </div>
+    </div>
+  </div>
+
+  <!-- Changelog -->
+  <div class="section-card">
+    <div class="section-header" style="cursor:pointer" onclick="toggleChangelog()">
+      <div class="section-icon icon-blue">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div>
+        <div class="section-title">Version history</div>
+        <div class="section-subtitle">Summary of changes between versions</div>
+      </div>
+      <svg id="cl-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#aaa;transition:transform 0.2s;flex-shrink:0;margin-left:auto"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div id="cl-body" style="display:none;padding:0 18px 18px">
+      <table class="data-table">
+        <thead><tr><th style="width:70px">Version</th><th style="width:100px">Date</th><th style="width:160px">Author</th><th>Summary</th></tr></thead>
+        <tbody>
+          <tr><td>1.0</td><td>June 2026</td><td>IT Service Manager</td><td>Initial handover document created</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /panel-ref -->
+
+</div><!-- /page-body -->
+
+<!-- ── FOOTER ── -->
+<div style="background:linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);color:rgba(255,255,255,0.7);font-size:11px;text-align:center;padding:14px 20px;margin-top:8px;line-height:1.7">
+  <div>Prepared by <span style="color:rgba(255,255,255,0.88)">Active8 Managed Technologies Limited</span> &middot; IT Service Management</div>
+  <div>MSP-EH-001 &middot; v1.0 &middot; June 2026 &middot; This article is maintained by the Active 8 IT team.</div>
+</div>
+
+<script>
+function switchTab(tab) {
+  ['overview','groups','ref'].forEach(t => {
+    document.getElementById('panel-' + t).classList.remove('active');
+    document.getElementById('nav-' + t).classList.remove('active');
+  });
+  document.getElementById('panel-' + tab).classList.add('active');
+  document.getElementById('nav-' + tab).classList.add('active');
+}
+
+function toggleChangelog() {
+  const body = document.getElementById('cl-body');
+  const chev = document.getElementById('cl-chevron');
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  chev.style.transform = isOpen ? '' : 'rotate(180deg)';
+}
+</script>
+
+</body>
+</html>
