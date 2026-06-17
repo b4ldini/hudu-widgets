@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MSP-HD-001 — Happy Days Nursery Locations</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;background:#f5f7fa;color:#1a1a2e;height:100%;overflow:hidden}
+
+/* ── STICKY NAV ── */
+.sticky-nav{position:sticky;top:0;z-index:500;background:linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);border-bottom:3px solid #c2e000;display:flex;align-items:center;padding:0 16px;gap:2px;flex-shrink:0;height:41px}
+.nav-tab{padding:10px 18px;font-size:12px;font-weight:600;letter-spacing:0.04em;color:rgba(255,255,255,0.6);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-3px;transition:color 0.15s,border-color 0.15s;white-space:nowrap;border:none;background:none;text-transform:uppercase}
+.nav-tab:hover{color:rgba(255,255,255,0.85)}
+.nav-tab.active{color:#fff;border-bottom:3px solid #c2e000}
+
+/* ── PANELS ── */
+.panel{display:none}
+.panel.active{display:flex;flex-direction:column}
+#panel-map.active{height:calc(100vh - 41px - 44px)}
+#panel-dir.active{height:calc(100vh - 41px - 44px);overflow-y:auto;padding:20px 24px}
+
+/* ── FOOTER ── */
+.site-footer{background:linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);color:rgba(255,255,255,0.7);font-size:11px;text-align:center;padding:10px 20px;line-height:1.7;flex-shrink:0;height:44px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px}
+
+/* ─────────────────────────────────────
+   MAP PANEL LAYOUT
+───────────────────────────────────── */
+#map-wrap{display:flex;flex:1;overflow:hidden;height:100%}
+
+/* Side panel */
+#side{width:310px;flex:0 0 310px;background:#fff;border-right:1px solid #e3e8ee;display:flex;flex-direction:column;overflow:hidden}
+#side-head{padding:12px 14px 6px;border-bottom:1px solid #eef1f4}
+#side-title{font-size:14px;font-weight:700;color:#1a1a2e}
+#side-sub{font-size:11px;color:#667;margin-top:2px}
+#search-wrap{padding:8px 12px;border-bottom:1px solid #eef1f4}
+#q{width:100%;padding:7px 10px;border:1px solid #d6dde4;border-radius:7px;font-size:13px;outline:none;font-family:inherit}
+#q:focus{border-color:#2557b7;box-shadow:0 0 0 2px rgba(37,87,183,0.15)}
+#legend{overflow-y:auto;flex:1;padding:6px 6px 20px}
+
+/* Region headers */
+.reg{display:flex;align-items:center;gap:0;margin:8px 4px 2px;font-size:12px;font-weight:700;cursor:pointer;user-select:none;border-radius:6px;padding:5px 8px;transition:background 0.12s}
+.reg:hover{background:#f0f3f6}
+.reg-dot{width:11px;height:11px;border-radius:50%;margin-right:8px;flex:0 0 11px}
+.reg-cnt{margin-left:auto;font-weight:600;color:#667;font-size:10px;background:#eef1f4;border-radius:10px;padding:1px 7px}
+.reg.off{opacity:.35}
+
+/* Site items */
+.item{font-size:12px;padding:3px 8px 3px 28px;color:#33404f;cursor:pointer;border-radius:5px;line-height:1.35;margin:1px 4px}
+.item:hover{background:#eef5ff}
+.item .pc{color:#889;font-size:11px;margin-left:4px}
+.item.hidden{display:none}
+
+/* Map */
+#map{flex:1}
+.pin{display:flex;align-items:center;justify-content:center;border-radius:50%;color:#fff;font-weight:700;font-size:10px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+.cl{display:flex;align-items:center;justify-content:center;border-radius:50%;color:#fff;font-weight:700;border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.4);width:34px;height:34px}
+.lp b{font-size:13px;color:#1a1a2e}
+.lp .lr{font-size:11px;font-weight:700;margin-top:3px}
+.lp .la{font-size:11px;color:#555;margin-top:2px;line-height:1.4}
+
+/* ─────────────────────────────────────
+   DIRECTORY PANEL
+───────────────────────────────────── */
+.dir-region{margin-bottom:24px}
+.dir-region-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.dir-region-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.dir-region-title{font-size:14px;font-weight:700;color:#1a1a2e}
+.dir-region-cnt{font-size:11px;font-weight:600;color:#889;background:#eef1f4;border-radius:10px;padding:2px 9px;margin-left:auto}
+.dir-table{width:100%;border-collapse:collapse;font-size:13px}
+.dir-table th{background:rgba(128,128,128,0.1);font-size:10px;letter-spacing:0.07em;text-transform:uppercase;opacity:0.65;padding:7px 12px;border:1px solid rgba(128,128,128,0.15);text-align:left;font-weight:600}
+.dir-table td{padding:8px 12px;border:1px solid rgba(128,128,128,0.12);vertical-align:top;line-height:1.4}
+.dir-table tr:nth-child(even) td{background:rgba(128,128,128,0.035)}
+.dir-table td:first-child{font-weight:600;color:#1a1a2e}
+.pc-badge{font-family:'Courier New',Consolas,monospace;font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;background:rgba(37,87,183,0.09);border:1px solid rgba(37,87,183,0.2);color:#2557b7;white-space:nowrap}
+
+/* ─────────────────────────────────────
+   DIR SEARCH BAR
+───────────────────────────────────── */
+.dir-search-bar{margin-bottom:18px}
+.dir-search-bar input{width:100%;max-width:400px;padding:9px 13px;border:1px solid #d6dde4;border-radius:8px;font-size:13px;outline:none;font-family:inherit}
+.dir-search-bar input:focus{border-color:#2557b7;box-shadow:0 0 0 2px rgba(37,87,183,0.12)}
+.dir-stats{font-size:12px;color:#889;margin-top:6px}
+
+/* No-results */
+.no-results{text-align:center;padding:40px 20px;color:#889;font-size:13px}
+
+@media(max-width:700px){
+  #side{width:260px;flex:0 0 260px}
+  #panel-dir.active{padding:14px}
+}
+@media(max-width:540px){
+  #map-wrap{flex-direction:column}
+  #side{width:100%;flex:0 0 auto;height:220px;border-right:none;border-bottom:1px solid #e3e8ee}
+  #panel-map.active{height:calc(100vh - 41px - 44px)}
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav class="sticky-nav">
+  <button class="nav-tab active" id="nav-map" onclick="switchTab('map')">Interactive Map</button>
+  <button class="nav-tab"        id="nav-dir" onclick="switchTab('dir')">Site Directory</button>
+</nav>
+
+<!-- ══════════════════════════════════════
+     PANEL 1 — MAP
+══════════════════════════════════════ -->
+<div class="panel active" id="panel-map">
+  <div id="map-wrap">
+    <div id="side">
+      <div id="side-head">
+        <div id="side-title">Happy Days — Nursery Locations</div>
+        <div id="side-sub">45 sites &middot; 11 regions &middot; click region to toggle &middot; click site to fly to it</div>
+      </div>
+      <div id="search-wrap">
+        <input id="q" type="search" placeholder="Search name, town or postcode&hellip;" autocomplete="off">
+      </div>
+      <div id="legend"></div>
+    </div>
+    <div id="map"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PANEL 2 — DIRECTORY
+══════════════════════════════════════ -->
+<div class="panel" id="panel-dir">
+  <div class="dir-search-bar">
+    <input id="dq" type="search" placeholder="Filter by name, town or postcode&hellip;" autocomplete="off" oninput="filterDir(this.value)">
+    <div class="dir-stats" id="dir-stats">Showing all 45 sites across 11 regions</div>
+  </div>
+  <div id="dir-content"></div>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer class="site-footer">
+  <div>MSP-HD-001 &middot; v1.0 &middot; June 2026 &middot; Happy Days Nursery — 45 sites</div>
+  <div>This article is maintained by the <span style="color:rgba(255,255,255,0.88)">Active 8 IT team.</span></div>
+</footer>
+
+<script>
+const DATA=[{"name":"Polka Dot Farm","address":"The Outlet Farm Shop, Tye Common Rd","county":"Essex (Billericay)","postcode":"CM12 9SD","lat":51.609762,"lng":0.392928,"region":"Essex"},{"name":"Happy Days Cheswick","address":"Unit 9, The Square, Longdown Avenue","county":"Bristol","postcode":"BS16 1GU","lat":51.497506,"lng":-2.559229,"region":"Bristol, Bath & West"},{"name":"Happy Days Lyde Green","address":"Willowherb Road, Lyde Green","county":"Bristol","postcode":"BS16 7LH","lat":51.49735,"lng":-2.469782,"region":"Bristol, Bath & West"},{"name":"Tiddlers Nursery Saltford","address":"480 Bath Road","county":"Bristol","postcode":"BS31 3DJ","lat":51.402079,"lng":-2.459331,"region":"Bristol, Bath & West"},{"name":"Tiddlers PreSchool Saltford","address":"Claverton Road","county":"Bristol","postcode":"BS31 3DW","lat":51.400883,"lng":-2.461734,"region":"Bristol, Bath & West"},{"name":"Happy Days Bradley Stoke","address":"Almondsbury Business Centre, Bradley Stoke","county":"Bristol","postcode":"BS32 4QH","lat":51.548094,"lng":-2.555278,"region":"Bristol, Bath & West"},{"name":"Happy Days Charlton Heights","address":"Chessel Drive, Patchway","county":"Bristol","postcode":"BS34 5UZ","lat":51.529835,"lng":-2.576881,"region":"Bristol, Bath & West"},{"name":"Happy Days Thornbury","address":"2 Cooper Road, Thornbury","county":"Bristol","postcode":"BS35 3UP","lat":51.602246,"lng":-2.523219,"region":"Bristol, Bath & West"},{"name":"Happy Days Yate","address":"Dowsell Way, Yate","county":"Bristol","postcode":"BS37 7EB","lat":51.559471,"lng":-2.415663,"region":"Bristol, Bath & West"},{"name":"Happy Days The Hollies","address":"9 Sanatorium Road, Canton","county":"Cardiff","postcode":"CF11 8DG","lat":51.480269,"lng":-3.217927,"region":"South Wales"},{"name":"Happy Days Penrice","address":"Porthpean Road, Saint Austell","county":"Cornwall","postcode":"PL26 6AA","lat":50.327128,"lng":-4.773093,"region":"Cornwall"},{"name":"Happy Days Penair","address":"Penair School, St. Clement, Truro","county":"Cornwall","postcode":"TR1 1TN","lat":50.266985,"lng":-5.02992,"region":"Cornwall"},{"name":"Happy Days Playbox","address":"9a Treyew Road, Truro","county":"Cornwall","postcode":"TR1 3AN","lat":50.260929,"lng":-5.066329,"region":"Cornwall"},{"name":"Happy Days Truro City","address":"College Road, Truro","county":"Cornwall","postcode":"TR1 3XX","lat":50.262784,"lng":-5.10083,"region":"Cornwall"},{"name":"Happy Days Treloweth","address":"Higher Broad Lane, Illogan, Redruth","county":"Cornwall","postcode":"TR15 3JL","lat":50.233018,"lng":-5.257799,"region":"Cornwall"},{"name":"Happy Days Summercourt","address":"Chapel Town, Summercourt, Newquay","county":"Cornwall","postcode":"TR8 5YA","lat":50.365701,"lng":-4.978164,"region":"Cornwall"},{"name":"Happy Days Verwood","address":"19 Church Hill, Verwood","county":"Dorset","postcode":"BH31 6HT","lat":50.877906,"lng":-1.880988,"region":"Dorset"},{"name":"Snowdrop","address":"Franklands Village, Lindfield","county":"East Sussex","postcode":"RH16 3RS","lat":50.995647,"lng":-0.086763,"region":"Sussex"},{"name":"Primrose","address":"76 Franklynn Road","county":"East Sussex","postcode":"RH16 4DJ","lat":50.993846,"lng":-0.097083,"region":"Sussex"},{"name":"Happy Days Exeter","address":"Peninsula Business Park, Rydon Lane","county":"Exeter","postcode":"EX2 7XE","lat":50.71511,"lng":-3.482081,"region":"Devon & Plymouth"},{"name":"Happy Days Falmouth","address":"Jubilee Road, Penwerris","county":"Falmouth","postcode":"TR11 2BB","lat":50.157883,"lng":-5.079148,"region":"Cornwall"},{"name":"Edward Bears Cirencester","address":"64 Victoria Rd","county":"Gloucestershire","postcode":"GL7 1ES","lat":51.713058,"lng":-1.960677,"region":"Bristol, Bath & West"},{"name":"Boys and Girls Stanmore","address":"57-65 The Broadway","county":"Greater London","postcode":"HA7 4DJ","lat":51.617529,"lng":-0.309439,"region":"London & Herts"},{"name":"Boys and Girls Watford","address":"Central Hall, Loates Ln","county":"Greater London","postcode":"WD17 2PA","lat":51.657959,"lng":-0.393307,"region":"London & Herts"},{"name":"Boys and Girls Croxley Green","address":"Woodshots Meadow","county":"Greater London","postcode":"WD18 8YS","lat":51.648193,"lng":-0.428533,"region":"London & Herts"},{"name":"Boys and Girls Rickmansworth","address":"Greville House, Chorleywood Close","county":"Greater London","postcode":"WD3 4EG","lat":51.642069,"lng":-0.474241,"region":"London & Herts"},{"name":"Toddle Town Godalming","address":"15 Lower Manor Road, Godalming","county":"Surrey","postcode":"GU7 3EG","lat":51.194422,"lng":-0.605183,"region":"Hampshire & South Coast"},{"name":"Toddle Town Farnham","address":"The Pump House, Kimbers Lane","county":"Surrey","postcode":"GU9 9PT","lat":51.218282,"lng":-0.786845,"region":"Hampshire & South Coast"},{"name":"Juniors Boughton Monchelsea","address":"Farm Estate, Heath Rd, Boughton Monchelsea","county":"Kent","postcode":"ME17 4JD","lat":51.229167,"lng":0.543559,"region":"Kent"},{"name":"Juniors Tunbridge Wells","address":"6 Clanricarde Gardens","county":"Kent","postcode":"TN1 1PH","lat":51.131686,"lng":0.261007,"region":"Kent"},{"name":"Juniors Cranbrook","address":"Hartley Dyke Business Centre, Cranbrook","county":"Kent","postcode":"TN17 3QG","lat":51.08502,"lng":0.512408,"region":"Kent"},{"name":"Juniors Tonbridge","address":"1 Waterloo Road","county":"Kent","postcode":"TN9 2SN","lat":51.190766,"lng":0.269295,"region":"Kent"},{"name":"Happy Days Derriford","address":"3 Derriford Park, Derriford Business Park","county":"Plymouth","postcode":"PL6 5QZ","lat":50.41588,"lng":-4.123051,"region":"Devon & Plymouth"},{"name":"Happy Days Poole","address":"Beechbank Avenue, Creekmoor","county":"Poole","postcode":"BH17 7FF","lat":50.747781,"lng":-2.006235,"region":"Dorset"},{"name":"Farlington","address":"376 Havant Road","county":"Portsmouth","postcode":"PO6 1NF","lat":50.847048,"lng":-1.033065,"region":"Hampshire & South Coast"},{"name":"Dolls House","address":"71 Havant Road","county":"Portsmouth","postcode":"PO6 2JD","lat":50.846463,"lng":-1.05836,"region":"Hampshire & South Coast"},{"name":"Happy Days Teddy Bears","address":"232 Southampton Road","county":"Portsmouth","postcode":"PO6 4QD","lat":50.847377,"lng":-1.116567,"region":"Hampshire & South Coast"},{"name":"Happy Days Bath","address":"Kellaway Lane, Combe Down, Bath","county":"Somerset","postcode":"BA2 5EA","lat":51.363097,"lng":-2.353801,"region":"Bristol, Bath & West"},{"name":"Happy Days Yew Tree","address":"Forest Hill, Yeovil","county":"Somerset","postcode":"BA20 2PG","lat":50.932515,"lng":-2.651067,"region":"Bristol, Bath & West"},{"name":"Happy Days Weston-Super-Mare","address":"6 Whirlwind Road, Weston Business Quarter","county":"Somerset","postcode":"BS24 8EF","lat":51.343745,"lng":-2.934528,"region":"Bristol, Bath & West"},{"name":"Happy Days Boorley Green","address":"Nairn Road, Botley","county":"Southampton","postcode":"SO32 2SH","lat":50.92885,"lng":-1.274353,"region":"Hampshire & South Coast"},{"name":"Mulberry Corner","address":"1-2 Castle Lane, Chandlers Ford","county":"Southampton","postcode":"SO53 4PW","lat":50.975123,"lng":-1.399146,"region":"Hampshire & South Coast"},{"name":"Happy Days Swindon","address":"Elstree Way","county":"Swindon","postcode":"SN25 4YX","lat":51.598621,"lng":-1.794236,"region":"Bristol, Bath & West"},{"name":"Happy Days Salisbury","address":"Longhedge Village, Salisbury","county":"Wiltshire","postcode":"SP4 6SA","lat":51.105174,"lng":-1.792948,"region":"Hampshire & South Coast"},{"name":"Happy Days Droitwich","address":"Woodland Way, Yew Tree Village, Droitwich Spa","county":"Worcestershire","postcode":"WR9 7GP","lat":52.249671,"lng":-2.142397,"region":"Midlands (Worcs)"}];
+
+const ORDER=["Cornwall","Devon & Plymouth","Bristol, Bath & West","South Wales","Dorset","Hampshire & South Coast","Sussex","Kent","London & Herts","Midlands (Worcs)","Essex"];
+const COLORS={"Cornwall":"#e6194B","Devon & Plymouth":"#f58231","Bristol, Bath & West":"#3cb44b","South Wales":"#9A6324","Dorset":"#911eb4","Hampshire & South Coast":"#4363d8","Sussex":"#42d4f4","Kent":"#f032e6","London & Herts":"#000075","Midlands (Worcs)":"#808000","Essex":"#469990"};
+
+/* ── MAP ── */
+const map = L.map('map', {scrollWheelZoom:true}).setView([51.4,-2.6],7);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);
+
+const groups={}, markers={}, state={};
+ORDER.forEach(r => {
+  const col = COLORS[r];
+  groups[r] = L.markerClusterGroup({
+    maxClusterRadius:34, spiderfyOnMaxZoom:true, showCoverageOnHover:false,
+    spiderLegPolylineOptions:{weight:1,color:col,opacity:.6},
+    iconCreateFunction: c => L.divIcon({html:`<div class="cl" style="background:${col}">${c.getChildCount()}</div>`,className:'',iconSize:[34,34]})
+  });
+  map.addLayer(groups[r]); state[r]=true;
+});
+
+const bounds=[];
+DATA.forEach((d,i) => {
+  const c = COLORS[d.region];
+  const icon = L.divIcon({className:'',html:`<div class="pin" style="width:26px;height:26px;background:${c}">${i+1}</div>`,iconSize:[26,26],iconAnchor:[13,13]});
+  const m = L.marker([d.lat,d.lng],{icon});
+  m.bindPopup(`<div class="lp"><b>${i+1}. ${d.name}</b><div class="lr" style="color:${c}">${d.region}</div><div class="la">${d.address}<br>${d.county} &middot; <b>${d.postcode}</b></div></div>`);
+  groups[d.region].addLayer(m); markers[i]=m; bounds.push([d.lat,d.lng]);
+});
+map.fitBounds(bounds,{padding:[40,40]});
+
+function flyTo(i,d){
+  map.flyTo([d.lat,d.lng],14);
+  setTimeout(()=>groups[d.region].zoomToShowLayer(markers[i],()=>markers[i].openPopup()),300);
+}
+
+/* ── LEGEND ── */
+const legend = document.getElementById('legend');
+ORDER.forEach(r => {
+  const items = DATA.map((d,i)=>({d,i})).filter(x=>x.d.region===r);
+  const head = document.createElement('div'); head.className='reg';
+  head.innerHTML=`<span class="reg-dot" style="background:${COLORS[r]}"></span>${r}<span class="reg-cnt">${items.length}</span>`;
+  head.onclick=()=>{
+    state[r]=!state[r];
+    state[r] ? map.addLayer(groups[r]) : map.removeLayer(groups[r]);
+    head.classList.toggle('off',!state[r]);
+  };
+  legend.appendChild(head);
+  items.forEach(({d,i})=>{
+    const it=document.createElement('div'); it.className='item';
+    it.dataset.txt=(d.name+' '+d.county+' '+d.postcode).toLowerCase();
+    it.innerHTML=`${i+1}. ${d.name}<span class="pc">${d.postcode}</span>`;
+    it.onclick=()=>flyTo(i,d);
+    legend.appendChild(it);
+  });
+});
+
+/* ── MAP SEARCH ── */
+document.getElementById('q').addEventListener('input',e=>{
+  const q=e.target.value.toLowerCase().trim();
+  document.querySelectorAll('#legend .item').forEach(it=>{
+    it.classList.toggle('hidden',!!(q && !it.dataset.txt.includes(q)));
+  });
+});
+
+/* ── DIRECTORY TAB ── */
+function buildDir(){
+  const wrap = document.getElementById('dir-content');
+  ORDER.forEach(r=>{
+    const sites = DATA.map((d,i)=>({d,i})).filter(x=>x.d.region===r);
+    const sec = document.createElement('div'); sec.className='dir-region'; sec.dataset.region=r;
+    const col=COLORS[r];
+    sec.innerHTML=`
+      <div class="dir-region-head">
+        <div class="dir-region-dot" style="background:${col}"></div>
+        <div class="dir-region-title">${r}</div>
+        <div class="dir-region-cnt">${sites.length} site${sites.length!==1?'s':''}</div>
+      </div>
+      <table class="dir-table">
+        <thead><tr><th>#</th><th>Site name</th><th>Address</th><th>County</th><th>Postcode</th></tr></thead>
+        <tbody>${sites.map(({d,i})=>`
+          <tr class="dir-row" data-txt="${(d.name+' '+d.county+' '+d.postcode+' '+r).toLowerCase()}">
+            <td style="color:#889;font-family:'Courier New',Consolas,monospace;font-size:11px;width:30px">${i+1}</td>
+            <td>${d.name}</td>
+            <td>${d.address}</td>
+            <td>${d.county}</td>
+            <td><span class="pc-badge">${d.postcode}</span></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+    wrap.appendChild(sec);
+  });
+}
+buildDir();
+
+function filterDir(q){
+  q=q.toLowerCase().trim();
+  let vis=0;
+  document.querySelectorAll('.dir-row').forEach(r=>{
+    const show=!q||r.dataset.txt.includes(q);
+    r.style.display=show?'':'none';
+    if(show)vis++;
+  });
+  /* hide empty region sections */
+  document.querySelectorAll('.dir-region').forEach(sec=>{
+    const anyVis=[...sec.querySelectorAll('.dir-row')].some(r=>r.style.display!=='none');
+    sec.style.display=anyVis?'':'none';
+  });
+  document.getElementById('dir-stats').textContent=q
+    ? `Showing ${vis} of 45 sites`
+    : 'Showing all 45 sites across 11 regions';
+}
+
+/* ── TAB SWITCHING ── */
+function switchTab(tab){
+  ['map','dir'].forEach(t=>{
+    document.getElementById('panel-'+t).classList.remove('active');
+    document.getElementById('nav-'+t).classList.remove('active');
+  });
+  document.getElementById('panel-'+tab).classList.add('active');
+  document.getElementById('nav-'+tab).classList.add('active');
+  if(tab==='map') setTimeout(()=>map.invalidateSize(),50);
+}
+</script>
+</body>
+</html>
