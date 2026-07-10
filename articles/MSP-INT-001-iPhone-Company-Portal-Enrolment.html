@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enrol Your Personal iPhone – Intune Company Portal</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background: #f7f9fc;
+  }
+
+  /* NAV */
+  .sticky-nav {
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  }
+
+  .sticky-nav-inner {
+    padding: 0 40px;
+    display: flex;
+    align-items: stretch;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .sticky-nav-inner::-webkit-scrollbar { display: none; }
+
+  .nav-link {
+    padding: 0 14px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #888;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+    border-radius: 0;
+    position: relative;
+  }
+
+  .nav-link:hover {
+    color: #1a3a8f;
+    background: rgba(37,87,183,0.06);
+    border-bottom-color: #2557b7;
+  }
+
+  .nav-link:active {
+    background: rgba(37,87,183,0.12);
+  }
+
+  .nav-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .num-blue  { background: rgba(37,87,183,0.12); color: #2557b7; }
+  .num-green { background: rgba(0,122,61,0.12);  color: #007a3d; }
+  .num-lime  { background: rgba(194,224,0,0.2);  color: #6b8500; }
+
+  /* PAGE BODY */
+  .page-body { padding: 44px 40px 72px; }
+
+  /* OVERVIEW CARD */
+  .overview-card {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
+    border-radius: 12px;
+    padding: 30px 34px;
+    margin-bottom: 20px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .overview-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(194,224,0,0.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .card-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.38);
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .overview-card p {
+    color: rgba(255,255,255,0.8);
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .pill-row { display: flex; gap: 8px; flex-wrap: wrap; position: relative; margin-top: 18px; }
+
+  .pill {
+    padding: 4px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  /* SECTION HEADING */
+  .section-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .step-badge {
+    flex-shrink: 0;
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 20px;
+    color: white;
+  }
+
+  .badge-blue  { background: #2557b7; }
+  .badge-green { background: #007a3d; }
+  .badge-lime  { background: #8aaa00; }
+
+  .step-meta {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 4px;
+  }
+
+  .step-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 21px;
+    font-weight: 400;
+    color: #1a1a1a;
+    line-height: 1.2;
+  }
+
+  /* CONTENT CARD */
+  .content-card {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+    padding: 22px 26px 26px;
+  }
+
+  /* STEPS */
+  .steps { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #f7f9fc;
+    border-radius: 8px;
+    padding: 11px 14px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .step-num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: rgba(37,87,183,0.1);
+    color: #2557b7;
+    border: 1px solid rgba(37,87,183,0.2);
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step p { font-size: 13px; padding-top: 3px; }
+
+  code.inline-code {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 12px;
+    background: rgba(37,87,183,0.07);
+    border: 1px solid rgba(37,87,183,0.15);
+    padding: 1px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  /* AMBER ALERT */
+  .lost-alert {
+    border-radius: 8px;
+    padding: 13px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    margin-bottom: 44px;
+  }
+
+  .lost-alert.in-card { margin-top: 20px; margin-bottom: 0; }
+  .lost-alert-icon { font-size: 15px; flex-shrink: 0; margin-top: 2px; color: #d97706; }
+  .lost-alert strong { display: block; font-size: 13px; font-weight: 600; margin-bottom: 3px; color: #92400e; }
+  .lost-alert p { font-size: 13px; color: #78350f; line-height: 1.6; }
+
+  /* CALLOUT */
+  .callout {
+    padding: 13px 16px;
+    margin-top: 14px;
+    border-radius: 8px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .callout-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .callout-title { font-weight: 600; font-size: 13px; margin-bottom: 3px; }
+  .callout-body  { font-size: 13px; line-height: 1.6; }
+  .callout-info  { background: #eff6ff; border: 1px solid #bfdbfe; }
+  .callout-info .callout-icon  { color: #2563eb; }
+  .callout-info .callout-title { color: #1e40af; }
+  .callout-info .callout-body  { color: #1e3a5f; }
+
+  /* PRIVACY BANNER */
+  .app-trust-banner {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 60%, #1e4aa0 100%);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 48px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(30,74,160,0.25);
+  }
+
+  .app-trust-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(194,224,0,0.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .app-trust-banner h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 21px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .app-trust-banner > p {
+    color: rgba(255,255,255,0.78);
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 22px;
+    position: relative;
+  }
+
+  .trust-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  .trust-card {
+    border-radius: 8px;
+    padding: 16px 18px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+
+  .trust-card-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .trust-card.pro .trust-card-label { color: #c2e000; }
+  .trust-card.con .trust-card-label { color: rgba(255,160,120,0.9); }
+
+  .trust-card-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 14px;
+    color: white;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+
+  .trust-card ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+  .trust-card ul li {
+    font-size: 13px;
+    color: rgba(255,255,255,0.68);
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    line-height: 1.5;
+  }
+
+  .trust-card ul li::before { font-weight: 700; font-size: 11px; flex-shrink: 0; margin-top: 1px; }
+  .trust-card.pro ul li::before { content: '✓'; color: #c2e000; }
+  .trust-card.con ul li::before { content: '!'; color: rgba(255,140,100,0.9); }
+
+  .privacy-callout {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 18px 20px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    position: relative;
+  }
+
+  .privacy-callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+
+  .privacy-callout-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 15px;
+    color: white;
+    margin-bottom: 8px;
+  }
+
+  .privacy-callout p { font-size: 13px; color: rgba(255,255,255,0.68); line-height: 1.65; }
+  .privacy-callout p + p { margin-top: 8px; }
+
+  /* DIVIDER */
+  .divider { margin: 34px 0; display: flex; align-items: center; gap: 14px; }
+  .divider-line { flex: 1; height: 1px; background: rgba(0,0,0,0.1); }
+  .divider-arrow { color: #bbb; font-size: 14px; }
+
+  /* REQUIREMENTS TABLE */
+  .id-table-wrap {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+
+  .id-table-intro { padding: 16px 22px 0; }
+  .id-table-intro p { font-size: 14px; line-height: 1.6; padding-bottom: 14px; border-bottom: 1px solid rgba(0,0,0,0.08); }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    background: #f7f9fc;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #888;
+    padding: 10px 22px;
+    text-align: left;
+    border-bottom: 2px solid rgba(0,0,0,0.08);
+  }
+
+  tbody tr { border-bottom: 1px solid rgba(0,0,0,0.07); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 14px 22px; font-size: 14px; vertical-align: middle; line-height: 1.5; }
+
+  .req-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+    background: rgba(37,87,183,0.1);
+    color: #2557b7;
+  }
+
+  /* FAQ / TROUBLESHOOTING */
+  .faq-wrap {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+
+  .faq-header {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
+    padding: 18px 26px;
+  }
+
+  .faq-header h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 2px;
+  }
+
+  .faq-header p {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.42);
+    letter-spacing: 0.06em;
+  }
+
+  details { border-bottom: 1px solid rgba(0,0,0,0.08); }
+  details:last-child { border-bottom: none; }
+
+  summary {
+    padding: 15px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    list-style: none;
+    user-select: none;
+  }
+
+  summary::-webkit-details-marker { display: none; }
+  summary:hover { background: #f7f9fc; }
+  summary::after { content: '+'; font-size: 20px; font-weight: 300; color: #bbb; flex-shrink: 0; }
+  details[open] summary::after { content: '×'; color: #2557b7; }
+  details[open] summary { color: #2557b7; background: #f7f9fc; }
+
+  .faq-answer {
+    padding: 4px 22px 16px;
+    font-size: 14px;
+    line-height: 1.7;
+    background: #f7f9fc;
+    color: #333;
+  }
+
+  /* HELP SECTION */
+  .help-section {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 60%, #1e4aa0 100%);
+    border-radius: 12px;
+    padding: 32px 34px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 44px;
+    color: white;
+    box-shadow: 0 4px 22px rgba(30,74,160,0.3);
+  }
+
+  .help-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 80% 20%, rgba(194,224,0,0.1) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .help-section h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 21px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 5px;
+    position: relative;
+  }
+
+  .help-sub {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 22px;
+    position: relative;
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    position: relative;
+    margin-bottom: 12px;
+  }
+
+  .contact-card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 14px 16px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .contact-card:hover { background: rgba(255,255,255,0.12); border-color: rgba(194,224,0,0.35); }
+
+  .contact-icon-wrap {
+    width: 38px; height: 38px;
+    border-radius: 8px;
+    background: rgba(194,224,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+
+  .contact-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #c2e000;
+    margin-bottom: 3px;
+  }
+
+  .contact-value { font-size: 13px; font-weight: 600; color: white; }
+
+  .rmm-note {
+    background: rgba(194,224,0,0.08);
+    border: 1px solid rgba(194,224,0,0.2);
+    border-radius: 8px;
+    padding: 13px 16px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.72);
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    position: relative;
+  }
+
+  .rmm-note strong { color: #c2e000; }
+
+  /* COMPLETION BANNER */
+  .completion-banner {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
+    border-radius: 12px;
+    padding: 36px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 4px 22px rgba(30,74,160,0.28);
+  }
+
+  .completion-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(194,224,0,0.18) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .completion-inner { position: relative; z-index: 1; }
+
+  .completion-icon {
+    width: 52px; height: 52px;
+    background: rgba(194,224,0,0.2);
+    border: 2px solid rgba(194,224,0,0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    font-size: 22px;
+    color: #c2e000;
+  }
+
+  .completion-eyebrow {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(194,224,0,0.75);
+    margin-bottom: 10px;
+  }
+
+  .completion-banner h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 23px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 12px;
+  }
+
+  .completion-banner p { font-size: 14px; color: rgba(255,255,255,0.6); max-width: 460px; margin: 0 auto 20px; line-height: 1.7; }
+
+  .completion-pills { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+
+  .cpill-lime {
+    background: rgba(194,224,0,0.15);
+    border: 1px solid rgba(194,224,0,0.35);
+    border-radius: 20px;
+    padding: 4px 13px;
+    font-size: 12px;
+    color: #c2e000;
+    font-weight: 500;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 640px) {
+    .sticky-nav-inner { padding: 0 14px; }
+    .page-body       { padding: 28px 14px 56px; }
+
+    .overview-card,
+    .app-trust-banner,
+    .help-section,
+    .completion-banner { padding: 20px 16px; }
+
+    .content-card { padding: 16px 16px 20px; }
+
+    .trust-grid,
+    .contact-grid { grid-template-columns: 1fr; }
+
+    .privacy-callout { flex-direction: column; gap: 10px; }
+
+    summary   { padding: 13px 16px; }
+    .faq-answer { padding: 4px 16px 14px; }
+    .faq-header { padding: 14px 18px; }
+
+    .completion-pills { flex-direction: column; align-items: center; }
+
+    thead th,
+    tbody td { padding: 10px 14px; }
+  }
+
+  @media (max-width: 380px) {
+    .step-title { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sticky-nav">
+  <div class="sticky-nav-inner">
+    <a class="nav-link" href="#need"><span class="nav-num num-lime">?</span> What You'll Need</a>
+    <a class="nav-link" href="#step1"><span class="nav-num num-blue">1</span> Install App</a>
+    <a class="nav-link" href="#step2"><span class="nav-num num-green">2</span> Sign In</a>
+    <a class="nav-link" href="#step3"><span class="nav-num num-blue">3</span> Device Setup</a>
+    <a class="nav-link" href="#step4"><span class="nav-num num-green">4</span> Profile</a>
+    <a class="nav-link" href="#step5"><span class="nav-num num-blue">5</span> Finish Setup</a>
+    <a class="nav-link" href="#step6"><span class="nav-num num-green">6</span> Work Apps</a>
+    <a class="nav-link" href="#privacy"><span class="nav-num num-lime">✓</span> Your Privacy</a>
+    <a class="nav-link" href="#troubleshoot"><span class="nav-num num-blue">!</span> Troubleshooting</a>
+  </div>
+</nav>
+
+<main class="page-body">
+
+  <!-- OVERVIEW -->
+  <div class="overview-card">
+    <div class="card-label">Article Overview</div>
+    <p>This guide walks you through setting up your <strong>personal iPhone</strong> so you can securely access your work apps and data &mdash; Outlook, Teams, OneDrive and more &mdash; using the <strong>Intune Company Portal</strong> app.</p>
+    <p>Enrolment registers your device with your organisation&rsquo;s Microsoft 365 environment and typically takes <strong>10&ndash;15 minutes</strong>. Worried about what work can see on a personal phone? The <a href="#privacy" style="color:#c2e000;text-decoration:none;">Your Privacy</a> section explains exactly what your organisation can and cannot see.</p>
+    <div class="pill-row">
+      <div class="pill"><span class="dot" style="background:#c2e000;"></span> Takes 10&ndash;15 minutes</div>
+      <div class="pill"><span class="dot" style="background:#4d8cff;"></span> Personal iPhone (BYOD)</div>
+      <div class="pill"><span class="dot" style="background:#4ade80;"></span> iOS 14 or later</div>
+      <div class="pill"><span class="dot" style="background:rgba(255,255,255,0.4);"></span> Outlook &middot; Teams &middot; OneDrive</div>
+    </div>
+  </div>
+
+  <div class="lost-alert">
+    <div class="lost-alert-icon">&#9888;</div>
+    <div>
+      <strong>Before you begin</strong>
+      <p>Stay connected to Wi-Fi for the whole process and don&rsquo;t pause for more than a few minutes between steps &mdash; the setup can time out and you&rsquo;ll need to start again.</p>
+    </div>
+  </div>
+
+  <!-- WHAT YOU'LL NEED -->
+  <div id="need">
+    <div class="section-heading">
+      <div class="step-badge badge-lime">?</div>
+      <div>
+        <div class="step-meta">Preparation</div>
+        <div class="step-title">What You&rsquo;ll Need</div>
+      </div>
+    </div>
+
+    <div class="id-table-wrap">
+      <div class="id-table-intro">
+        <p>Have these four things ready before you start &mdash; it keeps the whole process smooth and avoids the setup timing out partway through.</p>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Requirement</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="req-pill">📱 iPhone</span></td>
+            <td>Running iOS 14 or later, connected to Wi-Fi</td>
+          </tr>
+          <tr>
+            <td><span class="req-pill">💼 Work account</span></td>
+            <td>Your work email address and password (e.g. <code class="inline-code">j.smith@yourcompany.com</code>)</td>
+          </tr>
+          <tr>
+            <td><span class="req-pill">🍎 Apple ID</span></td>
+            <td>Signed in to the App Store so you can download apps</td>
+          </tr>
+          <tr>
+            <td><span class="req-pill">🔐 MFA access</span></td>
+            <td>Access to your usual sign-in approval method (Microsoft Authenticator, text message, or phone call)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 1 -->
+  <div id="step1">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">1</div>
+      <div>
+        <div class="step-meta">Step 01 of 06</div>
+        <div class="step-title">Install the Company Portal App</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>Open the <strong>App Store</strong> on your iPhone.</p></div>
+        <div class="step"><div class="step-num">2</div><p>Search for <strong>Intune Company Portal</strong> (published by Microsoft Corporation).</p></div>
+        <div class="step"><div class="step-num">3</div><p>Tap <strong>Get</strong> to download and install the app.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 2 -->
+  <div id="step2">
+    <div class="section-heading">
+      <div class="step-badge badge-green">2</div>
+      <div>
+        <div class="step-meta">Step 02 of 06</div>
+        <div class="step-title">Sign In with Your Work Account</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>Open the <strong>Company Portal</strong> app.</p></div>
+        <div class="step"><div class="step-num">2</div><p>Sign in with your <strong>work email address and password</strong>.</p></div>
+        <div class="step"><div class="step-num">3</div><p>Approve the multi-factor authentication prompt if you receive one.</p></div>
+        <div class="step"><div class="step-num">4</div><p>If asked to allow notifications, tap <strong>Allow</strong> &mdash; this is how the app tells you about anything that needs your attention later.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 3 -->
+  <div id="step3">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">3</div>
+      <div>
+        <div class="step-meta">Step 03 of 06</div>
+        <div class="step-title">Begin Device Setup</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>On the <strong>How to set up your device</strong> (or <strong>Set up access</strong>) screen, review the steps shown and tap <strong>Get started</strong> / <strong>Begin</strong>.</p></div>
+        <div class="step"><div class="step-num">2</div><p>If asked who owns the device, tap <strong>I own this device</strong>.</p></div>
+        <div class="step"><div class="step-num">3</div><p>Safari will open and prompt you to download a configuration profile. Tap <strong>Allow</strong>.</p></div>
+        <div class="step"><div class="step-num">4</div><p>When the download completes, tap <strong>Close</strong>.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 4 -->
+  <div id="step4">
+    <div class="section-heading">
+      <div class="step-badge badge-green">4</div>
+      <div>
+        <div class="step-meta">Step 04 of 06</div>
+        <div class="step-title">Install the Management Profile</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>Open the <strong>Settings</strong> app and tap <strong>Profile Downloaded</strong> near the top. If you don&rsquo;t see it, go to <strong>General</strong> &gt; <strong>VPN &amp; Device Management</strong>.</p></div>
+        <div class="step"><div class="step-num">2</div><p>Tap <strong>Management Profile</strong>, then tap <strong>Install</strong>.</p></div>
+        <div class="step"><div class="step-num">3</div><p>Enter your iPhone passcode if prompted, then tap <strong>Install</strong> again.</p></div>
+        <div class="step"><div class="step-num">4</div><p>Read the remote management notice, tap <strong>Install</strong> once more, then tap <strong>Trust</strong>.</p></div>
+        <div class="step"><div class="step-num">5</div><p>Wait for the profile to finish installing, then tap <strong>Done</strong>.</p></div>
+      </div>
+
+      <div class="lost-alert in-card">
+        <div class="lost-alert-icon">&#9888;</div>
+        <div>
+          <strong>Passcode required</strong>
+          <p>If your iPhone doesn&rsquo;t currently have a passcode set, you&rsquo;ll be asked to create one as part of enrolment. This is a security requirement for accessing work data.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 5 -->
+  <div id="step5">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">5</div>
+      <div>
+        <div class="step-meta">Step 05 of 06</div>
+        <div class="step-title">Finish in the Company Portal App</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>Return to the <strong>Company Portal</strong> app and open <strong>Notifications</strong>.</p></div>
+        <div class="step"><div class="step-num">2</div><p>Under pending requirements, tap the option to <strong>register your device</strong> if shown.</p></div>
+        <div class="step"><div class="step-num">3</div><p>Wait a few minutes while your device receives its settings. You may be prompted to install required apps such as <strong>Microsoft Authenticator</strong> &mdash; tap <strong>Install</strong> (or <strong>Manage</strong> if it&rsquo;s already installed) on each prompt.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 6 -->
+  <div id="step6">
+    <div class="section-heading">
+      <div class="step-badge badge-green">6</div>
+      <div>
+        <div class="step-meta">Step 06 of 06</div>
+        <div class="step-title">Sign In to Your Work Apps</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>Install any work apps you need &mdash; <strong>Outlook</strong>, <strong>Teams</strong>, <strong>OneDrive</strong> &mdash; from the Company Portal app or the App Store.</p></div>
+        <div class="step"><div class="step-num">2</div><p>Open an app and sign in with your <strong>work account</strong>.</p></div>
+        <div class="step"><div class="step-num">3</div><p>The first sign-in checks that your device meets your organisation&rsquo;s security requirements. If prompted, tap <strong>Check compliance</strong>, follow the instructions shown in Company Portal, then tap <strong>Retry</strong>.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPLETION BANNER -->
+  <div class="completion-banner">
+    <div class="completion-inner">
+      <div class="completion-icon">&#10003;</div>
+      <div class="completion-eyebrow">Enrolment Complete</div>
+      <h2>Your iPhone is set up for work</h2>
+      <p>Once you can open Outlook or Teams and see your work email and chats, your iPhone is fully set up. Your device will stay compliant automatically &mdash; just install iOS updates when prompted.</p>
+      <div class="completion-pills">
+        <div class="cpill-lime">&#10003; Outlook &amp; Teams signed in</div>
+        <div class="cpill-lime">&#10003; Device registered &amp; compliant</div>
+        <div class="cpill-lime">&#10003; Stays compliant automatically</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRIVACY -->
+  <div id="privacy">
+    <div class="section-heading">
+      <div class="step-badge badge-lime">✓</div>
+      <div>
+        <div class="step-meta">Worth Knowing</div>
+        <div class="step-title">Your Privacy &mdash; What Your Organisation Can and Can&rsquo;t See</div>
+      </div>
+    </div>
+
+    <div class="app-trust-banner">
+      <div class="card-label">Personal Device, Personal Data</div>
+      <h2>Enrolling a personal device is a common concern</h2>
+      <p>Enrolment lets your organisation apply security settings and remove <em>work</em> data if needed &mdash; it does not give access to your personal life.</p>
+
+      <div class="trust-grid">
+        <div class="trust-card pro">
+          <div class="trust-card-label">Your Organisation CANNOT See</div>
+          <div class="trust-card-title">Your personal life stays private</div>
+          <ul>
+            <li>Personal texts, emails, photos or videos</li>
+            <li>Browsing history or app usage</li>
+            <li>Your location</li>
+            <li>Passwords, contacts or calendar (personal)</li>
+          </ul>
+        </div>
+        <div class="trust-card con">
+          <div class="trust-card-label">Your Organisation CAN See</div>
+          <div class="trust-card-title">Only what&rsquo;s needed for security</div>
+          <ul>
+            <li>Device model, name and serial number</li>
+            <li>Operating system version and compliance status</li>
+            <li>Names of installed apps (not their content)</li>
+            <li>Work email address and work data on the device</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="privacy-callout">
+        <div class="privacy-callout-icon">🔒</div>
+        <div>
+          <div class="privacy-callout-title">If your device is lost, or you leave the organisation</div>
+          <p>Only the <strong style="color:rgba(255,255,255,0.9);">work profile and work data</strong> are removed &mdash; your personal apps, photos and files are untouched.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TROUBLESHOOTING -->
+  <div id="troubleshoot">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">!</div>
+      <div>
+        <div class="step-meta">If Something Goes Wrong</div>
+        <div class="step-title">Troubleshooting</div>
+      </div>
+    </div>
+
+    <div class="faq-wrap">
+      <div class="faq-header">
+        <h2>Common Problems &amp; Fixes</h2>
+        <p>Click any problem to expand the fix</p>
+      </div>
+      <details>
+        <summary>Sign-in fails in Company Portal</summary>
+        <div class="faq-answer">Double-check you&rsquo;re using your <strong>work</strong> email and password, not a personal Microsoft account. If your password has expired, reset it before enrolling.</div>
+      </details>
+      <details>
+        <summary>&ldquo;Profile Downloaded&rdquo; doesn&rsquo;t appear in Settings</summary>
+        <div class="faq-answer">Go to <strong>Settings</strong> &gt; <strong>General</strong> &gt; <strong>VPN &amp; Device Management</strong>. If nothing is there, repeat Step 3 &mdash; the profile download may not have completed.</div>
+      </details>
+      <details>
+        <summary>Setup closed or timed out partway through</summary>
+        <div class="faq-answer">Reopen the Company Portal app and sign in again &mdash; it resumes from where you left off.</div>
+      </details>
+      <details>
+        <summary>Outlook or Teams says the device isn&rsquo;t compliant</summary>
+        <div class="faq-answer">Open Company Portal &gt; <strong>Notifications</strong> and complete any pending requirements (e.g. set a passcode, update iOS). Then tap <strong>Retry</strong> in the app. Allow a few minutes for the status to refresh.</div>
+      </details>
+      <details>
+        <summary>Error about Microsoft Authenticator when signing in</summary>
+        <div class="faq-answer">Authenticator must finish installing before work apps will sign in. Wait a few minutes after enrolment, then try again.</div>
+      </details>
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="help-section">
+    <h2>Need help?</h2>
+    <p class="help-sub">IT Service Management &middot; Active8 Managed Technologies</p>
+    <div class="rmm-note">
+      <div>&#8505;</div>
+      <div>If you get stuck at any point, contact IT Support with your <strong>name</strong>, <strong>work email address</strong> and the <strong>step number</strong> you&rsquo;re stuck on, along with a screenshot of any error message if possible.</div>
+    </div>
+    <div class="contact-grid" style="margin-top:20px;">
+      <a href="mailto:ITSupport@a8mt.co.uk" class="contact-card">
+        <div class="contact-icon-wrap">📧</div>
+        <div>
+          <div class="contact-label">Email</div>
+          <div class="contact-value">ITSupport@a8mt.co.uk</div>
+        </div>
+      </a>
+      <a href="tel:03339997355" class="contact-card">
+        <div class="contact-icon-wrap">📞</div>
+        <div>
+          <div class="contact-label">Phone</div>
+          <div class="contact-value">0333 999 7355</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+</main>
+
+<footer style="background:linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);border-top:1px solid rgba(194,224,0,0.2);padding:18px 40px;text-align:center;">
+  <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">Prepared by <span style="color:rgba(255,255,255,0.85);">Active8 Managed Technologies Limited</span> &middot; IT Service Management</div>
+  <div style="font-family:'Courier New',Consolas,monospace;font-size:10px;color:rgba(255,255,255,0.32);margin-top:5px;">v1.0 &middot; July 2026 &middot; This article is maintained by the Active 8 IT team.</div>
+</footer>
+
+<script>
+(function(){
+  function sendHeight(){
+    var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+    window.parent.postMessage({type:'a8-iframe-resize', height:h}, '*');
+    try { if(window.frameElement) window.frameElement.style.height = (h+20)+'px'; } catch(e){}
+  }
+  // Fire immediately, on load, on resize, and via ResizeObserver
+  sendHeight();
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+  if(window.ResizeObserver){ new ResizeObserver(sendHeight).observe(document.body); }
+  // Retry every 300ms for 12 seconds to survive any parent-side load race
+  var attempts = 0;
+  var timer = setInterval(function(){
+    sendHeight();
+    if(++attempts >= 40) clearInterval(timer);
+  }, 300);
+})();
+</script>
+
+</body>
+</html>
