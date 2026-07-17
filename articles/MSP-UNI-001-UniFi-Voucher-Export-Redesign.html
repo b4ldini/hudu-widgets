@@ -691,6 +691,7 @@
     <a class="nav-link" href="#step3"><span class="nav-num num-blue">3</span> Load the Tool</a>
     <a class="nav-link" href="#step4"><span class="nav-num num-green">4</span> Review Codes</a>
     <a class="nav-link" href="#step5"><span class="nav-num num-blue">5</span> Generate &amp; Send</a>
+    <a class="nav-link" href="#tool"><span class="nav-num num-lime">🛠</span> Use the Tool</a>
     <a class="nav-link" href="#why"><span class="nav-num num-lime">✓</span> Why This Tool</a>
     <a class="nav-link" href="#troubleshoot"><span class="nav-num num-blue">!</span> Troubleshooting</a>
   </div>
@@ -701,7 +702,7 @@
   <!-- OVERVIEW -->
   <div class="overview-card">
     <div class="card-label">Article Overview</div>
-    <p>This guide shows you how to take a batch of hotspot vouchers from the <strong>UniFi Network portal</strong> and turn them into a <strong>clean, print-ready voucher sheet</strong> you can send straight to the customer &mdash; using the <strong>Wi-Fi Voucher Redesigner</strong>, which is embedded right inside this article at <a href="#step3" style="color:#c2e000;text-decoration:none;">Step 3</a>.</p>
+    <p>This guide shows you how to take a batch of hotspot vouchers from the <strong>UniFi Network portal</strong> and turn them into a <strong>clean, print-ready voucher sheet</strong> you can send straight to the customer &mdash; using the <strong>Wi-Fi Voucher Redesigner</strong>, which is embedded <a href="#tool" style="color:#c2e000;text-decoration:none;">in the middle of this article</a> &mdash; read the steps first, then work in the tool without leaving the page.</p>
     <p>The raw UniFi export is not customer-ready: the layout is plain, and its text layer is broken in a way that <strong>silently corrupts voucher codes</strong> if anyone copies them. The Redesigner repairs and verifies every code, then produces branded A4 voucher cards with cut lines. The <a href="#why" style="color:#c2e000;text-decoration:none;">Why This Tool</a> section explains the problem in detail.</p>
     <div class="pill-row">
       <div class="pill"><span class="dot" style="background:#c2e000;"></span> Takes 5&ndash;10 minutes</div>
@@ -747,7 +748,7 @@
           </tr>
           <tr>
             <td><span class="req-pill">🛠 Voucher Redesigner</span></td>
-            <td>Embedded in this article at <a href="#step3" style="color:#2557b7;">Step 3</a> &mdash; or open it full-screen at <a href="https://b4ldini.github.io/hudu-widgets/tools/voucher-tool.html" target="_blank" rel="noopener" style="color:#2557b7;">b4ldini.github.io/hudu-widgets/tools/voucher-tool.html</a></td>
+            <td>Embedded <a href="#tool" style="color:#2557b7;">in the middle of this article</a> &mdash; or open it full-screen at <a href="https://b4ldini.github.io/hudu-widgets/tools/voucher-tool.html" target="_blank" rel="noopener" style="color:#2557b7;">b4ldini.github.io/hudu-widgets/tools/voucher-tool.html</a></td>
           </tr>
           <tr>
             <td><span class="req-pill">💻 Browser + internet</span></td>
@@ -835,7 +836,7 @@
 
     <div class="content-card">
       <div class="steps">
-        <div class="step"><div class="step-num">1</div><p>Use the <strong>Wi-Fi Voucher Redesigner</strong> embedded directly below &mdash; or, if you&rsquo;d like more room, <a href="https://b4ldini.github.io/hudu-widgets/tools/voucher-tool.html" target="_blank" rel="noopener" style="color:#2557b7;">open it in its own tab</a>.</p></div>
+        <div class="step"><div class="step-num">1</div><p>Scroll down to the <a href="#tool" style="color:#2557b7;"><strong>Wi-Fi Voucher Redesigner</strong> embedded in the middle of this article</a> &mdash; or, if you&rsquo;d like more room, <a href="https://b4ldini.github.io/hudu-widgets/tools/voucher-tool.html" target="_blank" rel="noopener" style="color:#2557b7;">open it in its own tab</a>.</p></div>
         <div class="step"><div class="step-num">2</div><p>Drag the exported PDF onto the box labelled <strong>&ldquo;Drop the voucher export here&rdquo;</strong>, or click the box to browse for it. You can drop several files at once &mdash; results are merged and de-duplicated.</p></div>
         <div class="step"><div class="step-num">3</div><p>Wait for the progress bar to finish. The tool reads the PDF&rsquo;s text layer <em>and</em> re-reads each code from the page image, then cross-checks the two &mdash; this is what makes the codes trustworthy.</p></div>
       </div>
@@ -847,16 +848,6 @@
           <div class="callout-body">The tool also accepts photos or screenshots of vouchers (PNG/JPG) and plain code lists (CSV/TXT). Codes from images can&rsquo;t be independently verified, so the tool flags them &mdash; prefer the PDF export whenever you can.</div>
         </div>
       </div>
-    </div>
-
-    <!-- EMBEDDED TOOL -->
-    <div class="content-card" style="padding:0;overflow:hidden;">
-      <iframe
-        src="../tools/voucher-tool.html"
-        style="width:100%;height:820px;border:none;display:block;background:#fff;"
-        title="Wi-Fi Voucher Redesigner"
-        loading="lazy"
-      ></iframe>
     </div>
   </div>
 
@@ -909,6 +900,28 @@
         <div class="step"><div class="step-num">3</div><p>Click <strong>Download redesigned PDF</strong>. You get an A4 sheet of clean voucher cards &mdash; 24 per page, each with the Wi-Fi name, code, validity and speeds, with dashed cut lines between cards.</p></div>
         <div class="step"><div class="step-num">4</div><p>Open the PDF and give it a quick visual once-over, then <strong>email it to the customer</strong> (or print and hand over). They can cut the sheet into individual vouchers for their guests.</p></div>
       </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- THE TOOL -->
+  <div id="tool">
+    <div class="section-heading">
+      <div class="step-badge badge-lime">🛠</div>
+      <div>
+        <div class="step-meta">Work Here</div>
+        <div class="step-title">The Wi-Fi Voucher Redesigner</div>
+      </div>
+    </div>
+
+    <div class="content-card" style="padding:0;overflow:hidden;">
+      <iframe
+        src="../tools/voucher-tool.html"
+        style="width:100%;height:820px;border:none;display:block;background:#fff;"
+        title="Wi-Fi Voucher Redesigner"
+        loading="lazy"
+      ></iframe>
     </div>
   </div>
 
