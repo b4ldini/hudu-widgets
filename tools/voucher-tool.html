@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wi-Fi Voucher Redesigner</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.1.0/tesseract.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --accent: #1B4F8A;
+    --accent-light: #EAF1F8;
+    --grey: #6B7280;
+    --dark: #1F2937;
+    --border: #C9D4E0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0; background: #F3F5F9; color: var(--dark);
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 32px 20px 64px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--grey); font-size: 14px; margin-bottom: 24px; }
+  .card { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .card h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .05em; color: var(--accent); margin: 0 0 12px; }
+  #drop {
+    border: 2px dashed var(--border); border-radius: 10px; padding: 36px 20px;
+    text-align: center; color: var(--grey); cursor: pointer; transition: all .15s;
+  }
+  #drop.hover, #drop:hover { border-color: var(--accent); background: var(--accent-light); }
+  #drop strong { color: var(--dark); }
+  input[type=file] { display: none; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .field { flex: 1; min-width: 140px; }
+  label { display: block; font-size: 12px; color: var(--grey); margin-bottom: 4px; }
+  input[type=text] {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px;
+    font-size: 14px; font-family: inherit;
+  }
+  input[type=text]:focus { outline: none; border-color: var(--accent); }
+  textarea {
+    width: 100%; height: 180px; padding: 10px; border: 1px solid var(--border); border-radius: 6px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 13px; resize: vertical;
+  }
+  button {
+    background: var(--accent); color: #fff; border: none; border-radius: 8px;
+    padding: 12px 22px; font-size: 15px; font-weight: 600; cursor: pointer;
+  }
+  button:disabled { background: #A9B7C6; cursor: not-allowed; }
+  button.secondary { background: #fff; color: var(--accent); border: 1px solid var(--accent); }
+  #progressWrap { display: none; margin-top: 14px; }
+  .bar { height: 8px; background: var(--accent-light); border-radius: 4px; overflow: hidden; }
+  .bar > div { height: 100%; width: 0%; background: var(--accent); transition: width .2s; }
+  #status { font-size: 13px; color: var(--grey); margin-top: 6px; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; margin-left: 8px; }
+  .badge.ok { background: #E6F4EA; color: #1E7E34; }
+  .badge.warn { background: #FDF3E1; color: #B45309; }
+  #results, #genRow { display: none; }
+  .hint { font-size: 12px; color: var(--grey); margin-top: 6px; }
+  #warnBox { display: none; background: #FDF3E1; border: 1px solid #F0D9A8; color: #7A5210;
+    border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Wi-Fi Voucher Redesigner</h1>
+  <div class="sub">Drop a voucher export &rarr; get clean, print-ready voucher cards (A4, 24 per page, cut lines).</div>
+
+  <div class="card">
+    <h2>1 · Upload export</h2>
+    <div id="drop">
+      <strong>Drop the voucher export here</strong> or click to browse<br>
+      <span style="font-size:12px">PDF exports, photos/screenshots, or CSV/TXT code lists. Everything runs in your browser — nothing is uploaded. Broken UniFi text layers are repaired by per-code OCR with dual-source verification.</span>
+    </div>
+    <input type="file" id="file" multiple
+      accept=".pdf,.png,.jpg,.jpeg,.webp,.bmp,.gif,.csv,.txt,.tsv,application/pdf,image/*,text/plain,text/csv">
+    <div id="progressWrap">
+      <div class="bar"><div id="barFill"></div></div>
+      <div id="status">Starting…</div>
+    </div>
+  </div>
+
+  <div class="card" id="results">
+    <h2>2 · Review codes <span id="checkBadge" class="badge"></span></h2>
+    <div id="warnBox"></div>
+    <textarea id="codes" spellcheck="false"></textarea>
+    <div class="hint">One code per line. Edit freely — every non-empty line becomes a voucher card.</div>
+  </div>
+
+  <div class="card" id="genRow">
+    <h2>3 · Voucher details</h2>
+    <div class="row">
+      <div class="field"><label>Network name (SSID)</label><input type="text" id="ssid" value="AAF-GUEST"></div>
+      <div class="field"><label>Validity</label><input type="text" id="valid" value="Valid 8h"></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div class="field"><label>Download</label><input type="text" id="dl" value="Download 20 Mbps"></div>
+      <div class="field"><label>Upload</label><input type="text" id="ul" value="Upload 5 Mbps"></div>
+      <div class="field"><label>Data</label><input type="text" id="data" value="Unlimited data"></div>
+    </div>
+    <div style="margin-top:18px; display:flex; gap:10px; align-items:center">
+      <button id="gen">Download redesigned PDF</button>
+      <span class="hint" id="count"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+/*LIB-START*/
+// VoucherLib — extraction pipeline, environment-agnostic (browser + Node test harness).
+// All I/O goes through `deps`: { createCanvas(w,h), ocr(canvas, psm) -> text, onProgress(pct,msg) }.
+//
+// Design (see voucher-tool-knowledge.md): UniFi exports have a broken text layer —
+// zero and dash glyphs map to Private Use Area chars, so text extraction silently
+// corrupts codes. But the text layer is still authoritative for HOW MANY vouchers
+// exist, WHERE each one is on the page, and every NON-ZERO digit of each code in
+// order. So each code is OCR'd individually in its own cropped region (full-page
+// OCR of a multi-column grid is fragile — codes concatenate and one bad glyph
+// loses a voucher), and accepted only when OCR and text layer agree.
+const VoucherLib = (() => {
+  const PUA = /[\uE000-\uF8FF]/;          // detect broken glyph mappings
+  const PUA_G = /[\uE000-\uF8FF]/g;
+  const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+  const MIN_CODE_DIGITS = 6;              // a 10-digit code with ≤4 zeros still qualifies
+
+  const stripZeros = s => s.replace(/0/g, "");
+  const normDashes = s => s.replace(/[–—]/g, "-");
+
+  function modeOf(arr) {
+    if (!arr.length) return null;
+    const counts = {};
+    for (const v of arr) counts[v] = (counts[v] || 0) + 1;
+    return +Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+  }
+
+  // Group text items into visual lines (y ± 2), then split lines into clusters
+  // at horizontal gaps. Cluster = one contiguous piece of text with a bbox.
+  function clusterPage(items) {
+    const rows = [];
+    for (const it of items) {
+      if (!it.str) continue;
+      const y = it.transform[5];
+      let row = rows.find(r => Math.abs(r.y - y) <= 2);
+      if (!row) { row = { y, items: [] }; rows.push(row); }
+      row.items.push(it);
+    }
+    const clusters = [];
+    for (const row of rows) {
+      const its = row.items.sort((a, b) => a.transform[4] - b.transform[4]);
+      let cur = null;
+      for (const it of its) {
+        const x = it.transform[4];
+        const h = it.height || Math.hypot(it.transform[1], it.transform[3]) || 10;
+        if (cur && x - cur.x1 > Math.max(10, 1.2 * Math.max(cur.h, h))) { clusters.push(cur); cur = null; }
+        if (!cur) cur = { str: "", x0: x, x1: x, yBase: row.y, h: 0 };
+        cur.str += it.str;
+        cur.x1 = Math.max(cur.x1, x + (it.width || 0));
+        cur.h = Math.max(cur.h, h);
+      }
+      if (cur) clusters.push(cur);
+    }
+    return clusters;
+  }
+
+  // Code entries = clusters that are purely digits/dashes (after stripping PUA
+  // chars and spaces). `run` is the digit sequence as the text layer sees it —
+  // in broken exports that means every digit EXCEPT zeros.
+  function findEntries(clusters, pageNo) {
+    const entries = [];
+    for (const c of clusters) {
+      const hasPUA = PUA.test(c.str);
+      const compact = normDashes(c.str.replace(PUA_G, "")).replace(/\s+/g, "");
+      if (!compact || !/^[\d-]+$/.test(compact)) continue;
+      if (ISO_DATE.test(compact)) continue;
+      const run = compact.replace(/\D/g, "");
+      if (run.length < MIN_CODE_DIGITS || run.length > 20) continue;
+      entries.push({ run, text: compact, hasPUA, page: pageNo, cluster: c, code: null, dashAt: null, status: "pending" });
+    }
+    return entries;
+  }
+
+  // Codes embedded in mixed text ("Code: 12345-67890") — only trustable when
+  // the text layer is healthy, so only used in text mode.
+  function findEmbeddedCodes(clusters) {
+    const out = [];
+    for (const c of clusters) {
+      const clean = normDashes(c.str.replace(PUA_G, ""));
+      if (/^[\d\s-]+$/.test(clean.trim())) continue; // pure digit clusters handled as entries
+      for (const m of clean.matchAll(/(?<![\d-])\d{3,6}-\d{3,6}(?![\d-])/g)) out.push(m[0]);
+    }
+    return out;
+  }
+
+  // All substrings of `digits` whose zero-stripped form equals the text run —
+  // i.e. every way the OCR read could contain this code (extra chars at the
+  // edges are OCR noise from crop bleed).
+  function windowsOf(digits, run) {
+    const target = stripZeros(run);
+    if (!target) return [];
+    const out = [];
+    for (let i = 0; i < digits.length; i++)
+      for (let j = i + target.length; j <= digits.length; j++) {
+        const w = digits.slice(i, j);
+        if (stripZeros(w) === target) out.push(w);
+      }
+    return [...new Set(out)];
+  }
+
+  function formatCode(digits, dashAt) {
+    if (dashAt && dashAt > 0 && dashAt < digits.length)
+      return digits.slice(0, dashAt) + "-" + digits.slice(dashAt);
+    if (digits.length === 10) return digits.slice(0, 5) + "-" + digits.slice(5);
+    if (digits.length >= 8 && digits.length % 2 === 0)
+      return digits.slice(0, digits.length / 2) + "-" + digits.slice(digits.length / 2);
+    return digits;
+  }
+
+  function dedupe(list) {
+    const seen = new Set(), uniq = [], dupes = [];
+    for (const c of list) (seen.has(c) ? dupes : (seen.add(c), uniq)).push(c);
+    return { uniq, dupes: [...new Set(dupes)] };
+  }
+
+  async function renderPage(page, deps, scale) {
+    const viewport = page.getViewport({ scale });
+    const canvas = deps.createCanvas(Math.ceil(viewport.width), Math.ceil(viewport.height));
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    return { canvas, viewport, scale };
+  }
+
+  // Crop one code's region out of the rendered page (tight vertically so
+  // neighbouring lines don't bleed noise into the read; generous horizontally
+  // for edge digits), upscaled for OCR.
+  function cropEntry(rp, cluster, up, deps) {
+    const { canvas, viewport } = rp;
+    const corners = [
+      viewport.convertToViewportPoint(cluster.x0, cluster.yBase - 0.35 * cluster.h),
+      viewport.convertToViewportPoint(cluster.x0, cluster.yBase + 1.15 * cluster.h),
+      viewport.convertToViewportPoint(cluster.x1, cluster.yBase - 0.35 * cluster.h),
+      viewport.convertToViewportPoint(cluster.x1, cluster.yBase + 1.15 * cluster.h)
+    ];
+    const xs = corners.map(p => p[0]), ys = corners.map(p => p[1]);
+    const padX = 0.9 * cluster.h * rp.scale;
+    const sx = Math.max(0, Math.min(...xs) - padX);
+    const sy = Math.max(0, Math.min(...ys));
+    const sw = Math.max(1, Math.min(canvas.width, Math.max(...xs) + padX) - sx);
+    const sh = Math.max(1, Math.min(canvas.height, Math.max(...ys)) - sy);
+    const out = deps.createCanvas(Math.round(sw * up), Math.round(sh * up));
+    const ctx = out.getContext("2d");
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, out.width, out.height);
+    ctx.drawImage(canvas, sx, sy, sw, sh, 0, 0, out.width, out.height);
+    return out;
+  }
+
+  // PSM: 6 = single block, 7 = single line, 8 = single word, 11 = sparse
+  const LADDER = [{ psm: "7", up: 2 }, { psm: "7", up: 3 }, { psm: "8", up: 2 }, { psm: "6", up: 2 }];
+
+  // OCR one entry's crop and accept only a read the text layer confirms.
+  // Exact zero-stripped equality first; otherwise an UNAMBIGUOUS window
+  // (crop bleed can add noise digits at the edges). `codeLen`, once known
+  // from other codes, resolves window ambiguity.
+  async function resolveEntry(entry, rp, deps, codeLen) {
+    for (const step of LADDER) {
+      const crop = cropEntry(rp, entry.cluster, step.up, deps);
+      const text = await deps.ocr(crop, step.psm);
+      const digits = (text || "").replace(/\D/g, "");
+      if (digits.length < entry.run.length) continue;
+      let pick = null;
+      if (stripZeros(digits) === stripZeros(entry.run) && digits.length <= entry.run.length + 8) {
+        pick = digits;
+      } else {
+        const wins = windowsOf(digits, entry.run);
+        const pool = codeLen ? wins.filter(w => w.length === codeLen) : wins;
+        if (pool.length === 1) pick = pool[0];
+      }
+      if (pick) {
+        entry.code = pick;
+        const dm = normDashes(text).match(/(\d+)-(\d+)/);
+        if (dm && (dm[1] + dm[2]).endsWith(pick.slice(-Math.min(4, pick.length)))) entry.dashAt = dm[1].length;
+        else if (dm && dm[1].length + dm[2].length === pick.length) entry.dashAt = dm[1].length;
+        entry.status = "verified";
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Full-canvas OCR used for images/scans and as a last-resort fallback.
+  async function ocrWholeCanvas(canvas, deps, tolerant) {
+    const found = [];
+    for (const psm of ["6", "11"]) {
+      const text = normDashes((await deps.ocr(canvas, psm)) || "");
+      for (const m of text.matchAll(/\d{5}\s*-\s*\d{5}|(?<![\d.-])\d{10}(?![\d.-])/g))
+        found.push(m[0].replace(/\D/g, ""));
+      if (tolerant)
+        for (const m of text.matchAll(/(?<![\d-])[\d-]{6,}(?![\d-])/g))
+          found.push(m[0].replace(/\D/g, ""));
+    }
+    return found;
+  }
+
+  async function extractFromPdf(pdf, deps) {
+    const onP = deps.onProgress || (() => {});
+    const pageData = [];
+    const entries = [];
+    let docHasPUA = false;
+
+    for (let p = 1; p <= pdf.numPages; p++) {
+      onP(5 + 10 * p / pdf.numPages, `Reading text layer — page ${p} of ${pdf.numPages}…`);
+      const page = await pdf.getPage(p);
+      const tc = await page.getTextContent();
+      const clusters = clusterPage(tc.items);
+      if (!docHasPUA && clusters.some(c => PUA.test(c.str))) docHasPUA = true;
+      entries.push(...findEntries(clusters, p));
+      pageData.push({ page, pageNo: p, clusters, rp: null });
+    }
+
+    // Healthy text layer: codes can be read directly, no OCR needed.
+    if (!docHasPUA && entries.length) {
+      const dashAt = modeOf(entries.filter(e => e.text.includes("-")).map(e => e.text.indexOf("-")));
+      const codes = entries.map(e => e.text.includes("-") ? e.text : formatCode(e.run, dashAt));
+      for (const pd of pageData) codes.push(...findEmbeddedCodes(pd.clusters));
+      const { uniq, dupes } = dedupe(codes);
+      return { mode: "text", codes: uniq, total: uniq.length, missed: [], dupes, unverified: false };
+    }
+
+    // No usable text at all (scanned/exported-as-image PDF): OCR-only.
+    if (!entries.length) {
+      const found = [];
+      for (const pd of pageData) {
+        onP(20 + 70 * pd.pageNo / pdf.numPages, `No text layer — OCR page ${pd.pageNo} of ${pdf.numPages}…`);
+        const rp = await renderPage(pd.page, deps, 3);
+        found.push(...await ocrWholeCanvas(rp.canvas, deps, false));
+      }
+      const dashAt = found.some(d => d.length === 10) ? 5 : null;
+      const { uniq, dupes } = dedupe(found.map(d => formatCode(d, dashAt)));
+      return { mode: "ocr-only", codes: uniq, total: null, missed: [], dupes, unverified: true };
+    }
+
+    // Broken text layer (UniFi): per-code OCR, verified against the text run.
+    let done = 0;
+    for (const pd of pageData) {
+      const pes = entries.filter(e => e.page === pd.pageNo);
+      if (!pes.length) continue;
+      pd.rp = await renderPage(pd.page, deps, 3);
+      for (const e of pes) {
+        onP(15 + 70 * done / entries.length, `Reading code ${done + 1} of ${entries.length}…`);
+        await resolveEntry(e, pd.rp, deps, null);
+        done++;
+      }
+    }
+
+    // Consensus code length from verified reads unlocks two more recoveries:
+    // runs already at full length lost no zeros (text layer alone is enough),
+    // and ambiguous OCR windows can be re-filtered by length.
+    let codeLen = modeOf(entries.filter(e => e.code).map(e => e.code.length));
+    for (const e of entries.filter(e => !e.code)) {
+      if (codeLen && e.run.length === codeLen) { e.code = e.run; e.status = "text-complete"; continue; }
+      if (codeLen && e.run.length > codeLen) { e.status = "not-a-code"; continue; }
+      if (e.page && codeLen) await resolveEntry(e, pageData.find(pd => pd.pageNo === e.page).rp, deps, codeLen);
+    }
+
+    // Last resort for stragglers: tolerant full-page OCR, matched per-run.
+    const unresolved = () => entries.filter(e => !e.code && e.status !== "not-a-code");
+    if (unresolved().length) {
+      for (const pd of pageData) {
+        const pes = unresolved().filter(e => e.page === pd.pageNo);
+        if (!pes.length || !pd.rp) continue;
+        onP(90, `Retrying ${pes.length} unread code(s) on page ${pd.pageNo}…`);
+        const found = await ocrWholeCanvas(pd.rp.canvas, deps, true);
+        for (const e of pes) {
+          const hits = [...new Set(found.filter(d =>
+            stripZeros(d) === stripZeros(e.run) && (!codeLen || d.length === codeLen)))];
+          if (hits.length === 1) { e.code = hits[0]; e.status = "verified"; }
+        }
+      }
+      codeLen = codeLen || modeOf(entries.filter(e => e.code).map(e => e.code.length));
+    }
+
+    const dashAt = modeOf(entries.filter(e => e.dashAt).map(e => e.dashAt)) || (codeLen === 10 ? 5 : null);
+    const real = entries.filter(e => e.status !== "not-a-code");
+    const { uniq, dupes } = dedupe(real.filter(e => e.code).map(e => formatCode(e.code, dashAt)));
+    const missed = real.filter(e => !e.code).map(e => ({ run: e.run, page: e.page }));
+    return { mode: "dual", codes: uniq, total: real.length, missed, dupes, unverified: false };
+  }
+
+  async function extractFromImageCanvas(canvas, deps) {
+    (deps.onProgress || (() => {}))(30, "OCR on image…");
+    const found = await ocrWholeCanvas(canvas, deps, false);
+    const dashAt = found.some(d => d.length === 10) ? 5 : null;
+    const { uniq, dupes } = dedupe(found.map(d => formatCode(d, dashAt)));
+    return { mode: "ocr-only", codes: uniq, total: null, missed: [], dupes, unverified: true };
+  }
+
+  function extractFromText(text) {
+    const clean = normDashes(text);
+    const found = [];
+    for (const m of clean.matchAll(/(?<![\d-])\d{3,6}-\d{3,6}(?![\d-])/g)) found.push(m[0]);
+    for (const m of clean.matchAll(/(?<![\d.-])\d{8,12}(?![\d.-])/g)) found.push(formatCode(m[0], null));
+    const { uniq, dupes } = dedupe(found);
+    return { mode: "text", codes: uniq, total: uniq.length, missed: [], dupes, unverified: false };
+  }
+
+  return { clusterPage, findEntries, extractFromPdf, extractFromImageCanvas, extractFromText, formatCode, dedupe };
+})();
+/*LIB-END*/
+
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+const $ = id => document.getElementById(id);
+const drop = $("drop"), fileInput = $("file");
+
+drop.addEventListener("click", () => fileInput.click());
+drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("hover"); });
+drop.addEventListener("dragleave", () => drop.classList.remove("hover"));
+drop.addEventListener("drop", e => {
+  e.preventDefault(); drop.classList.remove("hover");
+  if (e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener("change", () => { if (fileInput.files.length) handleFiles(fileInput.files); });
+
+function setProgress(pct, msg) {
+  $("progressWrap").style.display = "block";
+  $("barFill").style.width = pct + "%";
+  $("status").textContent = msg;
+}
+
+// --- OCR worker (lazy: text-layer-only files never load Tesseract) ---
+let ocrWorker = null, ocrPsm = null;
+async function ocr(canvas, psm) {
+  if (!ocrWorker) {
+    setProgress(12, "Starting OCR engine…");
+    ocrWorker = await Tesseract.createWorker("eng");
+    await ocrWorker.setParameters({ tessedit_char_whitelist: "0123456789-" });
+    ocrPsm = null;
+  }
+  if (psm !== ocrPsm) {
+    await ocrWorker.setParameters({ tessedit_pageseg_mode: psm });
+    ocrPsm = psm;
+  }
+  const { data } = await ocrWorker.recognize(canvas);
+  return data.text || "";
+}
+
+const deps = {
+  createCanvas: (w, h) => { const c = document.createElement("canvas"); c.width = w; c.height = h; return c; },
+  ocr,
+  onProgress: setProgress
+};
+
+function fileKind(file) {
+  const n = (file.name || "").toLowerCase();
+  if (file.type === "application/pdf" || n.endsWith(".pdf")) return "pdf";
+  if (file.type.startsWith("image/") || /\.(png|jpe?g|webp|bmp|gif)$/.test(n)) return "image";
+  if (file.type.startsWith("text/") || /\.(csv|txt|tsv)$/.test(n)) return "text";
+  return null;
+}
+
+async function imageToCanvas(file) {
+  const bmp = await createImageBitmap(file);
+  // Upscale small screenshots so OCR has enough pixels to work with.
+  const up = Math.max(1, Math.min(3, Math.ceil(1600 / Math.max(bmp.width, 1))));
+  const c = deps.createCanvas(bmp.width * up, bmp.height * up);
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, c.width, c.height);
+  ctx.drawImage(bmp, 0, 0, c.width, c.height);
+  return c;
+}
+
+async function handleFiles(fileList) {
+  $("results").style.display = "none";
+  $("genRow").style.display = "none";
+  const files = [...fileList];
+  const merged = { codes: [], total: 0, totalKnown: true, missed: [], dupes: [], unverified: false, errors: [] };
+
+  try {
+    for (const file of files) {
+      const kind = fileKind(file);
+      if (!kind) { merged.errors.push(`${file.name}: unsupported file type.`); continue; }
+      setProgress(2, `Processing ${file.name}…`);
+      try {
+        let res;
+        if (kind === "pdf") {
+          const buf = await file.arrayBuffer();
+          const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+          res = await VoucherLib.extractFromPdf(pdf, deps);
+        } else if (kind === "image") {
+          res = await VoucherLib.extractFromImageCanvas(await imageToCanvas(file), deps);
+        } else {
+          res = VoucherLib.extractFromText(await file.text());
+        }
+        merged.codes.push(...res.codes);
+        merged.missed.push(...res.missed.map(m => ({ ...m, file: file.name })));
+        merged.dupes.push(...res.dupes);
+        if (res.total === null) merged.totalKnown = false; else merged.total += res.total;
+        if (res.unverified) merged.unverified = true;
+      } catch (err) {
+        console.error(err);
+        merged.errors.push(`${file.name}: ${err.message}`);
+      }
+    }
+  } finally {
+    if (ocrWorker) { await ocrWorker.terminate().catch(() => {}); ocrWorker = null; }
+  }
+
+  const { uniq, dupes: crossDupes } = VoucherLib.dedupe(merged.codes);
+  merged.codes = uniq;
+  merged.dupes = [...new Set([...merged.dupes, ...crossDupes])];
+
+  $("codes").value = merged.codes.join("\n");
+  $("results").style.display = "block";
+  $("genRow").style.display = "block";
+  updateCount();
+
+  const badge = $("checkBadge"), warn = $("warnBox");
+  const warnings = [];
+  if (merged.unverified) warnings.push("Some codes came from OCR alone (image or scanned input) and could not be independently verified — compare the list against the original before printing.");
+  if (merged.dupes.length) warnings.push(`Ignored duplicate read(s): ${merged.dupes.join(", ")}.`);
+  if (merged.missed.length) warnings.push(`${merged.missed.length} voucher(s) could not be read reliably. The export's text layer drops zeros, so only their non-zero digits are known: ${merged.missed.map(m => `${m.run} (page ${m.page})`).join(", ")}. Find each in the original (the digits appear in this order, with zeros inserted somewhere) and add the full code below.`);
+  warnings.push(...merged.errors);
+
+  const expected = merged.totalKnown ? merged.total : null;
+  if (expected !== null && merged.codes.length === expected && !merged.unverified && !merged.errors.length) {
+    badge.className = "badge ok";
+    badge.textContent = `${merged.codes.length} of ${expected} verified`;
+  } else {
+    badge.className = "badge warn";
+    badge.textContent = expected !== null
+      ? `${merged.codes.length} of ${expected} verified`
+      : `${merged.codes.length} found (unverified)`;
+  }
+  warn.style.display = warnings.length ? "block" : "none";
+  warn.innerHTML = warnings.map(w => "&#9888;&#65039; " + w).join("<br>");
+  setProgress(100, expected !== null
+    ? `Done — ${merged.codes.length} of ${expected} voucher(s) verified.`
+    : `Done — ${merged.codes.length} voucher code(s) found.`);
+}
+
+function getCodes() {
+  return $("codes").value.split(/\n/).map(s => s.trim()).filter(Boolean);
+}
+function updateCount() {
+  $("count").textContent = getCodes().length + " vouchers · " +
+    Math.ceil(getCodes().length / 24) + " page(s)";
+}
+$("codes").addEventListener("input", updateCount);
+
+$("gen").addEventListener("click", () => {
+  const codes = getCodes();
+  if (!codes.length) { alert("No codes found."); return; }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
+
+  // Layout constants (mirror of the original redesign)
+  const W = 210, H = 297;
+  const COLS = 3, ROWS = 8;
+  const MX = 12, MY = 12, GAP = 3.5;
+  const CW = (W - 2 * MX - (COLS - 1) * GAP) / COLS;
+  const CH = (H - 2 * MY - (ROWS - 1) * GAP) / ROWS;
+  const ACCENT = [27, 79, 138], ACCENT_LIGHT = [234, 241, 248],
+        GREY = [107, 114, 128], DARK = [31, 41, 55],
+        BORDER = [201, 212, 224], CUT = [176, 183, 195];
+
+  const ssid = $("ssid").value.trim() || "Wi-Fi";
+  const valid = $("valid").value.trim();
+  const details1 = [$("dl").value.trim(), $("ul").value.trim()].filter(Boolean).join("   ·   ");
+  const details2 = $("data").value.trim();
+
+  function cutlines() {
+    doc.setDrawColor(...CUT); doc.setLineWidth(0.15);
+    doc.setLineDashPattern([0.7, 1.1], 0);
+    for (let i = 1; i < COLS; i++) {
+      const vx = MX + i * CW + (i - 0.5) * GAP;
+      doc.line(vx, MY - 4, vx, H - MY + 4);
+    }
+    for (let j = 1; j < ROWS; j++) {
+      const hy = MY + j * CH + (j - 0.5) * GAP;
+      doc.line(MX - 4, hy, W - MX + 4, hy);
+    }
+    doc.setLineDashPattern([], 0);
+  }
+
+  function card(x, y, code) {
+    // y = top of card
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(...BORDER); doc.setLineWidth(0.28);
+    doc.roundedRect(x, y, CW, CH, 2.5, 2.5, "FD");
+    // header band (rounded top corners only)
+    const bandH = 7;
+    doc.setFillColor(...ACCENT);
+    doc.roundedRect(x, y, CW, bandH, 2.5, 2.5, "F");
+    doc.rect(x, y + bandH / 2, CW, bandH / 2, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold"); doc.setFontSize(8.5);
+    doc.text(`Wi-Fi  ·  ${ssid}`, x + 4, y + bandH - 2.3);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5);
+    if (valid) doc.text(valid, x + CW - 4, y + bandH - 2.4, { align: "right" });
+    // code box
+    const boxH = 9, boxY = y + bandH + 3;
+    doc.setFillColor(...ACCENT_LIGHT);
+    doc.roundedRect(x + 4, boxY, CW - 8, boxH, 1.5, 1.5, "F");
+    doc.setTextColor(...DARK);
+    doc.setFont("courier", "bold");
+    let fs = 14;
+    doc.setFontSize(fs);
+    while (fs > 7 && doc.getTextWidth(code) > CW - 12) { fs -= 0.5; doc.setFontSize(fs); }
+    doc.text(code, x + CW / 2, boxY + boxH - 2.8, { align: "center" });
+    // details
+    doc.setFont("helvetica", "normal"); doc.setFontSize(7.5);
+    doc.setTextColor(...GREY);
+    const ty = boxY + boxH + 4.2;
+    if (details1) doc.text(details1, x + CW / 2, ty, { align: "center" });
+    if (details2) doc.text(details2, x + CW / 2, ty + 3.8, { align: "center" });
+  }
+
+  const perPage = COLS * ROWS;
+  for (let pi = 0; pi < codes.length; pi += perPage) {
+    if (pi > 0) doc.addPage();
+    cutlines();
+    codes.slice(pi, pi + perPage).forEach((code, k) => {
+      const col = k % COLS, row = Math.floor(k / COLS);
+      card(MX + col * (CW + GAP), MY + row * (CH + GAP), code);
+    });
+  }
+  doc.save("Vouchers_redesigned.pdf");
+});
+</script>
+<script>
+/* Auto-size when embedded same-origin (e.g. inside a hudu-widgets article iframe). No-op standalone. */
+(function(){
+  function sendHeight(){
+    var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+    window.parent.postMessage({type:'a8-iframe-resize', height:h}, '*');
+    try { if(window.frameElement) window.frameElement.style.height = (h+20)+'px'; } catch(e){}
+  }
+  sendHeight();
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+  if(window.ResizeObserver){ new ResizeObserver(sendHeight).observe(document.body); }
+})();
+</script>
+</body>
+</html>
+

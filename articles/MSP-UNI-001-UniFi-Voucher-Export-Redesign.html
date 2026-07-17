@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer-Ready Wi-Fi Vouchers – UniFi Export &amp; Redesigner</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background: #f7f9fc;
+  }
+
+  /* NAV */
+  .sticky-nav {
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  }
+
+  .sticky-nav-inner {
+    padding: 0 40px;
+    display: flex;
+    align-items: stretch;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .sticky-nav-inner::-webkit-scrollbar { display: none; }
+
+  .nav-link {
+    padding: 0 14px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #888;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+    border-radius: 0;
+    position: relative;
+  }
+
+  .nav-link:hover {
+    color: #1a3a8f;
+    background: rgba(37,87,183,0.06);
+    border-bottom-color: #2557b7;
+  }
+
+  .nav-link:active {
+    background: rgba(37,87,183,0.12);
+  }
+
+  .nav-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .num-blue  { background: rgba(37,87,183,0.12); color: #2557b7; }
+  .num-green { background: rgba(0,122,61,0.12);  color: #007a3d; }
+  .num-lime  { background: rgba(194,224,0,0.2);  color: #6b8500; }
+
+  /* PAGE BODY */
+  .page-body { padding: 44px 40px 72px; }
+
+  /* OVERVIEW CARD */
+  .overview-card {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
+    border-radius: 12px;
+    padding: 30px 34px;
+    margin-bottom: 20px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .overview-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(194,224,0,0.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .card-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.38);
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .overview-card p {
+    color: rgba(255,255,255,0.8);
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .pill-row { display: flex; gap: 8px; flex-wrap: wrap; position: relative; margin-top: 18px; }
+
+  .pill {
+    padding: 4px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  /* SECTION HEADING */
+  .section-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .step-badge {
+    flex-shrink: 0;
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 20px;
+    color: white;
+  }
+
+  .badge-blue  { background: #2557b7; }
+  .badge-green { background: #007a3d; }
+  .badge-lime  { background: #8aaa00; }
+
+  .step-meta {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 4px;
+  }
+
+  .step-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 21px;
+    font-weight: 400;
+    color: #1a1a1a;
+    line-height: 1.2;
+  }
+
+  /* CONTENT CARD */
+  .content-card {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+    padding: 22px 26px 26px;
+  }
+
+  /* STEPS */
+  .steps { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #f7f9fc;
+    border-radius: 8px;
+    padding: 11px 14px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .step-num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: rgba(37,87,183,0.1);
+    color: #2557b7;
+    border: 1px solid rgba(37,87,183,0.2);
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step p { font-size: 13px; padding-top: 3px; }
+
+  code.inline-code {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 12px;
+    background: rgba(37,87,183,0.07);
+    border: 1px solid rgba(37,87,183,0.15);
+    padding: 1px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  /* AMBER ALERT */
+  .lost-alert {
+    border-radius: 8px;
+    padding: 13px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    margin-bottom: 44px;
+  }
+
+  .lost-alert.in-card { margin-top: 20px; margin-bottom: 0; }
+  .lost-alert-icon { font-size: 15px; flex-shrink: 0; margin-top: 2px; color: #d97706; }
+  .lost-alert strong { display: block; font-size: 13px; font-weight: 600; margin-bottom: 3px; color: #92400e; }
+  .lost-alert p { font-size: 13px; color: #78350f; line-height: 1.6; }
+
+  /* CALLOUT */
+  .callout {
+    padding: 13px 16px;
+    margin-top: 14px;
+    border-radius: 8px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .callout-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .callout-title { font-weight: 600; font-size: 13px; margin-bottom: 3px; }
+  .callout-body  { font-size: 13px; line-height: 1.6; }
+  .callout-info  { background: #eff6ff; border: 1px solid #bfdbfe; }
+  .callout-info .callout-icon  { color: #2563eb; }
+  .callout-info .callout-title { color: #1e40af; }
+  .callout-info .callout-body  { color: #1e3a5f; }
+
+  /* TRUST BANNER */
+  .app-trust-banner {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 60%, #1e4aa0 100%);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 48px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(30,74,160,0.25);
+  }
+
+  .app-trust-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(194,224,0,0.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .app-trust-banner h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 21px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .app-trust-banner > p {
+    color: rgba(255,255,255,0.78);
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 22px;
+    position: relative;
+  }
+
+  .trust-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  .trust-card {
+    border-radius: 8px;
+    padding: 16px 18px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+
+  .trust-card-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .trust-card.pro .trust-card-label { color: #c2e000; }
+  .trust-card.con .trust-card-label { color: rgba(255,160,120,0.9); }
+
+  .trust-card-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 14px;
+    color: white;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+
+  .trust-card ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+  .trust-card ul li {
+    font-size: 13px;
+    color: rgba(255,255,255,0.68);
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    line-height: 1.5;
+  }
+
+  .trust-card ul li::before { font-weight: 700; font-size: 11px; flex-shrink: 0; margin-top: 1px; }
+  .trust-card.pro ul li::before { content: '✓'; color: #c2e000; }
+  .trust-card.con ul li::before { content: '!'; color: rgba(255,140,100,0.9); }
+
+  .privacy-callout {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 18px 20px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    position: relative;
+  }
+
+  .privacy-callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+
+  .privacy-callout-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 15px;
+    color: white;
+    margin-bottom: 8px;
+  }
+
+  .privacy-callout p { font-size: 13px; color: rgba(255,255,255,0.68); line-height: 1.65; }
+  .privacy-callout p + p { margin-top: 8px; }
+
+  /* DIVIDER */
+  .divider { margin: 34px 0; display: flex; align-items: center; gap: 14px; }
+  .divider-line { flex: 1; height: 1px; background: rgba(0,0,0,0.1); }
+  .divider-arrow { color: #bbb; font-size: 14px; }
+
+  /* REQUIREMENTS TABLE */
+  .id-table-wrap {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+
+  .id-table-intro { padding: 16px 22px 0; }
+  .id-table-intro p { font-size: 14px; line-height: 1.6; padding-bottom: 14px; border-bottom: 1px solid rgba(0,0,0,0.08); }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    background: #f7f9fc;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #888;
+    padding: 10px 22px;
+    text-align: left;
+    border-bottom: 2px solid rgba(0,0,0,0.08);
+  }
+
+  tbody tr { border-bottom: 1px solid rgba(0,0,0,0.07); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 14px 22px; font-size: 14px; vertical-align: middle; line-height: 1.5; }
+
+  .req-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+    background: rgba(37,87,183,0.1);
+    color: #2557b7;
+  }
+
+  /* FAQ / TROUBLESHOOTING */
+  .faq-wrap {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+
+  .faq-header {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
+    padding: 18px 26px;
+  }
+
+  .faq-header h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 2px;
+  }
+
+  .faq-header p {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.42);
+    letter-spacing: 0.06em;
+  }
+
+  details { border-bottom: 1px solid rgba(0,0,0,0.08); }
+  details:last-child { border-bottom: none; }
+
+  summary {
+    padding: 15px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    list-style: none;
+    user-select: none;
+  }
+
+  summary::-webkit-details-marker { display: none; }
+  summary:hover { background: #f7f9fc; }
+  summary::after { content: '+'; font-size: 20px; font-weight: 300; color: #bbb; flex-shrink: 0; }
+  details[open] summary::after { content: '×'; color: #2557b7; }
+  details[open] summary { color: #2557b7; background: #f7f9fc; }
+
+  .faq-answer {
+    padding: 4px 22px 16px;
+    font-size: 14px;
+    line-height: 1.7;
+    background: #f7f9fc;
+    color: #333;
+  }
+
+  /* HELP SECTION */
+  .help-section {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 60%, #1e4aa0 100%);
+    border-radius: 12px;
+    padding: 32px 34px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 44px;
+    color: white;
+    box-shadow: 0 4px 22px rgba(30,74,160,0.3);
+  }
+
+  .help-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 80% 20%, rgba(194,224,0,0.1) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .help-section h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 21px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 5px;
+    position: relative;
+  }
+
+  .help-sub {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 22px;
+    position: relative;
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    position: relative;
+    margin-bottom: 12px;
+  }
+
+  .contact-card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 14px 16px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .contact-card:hover { background: rgba(255,255,255,0.12); border-color: rgba(194,224,0,0.35); }
+
+  .contact-icon-wrap {
+    width: 38px; height: 38px;
+    border-radius: 8px;
+    background: rgba(194,224,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+
+  .contact-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #c2e000;
+    margin-bottom: 3px;
+  }
+
+  .contact-value { font-size: 13px; font-weight: 600; color: white; }
+
+  .rmm-note {
+    background: rgba(194,224,0,0.08);
+    border: 1px solid rgba(194,224,0,0.2);
+    border-radius: 8px;
+    padding: 13px 16px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.72);
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    position: relative;
+  }
+
+  .rmm-note strong { color: #c2e000; }
+
+  /* COMPLETION BANNER */
+  .completion-banner {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
+    border-radius: 12px;
+    padding: 36px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 4px 22px rgba(30,74,160,0.28);
+  }
+
+  .completion-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(194,224,0,0.18) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .completion-inner { position: relative; z-index: 1; }
+
+  .completion-icon {
+    width: 52px; height: 52px;
+    background: rgba(194,224,0,0.2);
+    border: 2px solid rgba(194,224,0,0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    font-size: 22px;
+    color: #c2e000;
+  }
+
+  .completion-eyebrow {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(194,224,0,0.75);
+    margin-bottom: 10px;
+  }
+
+  .completion-banner h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 23px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 12px;
+  }
+
+  .completion-banner p { font-size: 14px; color: rgba(255,255,255,0.6); max-width: 460px; margin: 0 auto 20px; line-height: 1.7; }
+
+  .completion-pills { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+
+  .cpill-lime {
+    background: rgba(194,224,0,0.15);
+    border: 1px solid rgba(194,224,0,0.35);
+    border-radius: 20px;
+    padding: 4px 13px;
+    font-size: 12px;
+    color: #c2e000;
+    font-weight: 500;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 640px) {
+    .sticky-nav-inner { padding: 0 14px; }
+    .page-body       { padding: 28px 14px 56px; }
+
+    .overview-card,
+    .app-trust-banner,
+    .help-section,
+    .completion-banner { padding: 20px 16px; }
+
+    .content-card { padding: 16px 16px 20px; }
+
+    .trust-grid,
+    .contact-grid { grid-template-columns: 1fr; }
+
+    .privacy-callout { flex-direction: column; gap: 10px; }
+
+    summary   { padding: 13px 16px; }
+    .faq-answer { padding: 4px 16px 14px; }
+    .faq-header { padding: 14px 18px; }
+
+    .completion-pills { flex-direction: column; align-items: center; }
+
+    thead th,
+    tbody td { padding: 10px 14px; }
+  }
+
+  @media (max-width: 380px) {
+    .step-title { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sticky-nav">
+  <div class="sticky-nav-inner">
+    <a class="nav-link" href="#need"><span class="nav-num num-lime">?</span> What You'll Need</a>
+    <a class="nav-link" href="#step1"><span class="nav-num num-blue">1</span> Find the Vouchers</a>
+    <a class="nav-link" href="#step2"><span class="nav-num num-green">2</span> Export to PDF</a>
+    <a class="nav-link" href="#step3"><span class="nav-num num-blue">3</span> Load the Tool</a>
+    <a class="nav-link" href="#step4"><span class="nav-num num-green">4</span> Review Codes</a>
+    <a class="nav-link" href="#step5"><span class="nav-num num-blue">5</span> Generate &amp; Send</a>
+    <a class="nav-link" href="#why"><span class="nav-num num-lime">✓</span> Why This Tool</a>
+    <a class="nav-link" href="#troubleshoot"><span class="nav-num num-blue">!</span> Troubleshooting</a>
+  </div>
+</nav>
+
+<main class="page-body">
+
+  <!-- OVERVIEW -->
+  <div class="overview-card">
+    <div class="card-label">Article Overview</div>
+    <p>This guide shows you how to take a batch of hotspot vouchers from the <strong>UniFi Network portal</strong> and turn them into a <strong>clean, print-ready voucher sheet</strong> you can send straight to the customer &mdash; using the <strong>Wi-Fi Voucher Redesigner</strong>, which is embedded right inside this article at <a href="#step3" style="color:#c2e000;text-decoration:none;">Step 3</a>.</p>
+    <p>The raw UniFi export is not customer-ready: the layout is plain, and its text layer is broken in a way that <strong>silently corrupts voucher codes</strong> if anyone copies them. The Redesigner repairs and verifies every code, then produces branded A4 voucher cards with cut lines. The <a href="#why" style="color:#c2e000;text-decoration:none;">Why This Tool</a> section explains the problem in detail.</p>
+    <div class="pill-row">
+      <div class="pill"><span class="dot" style="background:#c2e000;"></span> Takes 5&ndash;10 minutes</div>
+      <div class="pill"><span class="dot" style="background:#4d8cff;"></span> UniFi Network (HostiFi) portal</div>
+      <div class="pill"><span class="dot" style="background:#4ade80;"></span> Runs entirely in your browser</div>
+      <div class="pill"><span class="dot" style="background:rgba(255,255,255,0.4);"></span> A4 &middot; 24 cards per page &middot; cut lines</div>
+    </div>
+  </div>
+
+  <div class="lost-alert">
+    <div class="lost-alert-icon">&#9888;</div>
+    <div>
+      <strong>Never copy voucher codes out of the UniFi export</strong>
+      <p>The export PDF <em>looks</em> fine, but its text layer drops every zero and dash &mdash; <code class="inline-code">57908-78437</code> copies out as <code class="inline-code">579878437</code> with no visible error. Codes taken from the raw export by copy-paste <strong>will not work</strong> for the customer. Always run the export through the Voucher Redesigner, which repairs and verifies each code.</p>
+    </div>
+  </div>
+
+  <!-- WHAT YOU'LL NEED -->
+  <div id="need">
+    <div class="section-heading">
+      <div class="step-badge badge-lime">?</div>
+      <div>
+        <div class="step-meta">Preparation</div>
+        <div class="step-title">What You&rsquo;ll Need</div>
+      </div>
+    </div>
+
+    <div class="id-table-wrap">
+      <div class="id-table-intro">
+        <p>Have these ready before you start &mdash; the whole process takes only a few minutes once you have them.</p>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Requirement</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="req-pill">🌐 UniFi portal access</span></td>
+            <td>A login for the customer&rsquo;s UniFi Network controller (HostiFi-hosted, e.g. <code class="inline-code">m038657.hostifi.com</code>)</td>
+          </tr>
+          <tr>
+            <td><span class="req-pill">🛠 Voucher Redesigner</span></td>
+            <td>Embedded in this article at <a href="#step3" style="color:#2557b7;">Step 3</a> &mdash; or open it full-screen at <a href="https://b4ldini.github.io/hudu-widgets/tools/voucher-tool.html" target="_blank" rel="noopener" style="color:#2557b7;">b4ldini.github.io/hudu-widgets/tools/voucher-tool.html</a></td>
+          </tr>
+          <tr>
+            <td><span class="req-pill">💻 Browser + internet</span></td>
+            <td>Any modern browser (Edge, Chrome). Internet is needed once to load the tool&rsquo;s libraries &mdash; voucher codes themselves never leave your machine</td>
+          </tr>
+          <tr>
+            <td><span class="req-pill">📶 Network details</span></td>
+            <td>The customer&rsquo;s guest Wi-Fi name (SSID), voucher validity, and speed/data limits &mdash; these are printed on each voucher card</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 1 -->
+  <div id="step1">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">1</div>
+      <div>
+        <div class="step-meta">Step 01 of 05</div>
+        <div class="step-title">Find (or Create) the Vouchers in UniFi</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>Sign in to the customer&rsquo;s UniFi Network controller (e.g. <code class="inline-code">m038657.hostifi.com</code>) and select the correct <strong>site</strong> if more than one is listed.</p></div>
+        <div class="step"><div class="step-num">2</div><p>Open <strong>Hotspot Manager</strong> from the left-hand menu (the ticket icon &mdash; on older versions it lives under <strong>Insights</strong> &gt; <strong>Hotspot</strong>).</p></div>
+        <div class="step"><div class="step-num">3</div><p>Go to the <strong>Vouchers</strong> tab. Existing voucher batches are listed here.</p></div>
+        <div class="step"><div class="step-num">4</div><p>If you need new vouchers, click <strong>Create Voucher</strong> and set the amount, expiry (e.g. <strong>8 hours</strong>), usage type, and any bandwidth or data limits, then confirm.</p></div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">&#8505;</div>
+        <div>
+          <div class="callout-title">Match the limits to what the customer expects</div>
+          <div class="callout-body">The expiry and speed limits you set here are what the network actually enforces &mdash; the text printed on the voucher cards later is just a label. Make sure the two agree.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 2 -->
+  <div id="step2">
+    <div class="section-heading">
+      <div class="step-badge badge-green">2</div>
+      <div>
+        <div class="step-meta">Step 02 of 05</div>
+        <div class="step-title">Export the Voucher List to PDF</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>In the <strong>Vouchers</strong> tab, select the batch you want to send out and choose <strong>Print</strong> (the printer icon next to the batch, or the print option after selecting the vouchers).</p></div>
+        <div class="step"><div class="step-num">2</div><p>Your browser&rsquo;s print dialog opens. Set the destination to <strong>Save as PDF</strong> &mdash; don&rsquo;t send it to a physical printer.</p></div>
+        <div class="step"><div class="step-num">3</div><p>Click <strong>Save</strong> and keep the file somewhere easy to find (the filename usually looks like <code class="inline-code">m038657.hostifi.com - UniFi Network.pdf</code>).</p></div>
+      </div>
+
+      <div class="lost-alert in-card">
+        <div class="lost-alert-icon">&#9888;</div>
+        <div>
+          <strong>The saved PDF will look right but copy wrong</strong>
+          <p>This is expected &mdash; it&rsquo;s the broken text layer described at the top of this article. Don&rsquo;t try to fix it, retype codes, or copy them anywhere. Just feed the whole PDF to the Redesigner in the next step.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 3 -->
+  <div id="step3">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">3</div>
+      <div>
+        <div class="step-meta">Step 03 of 05</div>
+        <div class="step-title">Load the Export into the Voucher Redesigner</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>Use the <strong>Wi-Fi Voucher Redesigner</strong> embedded directly below &mdash; or, if you&rsquo;d like more room, <a href="https://b4ldini.github.io/hudu-widgets/tools/voucher-tool.html" target="_blank" rel="noopener" style="color:#2557b7;">open it in its own tab</a>.</p></div>
+        <div class="step"><div class="step-num">2</div><p>Drag the exported PDF onto the box labelled <strong>&ldquo;Drop the voucher export here&rdquo;</strong>, or click the box to browse for it. You can drop several files at once &mdash; results are merged and de-duplicated.</p></div>
+        <div class="step"><div class="step-num">3</div><p>Wait for the progress bar to finish. The tool reads the PDF&rsquo;s text layer <em>and</em> re-reads each code from the page image, then cross-checks the two &mdash; this is what makes the codes trustworthy.</p></div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">&#8505;</div>
+        <div>
+          <div class="callout-title">Photos and code lists work too</div>
+          <div class="callout-body">The tool also accepts photos or screenshots of vouchers (PNG/JPG) and plain code lists (CSV/TXT). Codes from images can&rsquo;t be independently verified, so the tool flags them &mdash; prefer the PDF export whenever you can.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMBEDDED TOOL -->
+    <div class="content-card" style="padding:0;overflow:hidden;">
+      <iframe
+        src="../tools/voucher-tool.html"
+        style="width:100%;height:820px;border:none;display:block;background:#fff;"
+        title="Wi-Fi Voucher Redesigner"
+        loading="lazy"
+      ></iframe>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 4 -->
+  <div id="step4">
+    <div class="section-heading">
+      <div class="step-badge badge-green">4</div>
+      <div>
+        <div class="step-meta">Step 04 of 05</div>
+        <div class="step-title">Review the Codes</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>Check the badge next to <strong>&ldquo;Review codes&rdquo;</strong>. A green <strong><code class="inline-code">10 of 10 verified</code></strong> means every voucher in the export was found and independently confirmed &mdash; you&rsquo;re good to continue.</p></div>
+        <div class="step"><div class="step-num">2</div><p>If the badge is amber, read the warning box above the code list. It tells you exactly what happened &mdash; duplicates it ignored, or vouchers it couldn&rsquo;t fully read.</p></div>
+        <div class="step"><div class="step-num">3</div><p>For any voucher the tool couldn&rsquo;t read, the warning lists the digits it <em>does</em> know and the page number. Find that voucher in the original export (the digits appear in order, with zeros somewhere between them), then type the full code into the list &mdash; one code per line.</p></div>
+        <div class="step"><div class="step-num">4</div><p>The code list is fully editable. Every non-empty line becomes one voucher card, so you can also remove codes you don&rsquo;t want to send.</p></div>
+      </div>
+
+      <div class="lost-alert in-card">
+        <div class="lost-alert-icon">&#9888;</div>
+        <div>
+          <strong>Don&rsquo;t generate until the count is right</strong>
+          <p>If the badge shows fewer codes than the export contains, a voucher is missing &mdash; the customer would receive a sheet with a voucher short. Resolve every warning before moving on.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 5 -->
+  <div id="step5">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">5</div>
+      <div>
+        <div class="step-meta">Step 05 of 05</div>
+        <div class="step-title">Set the Details, Generate &amp; Send</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>Under <strong>Voucher details</strong>, set the <strong>Network name (SSID)</strong> to the customer&rsquo;s guest network (e.g. <code class="inline-code">AAF-GUEST</code>) and the <strong>Validity</strong> line (e.g. <code class="inline-code">Valid 8h</code>).</p></div>
+        <div class="step"><div class="step-num">2</div><p>Update the <strong>Download</strong>, <strong>Upload</strong> and <strong>Data</strong> lines to match what you configured in UniFi (e.g. <code class="inline-code">Download 20 Mbps</code> &middot; <code class="inline-code">Upload 5 Mbps</code> &middot; <code class="inline-code">Unlimited data</code>).</p></div>
+        <div class="step"><div class="step-num">3</div><p>Click <strong>Download redesigned PDF</strong>. You get an A4 sheet of clean voucher cards &mdash; 24 per page, each with the Wi-Fi name, code, validity and speeds, with dashed cut lines between cards.</p></div>
+        <div class="step"><div class="step-num">4</div><p>Open the PDF and give it a quick visual once-over, then <strong>email it to the customer</strong> (or print and hand over). They can cut the sheet into individual vouchers for their guests.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPLETION BANNER -->
+  <div class="completion-banner">
+    <div class="completion-inner">
+      <div class="completion-icon">&#10003;</div>
+      <div class="completion-eyebrow">Vouchers Ready</div>
+      <h2>A customer-ready voucher sheet</h2>
+      <p>Every code on the sheet has been verified against the original export, so the customer&rsquo;s guests can type them in with confidence. The PDF is safe to email, print and cut.</p>
+      <div class="completion-pills">
+        <div class="cpill-lime">&#10003; Every code verified</div>
+        <div class="cpill-lime">&#10003; 24 cards per A4 page with cut lines</div>
+        <div class="cpill-lime">&#10003; Codes never left your browser</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHY THIS TOOL -->
+  <div id="why">
+    <div class="section-heading">
+      <div class="step-badge badge-lime">✓</div>
+      <div>
+        <div class="step-meta">Worth Knowing</div>
+        <div class="step-title">Why Not Just Send the UniFi Export?</div>
+      </div>
+    </div>
+
+    <div class="app-trust-banner">
+      <div class="card-label">The Broken Text Layer, Explained</div>
+      <h2>The UniFi export renders correctly but reads wrongly</h2>
+      <p>In UniFi&rsquo;s voucher export, the characters <strong>0</strong> (zero) and <strong>-</strong> (dash) are drawn on the page but missing from the PDF&rsquo;s text layer. Anything that trusts the text &mdash; copy-paste, &ldquo;export to Excel&rdquo;, simple PDF readers &mdash; silently mangles the codes.</p>
+
+      <div class="trust-grid">
+        <div class="trust-card con">
+          <div class="trust-card-label">The Raw UniFi Export</div>
+          <div class="trust-card-title">Fine to look at, unsafe to reuse</div>
+          <ul>
+            <li>Copying <code style="font-family:'Courier New',monospace;">57908-78437</code> yields <code style="font-family:'Courier New',monospace;">579878437</code> &mdash; a code that will never work</li>
+            <li>Zeros and dashes vanish with <em>no visible error</em></li>
+            <li>Plain, cramped layout with no network name on the card</li>
+            <li>Speed labels garble too (&ldquo;20.0 Mbps&rdquo; becomes &ldquo;2. Mbps&rdquo;)</li>
+          </ul>
+        </div>
+        <div class="trust-card pro">
+          <div class="trust-card-label">The Voucher Redesigner</div>
+          <div class="trust-card-title">Verified codes, presentable cards</div>
+          <ul>
+            <li>Reads each code twice &mdash; from the text layer <em>and</em> the page image &mdash; and only accepts codes where both agree</li>
+            <li>Tells you explicitly if any voucher couldn&rsquo;t be verified, rather than guessing</li>
+            <li>Prints the Wi-Fi name, validity and speeds on every card</li>
+            <li>Clean A4 grid with cut lines, ready to email or print</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="privacy-callout">
+        <div class="privacy-callout-icon">🔒</div>
+        <div>
+          <div class="privacy-callout-title">Nothing is uploaded anywhere</div>
+          <p>The Redesigner is a single HTML file &mdash; all reading, checking and PDF generation happens <strong style="color:rgba(255,255,255,0.9);">inside your browser</strong>. Voucher codes never leave your machine; the internet connection is only used to fetch the tool&rsquo;s libraries when the page loads.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TROUBLESHOOTING -->
+  <div id="troubleshoot">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">!</div>
+      <div>
+        <div class="step-meta">If Something Goes Wrong</div>
+        <div class="step-title">Troubleshooting</div>
+      </div>
+    </div>
+
+    <div class="faq-wrap">
+      <div class="faq-header">
+        <h2>Common Problems &amp; Fixes</h2>
+        <p>Click any problem to expand the fix</p>
+      </div>
+      <details>
+        <summary>The badge says fewer codes than the export contains</summary>
+        <div class="faq-answer">One or more vouchers couldn&rsquo;t be read reliably. The warning box lists each one with the digits the tool <em>could</em> confirm and the page it&rsquo;s on. Open the original export, find the matching voucher (its digits appear in the same order, with zeros inserted somewhere), and type the full code into the list manually. The count then updates.</div>
+      </details>
+      <details>
+        <summary>Warning: &ldquo;Some codes came from OCR alone&hellip; could not be independently verified&rdquo;</summary>
+        <div class="faq-answer">You loaded a photo, screenshot, or scanned PDF &mdash; there&rsquo;s no text layer to verify against, so the tool read the image alone. Compare the code list against the original carefully before generating, or better, go back to UniFi and save a proper PDF export (Step 2), which the tool can fully verify.</div>
+      </details>
+      <details>
+        <summary>Warning about ignored duplicate reads</summary>
+        <div class="faq-answer">The same code appeared more than once across the files you dropped (for example, the same export loaded twice). The tool keeps one copy of each code &mdash; this is safe and needs no action.</div>
+      </details>
+      <details>
+        <summary>The tool page won&rsquo;t process anything / sits at &ldquo;Starting&hellip;&rdquo;</summary>
+        <div class="faq-answer">The tool loads its PDF and OCR libraries from the internet the first time it needs them. Check you&rsquo;re online, then reload the page and drop the file again. Everything else runs locally.</div>
+      </details>
+      <details>
+        <summary>The code text is smaller on some cards in the output PDF</summary>
+        <div class="faq-answer">Card text auto-shrinks so longer codes always fit inside the code box &mdash; this is by design and prints perfectly legibly.</div>
+      </details>
+      <details>
+        <summary>I can&rsquo;t find the Vouchers page in the UniFi portal</summary>
+        <div class="faq-answer">Voucher management moved between UniFi Network versions. Look for <strong>Hotspot Manager</strong> (ticket icon) in the left menu; on older controllers it&rsquo;s under <strong>Insights</strong> &gt; <strong>Hotspot</strong>. Vouchers also only exist on sites where the guest hotspot portal is enabled.</div>
+      </details>
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="help-section">
+    <h2>Need help?</h2>
+    <p class="help-sub">IT Service Management &middot; Active8 Managed Technologies</p>
+    <div class="rmm-note">
+      <div>&#8505;</div>
+      <div>If the tool reports a problem you can&rsquo;t resolve, contact IT Support with the <strong>original UniFi export PDF</strong> attached and a <strong>screenshot of the warning message</strong> &mdash; the export is needed to reproduce the issue.</div>
+    </div>
+    <div class="contact-grid" style="margin-top:20px;">
+      <a href="mailto:ITSupport@a8mt.co.uk" class="contact-card">
+        <div class="contact-icon-wrap">📧</div>
+        <div>
+          <div class="contact-label">Email</div>
+          <div class="contact-value">ITSupport@a8mt.co.uk</div>
+        </div>
+      </a>
+      <a href="tel:03339997355" class="contact-card">
+        <div class="contact-icon-wrap">📞</div>
+        <div>
+          <div class="contact-label">Phone</div>
+          <div class="contact-value">0333 999 7355</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+</main>
+
+<footer style="background:linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);border-top:1px solid rgba(194,224,0,0.2);padding:18px 40px;text-align:center;">
+  <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">Prepared by <span style="color:rgba(255,255,255,0.85);">Active8 Managed Technologies Limited</span> &middot; IT Service Management</div>
+  <div style="font-family:'Courier New',Consolas,monospace;font-size:10px;color:rgba(255,255,255,0.32);margin-top:5px;">v1.0 &middot; July 2026 &middot; This article is maintained by the Active 8 IT team.</div>
+</footer>
+
+<script>
+(function(){
+  function sendHeight(){
+    var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+    window.parent.postMessage({type:'a8-iframe-resize', height:h}, '*');
+    try { if(window.frameElement) window.frameElement.style.height = (h+20)+'px'; } catch(e){}
+  }
+  // Fire immediately, on load, on resize, and via ResizeObserver
+  sendHeight();
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+  if(window.ResizeObserver){ new ResizeObserver(sendHeight).observe(document.body); }
+  // Retry every 300ms for 12 seconds to survive any parent-side load race
+  var attempts = 0;
+  var timer = setInterval(function(){
+    sendHeight();
+    if(++attempts >= 40) clearInterval(timer);
+  }, 300);
+})();
+</script>
+
+</body>
+</html>
