@@ -202,6 +202,31 @@
     border: 1px solid rgba(0,0,0,0.08);
   }
 
+  /* SCREENSHOT FIGURES */
+  .shot-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; margin-top: 16px; }
+  .shot-fig { margin: 16px 0 2px; }
+  .shot-row .shot-fig { margin: 0; }
+  .shot-fig img {
+    display: block;
+    max-width: 100%;
+    border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  }
+  .shot-fig figcaption {
+    font-size: 0.8rem;
+    color: #5a6270;
+    margin-top: 7px;
+    line-height: 1.45;
+    max-width: 420px;
+  }
+  .shot-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #e31e24; color: #fff; font-size: 0.68rem; font-weight: 700;
+    vertical-align: -2px;
+  }
+
   .step-num {
     width: 26px; height: 26px;
     border-radius: 50%;
@@ -778,9 +803,24 @@
     <div class="content-card">
       <div class="steps">
         <div class="step"><div class="step-num">1</div><p>Sign in to the customer&rsquo;s UniFi Network controller (e.g. <code class="inline-code">m038657.hostifi.com</code>) and select the correct <strong>site</strong> if more than one is listed.</p></div>
-        <div class="step"><div class="step-num">2</div><p>Open <strong>Hotspot Manager</strong> from the left-hand menu (the ticket icon &mdash; on older versions it lives under <strong>Insights</strong> &gt; <strong>Hotspot</strong>).</p></div>
-        <div class="step"><div class="step-num">3</div><p>Go to the <strong>Vouchers</strong> tab. Existing voucher batches are listed here.</p></div>
-        <div class="step"><div class="step-num">4</div><p>If you need new vouchers, click <strong>Create Voucher</strong> and set the amount, expiry (e.g. <strong>8 hours</strong>), usage type, and any bandwidth or data limits, then confirm.</p></div>
+        <div class="step"><div class="step-num">2</div><p>Open <strong>Clients</strong> from the left-hand menu, then click the <strong>Hotspot</strong> toggle at the top of the panel.</p></div>
+        <div class="step"><div class="step-num">3</div><p>Select the <strong>Vouchers</strong> tab (next to <em>Guests</em> and <em>Payments</em>). Existing vouchers are listed here.</p></div>
+        <div class="step"><div class="step-num">4</div><p>If you need new vouchers, click <strong>Add Voucher</strong> in the left-hand panel and set the amount, expiry (e.g. <strong>8 hours</strong>), usage type, and any bandwidth or data limits, then click <strong>Add</strong>.</p></div>
+      </div>
+
+      <div class="shot-row">
+        <figure class="shot-fig">
+          <img src="img/msp-uni-001/step-1-clients-hotspot.png" alt="UniFi Clients page with the Clients icon and the Hotspot toggle highlighted" width="235">
+          <figcaption><span class="shot-num">1</span> <strong>Clients</strong> in the left-hand menu, then <span class="shot-num">2</span> the <strong>Hotspot</strong> toggle at the top of the panel.</figcaption>
+        </figure>
+        <figure class="shot-fig">
+          <img src="img/msp-uni-001/step-2-vouchers-tab.png" alt="Hotspot panel with the Vouchers tab highlighted" width="200">
+          <figcaption>The <strong>Vouchers</strong> tab inside the Hotspot view.</figcaption>
+        </figure>
+        <figure class="shot-fig">
+          <img src="img/msp-uni-001/step-4-add-voucher.png" alt="Add New Voucher dialog with amount, expiration and limit fields" width="305">
+          <figcaption><strong>Add Voucher</strong> opens this dialog &mdash; amount, expiry and limits.</figcaption>
+        </figure>
       </div>
 
       <div class="callout callout-info">
@@ -807,10 +847,15 @@
 
     <div class="content-card">
       <div class="steps">
-        <div class="step"><div class="step-num">1</div><p>In the <strong>Vouchers</strong> tab, select the batch you want to send out and choose <strong>Print</strong> (the printer icon next to the batch, or the print option after selecting the vouchers).</p></div>
-        <div class="step"><div class="step-num">2</div><p>Your browser&rsquo;s print dialog opens. Set the destination to <strong>Save as PDF</strong> &mdash; don&rsquo;t send it to a physical printer.</p></div>
+        <div class="step"><div class="step-num">1</div><p>In the <strong>Vouchers</strong> tab, tick the checkbox at the top of the list to select every voucher (or tick just the ones you want to send), then click <strong>Print</strong> in the left-hand panel.</p></div>
+        <div class="step"><div class="step-num">2</div><p>Your browser&rsquo;s print dialog opens with a preview of the voucher cards. Set the destination to <strong>Save as PDF</strong> &mdash; don&rsquo;t send it to a physical printer.</p></div>
         <div class="step"><div class="step-num">3</div><p>Click <strong>Save</strong> and keep the file somewhere easy to find (the filename usually looks like <code class="inline-code">m038657.hostifi.com - UniFi Network.pdf</code>).</p></div>
       </div>
+
+      <figure class="shot-fig">
+        <img src="img/msp-uni-001/step-3-select-print.png" alt="Voucher list with the select-all checkbox and the Print action highlighted" style="max-width:640px;width:100%;">
+        <figcaption><span class="shot-num">1</span> The top checkbox selects the whole batch; <span class="shot-num">2</span> <strong>Print</strong> opens your browser&rsquo;s print dialog. <em>(Voucher codes blurred in this screenshot.)</em></figcaption>
+      </figure>
 
       <div class="lost-alert in-card">
         <div class="lost-alert-icon">&#9888;</div>
@@ -1058,7 +1103,7 @@
 
 <footer style="background:linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);border-top:1px solid rgba(194,224,0,0.2);padding:18px 40px;text-align:center;">
   <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">Prepared by <span style="color:rgba(255,255,255,0.85);">Active8 Managed Technologies Limited</span> &middot; IT Service Management</div>
-  <div style="font-family:'Courier New',Consolas,monospace;font-size:10px;color:rgba(255,255,255,0.32);margin-top:5px;">v1.0 &middot; July 2026 &middot; This article is maintained by the Active 8 IT team.</div>
+  <div style="font-family:'Courier New',Consolas,monospace;font-size:10px;color:rgba(255,255,255,0.32);margin-top:5px;">v1.1 &middot; July 2026 &middot; This article is maintained by the Active 8 IT team.</div>
 </footer>
 
 <script>
