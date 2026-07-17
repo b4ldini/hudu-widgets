@@ -703,7 +703,7 @@
   <div class="overview-card">
     <div class="card-label">Article Overview</div>
     <p>This guide shows you how to take a batch of hotspot vouchers from the <strong>UniFi Network portal</strong> and turn them into a <strong>clean, print-ready voucher sheet</strong> you can send straight to the customer &mdash; using the <strong>Wi-Fi Voucher Redesigner</strong>, which is embedded <a href="#tool" style="color:#c2e000;text-decoration:none;">in the middle of this article</a> &mdash; read the steps first, then work in the tool without leaving the page.</p>
-    <p>The raw UniFi export is not customer-ready: the layout is plain, and its text layer is broken in a way that <strong>silently corrupts voucher codes</strong> if anyone copies them. The Redesigner repairs and verifies every code, then produces branded A4 voucher cards with cut lines. The <a href="#why" style="color:#c2e000;text-decoration:none;">Why This Tool</a> section explains the problem in detail.</p>
+    <p>The raw UniFi export works, but it&rsquo;s plain and doesn&rsquo;t show the Wi-Fi network name &mdash; and its text layer <strong>silently corrupts voucher codes</strong> if anyone copies them out. The Redesigner verifies every code and produces branded A4 voucher cards with cut lines that look far more professional. The <a href="#why" style="color:#c2e000;text-decoration:none;">Why This Tool</a> section has the details.</p>
     <div class="pill-row">
       <div class="pill"><span class="dot" style="background:#c2e000;"></span> Takes 5&ndash;10 minutes</div>
       <div class="pill"><span class="dot" style="background:#4d8cff;"></span> UniFi Network (HostiFi) portal</div>
@@ -951,29 +951,27 @@
     </div>
 
     <div class="app-trust-banner">
-      <div class="card-label">The Broken Text Layer, Explained</div>
-      <h2>The UniFi export renders correctly but reads wrongly</h2>
-      <p>In UniFi&rsquo;s voucher export, the characters <strong>0</strong> (zero) and <strong>-</strong> (dash) are drawn on the page but missing from the PDF&rsquo;s text layer. Anything that trusts the text &mdash; copy-paste, &ldquo;export to Excel&rdquo;, simple PDF readers &mdash; silently mangles the codes.</p>
+      <div class="card-label">Presentation Matters</div>
+      <h2>You <em>can</em> send the export as it comes out of UniFi</h2>
+      <p>The raw export works &mdash; guests can read the codes off it and connect. But it doesn&rsquo;t mention the Wi-Fi network name anywhere, and honestly, it doesn&rsquo;t look very good. Running the same codes through the Redesigner costs a couple of minutes and hands the customer something that looks professional.</p>
 
       <div class="trust-grid">
         <div class="trust-card con">
           <div class="trust-card-label">The Raw UniFi Export</div>
-          <div class="trust-card-title">Fine to look at, unsafe to reuse</div>
+          <div class="trust-card-title">Usable, but it doesn&rsquo;t look great</div>
           <ul>
-            <li>Copying <code style="font-family:'Courier New',monospace;">57908-78437</code> yields <code style="font-family:'Courier New',monospace;">579878437</code> &mdash; a code that will never work</li>
-            <li>Zeros and dashes vanish with <em>no visible error</em></li>
-            <li>Plain, cramped layout with no network name on the card</li>
-            <li>Speed labels garble too (&ldquo;20.0 Mbps&rdquo; becomes &ldquo;2. Mbps&rdquo;)</li>
+            <li>No Wi-Fi network name (SSID) anywhere &mdash; guests have to be told separately which network to join</li>
+            <li>Plain, cramped cards with no branding or polish</li>
+            <li>One caution: codes can&rsquo;t be <em>copied</em> out of it &mdash; the PDF&rsquo;s text layer silently drops zeros and dashes (<code style="font-family:'Courier New',monospace;">57908-78437</code> copies as <code style="font-family:'Courier New',monospace;">579878437</code>)</li>
           </ul>
         </div>
         <div class="trust-card pro">
           <div class="trust-card-label">The Voucher Redesigner</div>
-          <div class="trust-card-title">Verified codes, presentable cards</div>
+          <div class="trust-card-title">The same codes, looking professional</div>
           <ul>
-            <li>Reads each code twice &mdash; from the text layer <em>and</em> the page image &mdash; and only accepts codes where both agree</li>
-            <li>Tells you explicitly if any voucher couldn&rsquo;t be verified, rather than guessing</li>
-            <li>Prints the Wi-Fi name, validity and speeds on every card</li>
-            <li>Clean A4 grid with cut lines, ready to email or print</li>
+            <li>Every card shows the Wi-Fi name, validity and speeds &mdash; guests have everything they need on one slip</li>
+            <li>Clean, branded A4 grid with cut lines, ready to email or print</li>
+            <li>Codes are read twice (text layer + page image) and cross-checked, so the copy-paste problem can&rsquo;t creep in</li>
           </ul>
         </div>
       </div>
