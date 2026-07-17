@@ -635,16 +635,20 @@ $("gen").addEventListener("click", () => {
 });
 </script>
 <script>
-/* Auto-size when embedded same-origin (e.g. inside a hudu-widgets article iframe). No-op standalone. */
+/* Auto-size when embedded same-origin (e.g. inside a hudu-widgets article iframe). No-op standalone.
+   Measures body content only (never documentElement, which tracks the iframe viewport and
+   would create a grow-forever feedback loop), and skips no-op updates. */
 (function(){
+  var last = -1;
   function sendHeight(){
-    var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+    var h = document.body.scrollHeight + 24;
+    if (Math.abs(h - last) < 5) return;
+    last = h;
     window.parent.postMessage({type:'a8-iframe-resize', height:h}, '*');
-    try { if(window.frameElement) window.frameElement.style.height = (h+20)+'px'; } catch(e){}
+    try { if(window.frameElement) window.frameElement.style.height = h + 'px'; } catch(e){}
   }
   sendHeight();
   window.addEventListener('load', sendHeight);
-  window.addEventListener('resize', sendHeight);
   if(window.ResizeObserver){ new ResizeObserver(sendHeight).observe(document.body); }
 })();
 </script>
