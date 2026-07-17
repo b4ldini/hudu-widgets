@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Managing Email Security – Microsoft Defender Portal Guide for Superusers</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background: #f7f9fc;
+  }
+
+  /* NAV */
+  .sticky-nav {
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  }
+
+  .sticky-nav-inner {
+    padding: 0 40px;
+    display: flex;
+    align-items: stretch;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .sticky-nav-inner::-webkit-scrollbar { display: none; }
+
+  .nav-link {
+    padding: 0 14px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #888;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+    border-radius: 0;
+    position: relative;
+  }
+
+  .nav-link:hover {
+    color: #1a3a8f;
+    background: rgba(37,87,183,0.06);
+    border-bottom-color: #2557b7;
+  }
+
+  .nav-link:active {
+    background: rgba(37,87,183,0.12);
+  }
+
+  .nav-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .num-blue  { background: rgba(37,87,183,0.12); color: #2557b7; }
+  .num-green { background: rgba(0,122,61,0.12);  color: #007a3d; }
+  .num-lime  { background: rgba(194,224,0,0.2);  color: #6b8500; }
+
+  /* PAGE BODY */
+  .page-body { padding: 44px 40px 72px; }
+
+  /* OVERVIEW CARD */
+  .overview-card {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
+    border-radius: 12px;
+    padding: 30px 34px;
+    margin-bottom: 20px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .overview-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(194,224,0,0.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .card-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.38);
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .overview-card p {
+    color: rgba(255,255,255,0.8);
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .pill-row { display: flex; gap: 8px; flex-wrap: wrap; position: relative; margin-top: 18px; }
+
+  .pill {
+    padding: 4px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  /* SECTION HEADING */
+  .section-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .step-badge {
+    flex-shrink: 0;
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 20px;
+    color: white;
+  }
+
+  .badge-blue  { background: #2557b7; }
+  .badge-green { background: #007a3d; }
+  .badge-lime  { background: #8aaa00; }
+
+  .step-meta {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 4px;
+  }
+
+  .step-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 21px;
+    font-weight: 400;
+    color: #1a1a1a;
+    line-height: 1.2;
+  }
+
+  /* CONTENT CARD */
+  .content-card {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+    padding: 22px 26px 26px;
+  }
+
+  /* STEPS */
+  .steps { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #f7f9fc;
+    border-radius: 8px;
+    padding: 11px 14px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  /* SCREENSHOT FIGURES */
+  .shot-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-start; margin-top: 16px; }
+  .shot-fig { margin: 16px 0 2px; }
+  .shot-row .shot-fig { margin: 0; }
+  .shot-fig img {
+    display: block;
+    max-width: 100%;
+    border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  }
+  .shot-fig figcaption {
+    font-size: 0.8rem;
+    color: #5a6270;
+    margin-top: 7px;
+    line-height: 1.45;
+    max-width: 420px;
+  }
+  .shot-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #e31e24; color: #fff; font-size: 0.68rem; font-weight: 700;
+    vertical-align: -2px;
+  }
+
+  .step-num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: rgba(37,87,183,0.1);
+    color: #2557b7;
+    border: 1px solid rgba(37,87,183,0.2);
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step p { font-size: 13px; padding-top: 3px; }
+
+  code.inline-code {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 12px;
+    background: rgba(37,87,183,0.07);
+    border: 1px solid rgba(37,87,183,0.15);
+    padding: 1px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  /* AMBER ALERT */
+  .lost-alert {
+    border-radius: 8px;
+    padding: 13px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    margin-bottom: 44px;
+  }
+
+  .lost-alert.in-card { margin-top: 20px; margin-bottom: 0; }
+  .lost-alert-icon { font-size: 15px; flex-shrink: 0; margin-top: 2px; color: #d97706; }
+  .lost-alert strong { display: block; font-size: 13px; font-weight: 600; margin-bottom: 3px; color: #92400e; }
+  .lost-alert p { font-size: 13px; color: #78350f; line-height: 1.6; }
+
+  /* CALLOUT */
+  .callout {
+    padding: 13px 16px;
+    margin-top: 14px;
+    border-radius: 8px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .callout-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .callout-title { font-weight: 600; font-size: 13px; margin-bottom: 3px; }
+  .callout-body  { font-size: 13px; line-height: 1.6; }
+  .callout-info  { background: #eff6ff; border: 1px solid #bfdbfe; }
+  .callout-info .callout-icon  { color: #2563eb; }
+  .callout-info .callout-title { color: #1e40af; }
+  .callout-info .callout-body  { color: #1e3a5f; }
+
+  /* TRUST BANNER */
+  .app-trust-banner {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 60%, #1e4aa0 100%);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 48px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(30,74,160,0.25);
+  }
+
+  .app-trust-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(194,224,0,0.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .app-trust-banner h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 21px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .app-trust-banner > p {
+    color: rgba(255,255,255,0.78);
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 22px;
+    position: relative;
+  }
+
+  .trust-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  .trust-card {
+    border-radius: 8px;
+    padding: 16px 18px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+
+  .trust-card-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .trust-card.pro .trust-card-label { color: #c2e000; }
+  .trust-card.con .trust-card-label { color: rgba(255,160,120,0.9); }
+
+  .trust-card-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 14px;
+    color: white;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+
+  .trust-card ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+  .trust-card ul li {
+    font-size: 13px;
+    color: rgba(255,255,255,0.68);
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    line-height: 1.5;
+  }
+
+  .trust-card ul li::before { font-weight: 700; font-size: 11px; flex-shrink: 0; margin-top: 1px; }
+  .trust-card.pro ul li::before { content: '✓'; color: #c2e000; }
+  .trust-card.con ul li::before { content: '→'; color: rgba(255,200,120,0.9); }
+
+  .privacy-callout {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 18px 20px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    position: relative;
+  }
+
+  .privacy-callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+
+  .privacy-callout-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 15px;
+    color: white;
+    margin-bottom: 8px;
+  }
+
+  .privacy-callout p { font-size: 13px; color: rgba(255,255,255,0.68); line-height: 1.65; }
+  .privacy-callout p + p { margin-top: 8px; }
+
+  /* DIVIDER */
+  .divider { margin: 34px 0; display: flex; align-items: center; gap: 14px; }
+  .divider-line { flex: 1; height: 1px; background: rgba(0,0,0,0.1); }
+  .divider-arrow { color: #bbb; font-size: 14px; }
+
+  /* REQUIREMENTS TABLE */
+  .id-table-wrap {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+
+  .id-table-intro { padding: 16px 22px 0; }
+  .id-table-intro p { font-size: 14px; line-height: 1.6; padding-bottom: 14px; border-bottom: 1px solid rgba(0,0,0,0.08); }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    background: #f7f9fc;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #888;
+    padding: 10px 22px;
+    text-align: left;
+    border-bottom: 2px solid rgba(0,0,0,0.08);
+  }
+
+  tbody tr { border-bottom: 1px solid rgba(0,0,0,0.07); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 14px 22px; font-size: 14px; vertical-align: middle; line-height: 1.5; }
+
+  .req-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+    background: rgba(37,87,183,0.1);
+    color: #2557b7;
+  }
+
+  /* VERDICT PILLS (release table) */
+  .ok-pill, .no-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .ok-pill { background: rgba(0,122,61,0.1); color: #007a3d; }
+  .no-pill { background: rgba(227,30,36,0.08); color: #b91c1c; }
+
+  /* FAQ / TROUBLESHOOTING */
+  .faq-wrap {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+
+  .faq-header {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
+    padding: 18px 26px;
+  }
+
+  .faq-header h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 2px;
+  }
+
+  .faq-header p {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.42);
+    letter-spacing: 0.06em;
+  }
+
+  details { border-bottom: 1px solid rgba(0,0,0,0.08); }
+  details:last-child { border-bottom: none; }
+
+  summary {
+    padding: 15px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    list-style: none;
+    user-select: none;
+  }
+
+  summary::-webkit-details-marker { display: none; }
+  summary:hover { background: #f7f9fc; }
+  summary::after { content: '+'; font-size: 20px; font-weight: 300; color: #bbb; flex-shrink: 0; }
+  details[open] summary::after { content: '×'; color: #2557b7; }
+  details[open] summary { color: #2557b7; background: #f7f9fc; }
+
+  .faq-answer {
+    padding: 4px 22px 16px;
+    font-size: 14px;
+    line-height: 1.7;
+    background: #f7f9fc;
+    color: #333;
+  }
+
+  /* HELP SECTION */
+  .help-section {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 60%, #1e4aa0 100%);
+    border-radius: 12px;
+    padding: 32px 34px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 44px;
+    color: white;
+    box-shadow: 0 4px 22px rgba(30,74,160,0.3);
+  }
+
+  .help-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 80% 20%, rgba(194,224,0,0.1) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .help-section h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 21px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 5px;
+    position: relative;
+  }
+
+  .help-sub {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 22px;
+    position: relative;
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    position: relative;
+    margin-bottom: 12px;
+  }
+
+  .contact-card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 14px 16px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .contact-card:hover { background: rgba(255,255,255,0.12); border-color: rgba(194,224,0,0.35); }
+
+  .contact-icon-wrap {
+    width: 38px; height: 38px;
+    border-radius: 8px;
+    background: rgba(194,224,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+
+  .contact-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #c2e000;
+    margin-bottom: 3px;
+  }
+
+  .contact-value { font-size: 13px; font-weight: 600; color: white; }
+
+  .rmm-note {
+    background: rgba(194,224,0,0.08);
+    border: 1px solid rgba(194,224,0,0.2);
+    border-radius: 8px;
+    padding: 13px 16px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.72);
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    position: relative;
+  }
+
+  .rmm-note strong { color: #c2e000; }
+
+  /* COMPLETION BANNER */
+  .completion-banner {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
+    border-radius: 12px;
+    padding: 36px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 4px 22px rgba(30,74,160,0.28);
+  }
+
+  .completion-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(194,224,0,0.18) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .completion-inner { position: relative; z-index: 1; }
+
+  .completion-icon {
+    width: 52px; height: 52px;
+    background: rgba(194,224,0,0.2);
+    border: 2px solid rgba(194,224,0,0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    font-size: 22px;
+    color: #c2e000;
+  }
+
+  .completion-eyebrow {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(194,224,0,0.75);
+    margin-bottom: 10px;
+  }
+
+  .completion-banner h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 23px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 12px;
+  }
+
+  .completion-banner p { font-size: 14px; color: rgba(255,255,255,0.6); max-width: 460px; margin: 0 auto 20px; line-height: 1.7; }
+
+  .completion-pills { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+
+  .cpill-lime {
+    background: rgba(194,224,0,0.15);
+    border: 1px solid rgba(194,224,0,0.35);
+    border-radius: 20px;
+    padding: 4px 13px;
+    font-size: 12px;
+    color: #c2e000;
+    font-weight: 500;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 640px) {
+    .sticky-nav-inner { padding: 0 14px; }
+    .page-body       { padding: 28px 14px 56px; }
+
+    .overview-card,
+    .app-trust-banner,
+    .help-section,
+    .completion-banner { padding: 20px 16px; }
+
+    .content-card { padding: 16px 16px 20px; }
+
+    .trust-grid,
+    .contact-grid { grid-template-columns: 1fr; }
+
+    .privacy-callout { flex-direction: column; gap: 10px; }
+
+    summary   { padding: 13px 16px; }
+    .faq-answer { padding: 4px 16px 14px; }
+    .faq-header { padding: 14px 18px; }
+
+    .completion-pills { flex-direction: column; align-items: center; }
+
+    thead th,
+    tbody td { padding: 10px 14px; }
+  }
+
+  @media (max-width: 380px) {
+    .step-title { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sticky-nav">
+  <div class="sticky-nav-inner">
+    <a class="nav-link" href="#need"><span class="nav-num num-lime">?</span> What You'll Need</a>
+    <a class="nav-link" href="#step1"><span class="nav-num num-blue">1</span> Sign In</a>
+    <a class="nav-link" href="#step2"><span class="nav-num num-green">2</span> The Daily Digest</a>
+    <a class="nav-link" href="#step3"><span class="nav-num num-blue">3</span> Search Quarantine</a>
+    <a class="nav-link" href="#step4"><span class="nav-num num-green">4</span> Release &amp; Block</a>
+    <a class="nav-link" href="#step5"><span class="nav-num num-blue">5</span> Report Phishing</a>
+    <a class="nav-link" href="#how"><span class="nav-num num-lime">✓</span> How It Works</a>
+    <a class="nav-link" href="#troubleshoot"><span class="nav-num num-blue">!</span> Troubleshooting</a>
+  </div>
+</nav>
+
+<main class="page-body">
+
+  <!-- OVERVIEW -->
+  <div class="overview-card">
+    <div class="card-label">Article Overview</div>
+    <p>Your organisation&rsquo;s email is protected by <strong>Microsoft Defender for Office 365</strong>, managed by Active8. Suspicious messages are held in <strong>quarantine</strong> instead of being delivered, and Defender emails each user a <strong>digest</strong> of what was held for them. As the designated <strong>superuser</strong>, you can also see and manage quarantined mail for <em>everyone</em> in your organisation.</p>
+    <p>This guide covers the day-to-day tasks: reading the digest email, finding a &ldquo;missing&rdquo; message in quarantine, releasing legitimate mail, blocking nuisance senders, and reporting anything suspicious &mdash; all through the Defender portal at <strong>security.microsoft.com</strong>.</p>
+    <div class="pill-row">
+      <div class="pill"><span class="dot" style="background:#c2e000;"></span> For designated superusers</div>
+      <div class="pill"><span class="dot" style="background:#4d8cff;"></span> security.microsoft.com</div>
+      <div class="pill"><span class="dot" style="background:#4ade80;"></span> No software to install</div>
+      <div class="pill"><span class="dot" style="background:rgba(255,255,255,0.4);"></span> Quarantine kept 30 days</div>
+    </div>
+  </div>
+
+  <div class="lost-alert">
+    <div class="lost-alert-icon">&#9888;</div>
+    <div>
+      <strong>Some messages can never be released &mdash; that&rsquo;s deliberate</strong>
+      <p>Messages Defender classifies as <strong>malware</strong> or <strong>high-confidence phishing</strong> are locked to administrators only. No release button will appear for them &mdash; Microsoft enforces this and it cannot be overridden from your side. If you believe one of these is genuinely legitimate, don&rsquo;t try to work around it: contact Active8 and we&rsquo;ll review and release it if it&rsquo;s safe.</p>
+    </div>
+  </div>
+
+  <!-- WHAT YOU'LL NEED -->
+  <div id="need">
+    <div class="section-heading">
+      <div class="step-badge badge-lime">?</div>
+      <div>
+        <div class="step-meta">Preparation</div>
+        <div class="step-title">What You&rsquo;ll Need</div>
+      </div>
+    </div>
+
+    <div class="id-table-wrap">
+      <div class="id-table-intro">
+        <p>Everything here is set up by Active8 when your email protection goes live &mdash; if any of it doesn&rsquo;t work for you, get in touch and we&rsquo;ll check your access.</p>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Requirement</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="req-pill">🔑 Work sign-in + MFA</span></td>
+            <td>Your normal Microsoft 365 work account. The portal will ask for your usual multi-factor authentication approval</td>
+          </tr>
+          <tr>
+            <td><span class="req-pill">👑 Superuser role</span></td>
+            <td>Active8 grants your account the <strong>Quarantine Administrator</strong> role &mdash; this is what lets you see other people&rsquo;s quarantined mail, not just your own</td>
+          </tr>
+          <tr>
+            <td><span class="req-pill">🌐 The portal</span></td>
+            <td>Bookmark <a href="https://security.microsoft.com/quarantine" target="_blank" rel="noopener" style="color:#2557b7;">security.microsoft.com/quarantine</a> &mdash; it goes straight to the quarantine page</td>
+          </tr>
+          <tr>
+            <td><span class="req-pill">📧 The digest email</span></td>
+            <td>Arrives automatically (usually daily) from your email security service &mdash; no setup needed. Every user gets their own; yours only lists <em>your</em> held mail</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 1 -->
+  <div id="step1">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">1</div>
+      <div>
+        <div class="step-meta">Step 01 of 05</div>
+        <div class="step-title">Sign In to the Defender Portal</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>Open <a href="https://security.microsoft.com/quarantine" target="_blank" rel="noopener" style="color:#2557b7;"><code class="inline-code">security.microsoft.com/quarantine</code></a> in your browser and sign in with your work account, approving the MFA prompt as usual.</p></div>
+        <div class="step"><div class="step-num">2</div><p>You land directly on the <strong>Quarantine</strong> page &mdash; a list of held messages with sender, subject, recipient and the reason each was held (Spam, Phish, Malware, etc.).</p></div>
+        <div class="step"><div class="step-num">3</div><p>If you ever arrive at the portal home page instead, navigate via the left menu: <strong>Email &amp; collaboration</strong> &rarr; <strong>Review</strong> &rarr; <strong>Quarantine</strong>.</p></div>
+        <div class="step"><div class="step-num">4</div><p>Seeing only your own messages? Your superuser role may not be active &mdash; contact Active8 and we&rsquo;ll check the <strong>Quarantine Administrator</strong> assignment.</p></div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">&#8505;</div>
+        <div>
+          <div class="callout-title">The portal is safe to explore</div>
+          <div class="callout-body">Nothing on the Quarantine page sends or deletes anything until you explicitly choose an action, and previewing a quarantined message is completely safe &mdash; it&rsquo;s shown as inert text and images, with links and attachments disarmed.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 2 -->
+  <div id="step2">
+    <div class="section-heading">
+      <div class="step-badge badge-green">2</div>
+      <div>
+        <div class="step-meta">Step 02 of 05</div>
+        <div class="step-title">Read the Daily Digest Email</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>Each user receives a digest listing messages held <strong>for them</strong> since the last digest &mdash; sender, subject, and the date each was held. No mail held means no digest that day.</p></div>
+        <div class="step"><div class="step-num">2</div><p>Next to each message are action links &mdash; typically <strong>Review message</strong>, <strong>Release</strong>, and <strong>Block sender</strong>. These work directly from the email; there&rsquo;s no need to open the portal for a simple release.</p></div>
+        <div class="step"><div class="step-num">3</div><p><strong>Release</strong> delivers the message to the recipient&rsquo;s inbox exactly as originally sent. <strong>Block sender</strong> adds the sender to that user&rsquo;s personal blocked list.</p></div>
+        <div class="step"><div class="step-num">4</div><p>Encourage staff to treat the digest as their first stop for &ldquo;I&rsquo;m missing an email&rdquo; &mdash; most cases resolve there without involving you or Active8.</p></div>
+      </div>
+
+      <div class="lost-alert in-card">
+        <div class="lost-alert-icon">&#9888;</div>
+        <div>
+          <strong>Only release what you recognise and were expecting</strong>
+          <p>Quarantine exists because these messages looked dangerous or unwanted. A convincing invoice or delivery notification from an unknown sender is exactly what phishing looks like. If in doubt, don&rsquo;t release &mdash; preview it in the portal first, or ask Active8 to check it.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 3 -->
+  <div id="step3">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">3</div>
+      <div>
+        <div class="step-meta">Step 03 of 05</div>
+        <div class="step-title">Find a Message in Quarantine</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <p style="font-size:13px;margin-bottom:12px;">The most common superuser task: someone says <em>&ldquo;I was expecting an email and it never arrived.&rdquo;</em> Here&rsquo;s how to find it.</p>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>On the <strong>Quarantine</strong> page, click <strong>Filter</strong> and narrow the list &mdash; the most useful filters are <strong>Recipient address</strong> (the person missing the email) and the <strong>Time received</strong> range.</p></div>
+        <div class="step"><div class="step-num">2</div><p>You can also use the <strong>search box</strong> to look for the sender&rsquo;s address or part of the subject line if you know them.</p></div>
+        <div class="step"><div class="step-num">3</div><p>Click the message to open the details pane. <strong>Preview message</strong> shows the content safely; the details also show <em>why</em> it was held (spam, phish, impersonation, malware) and whether anyone has already released it.</p></div>
+        <div class="step"><div class="step-num">4</div><p>Not in quarantine at all? Then Defender didn&rsquo;t hold it &mdash; the message may have gone to the user&rsquo;s <strong>Junk Email folder</strong> (worth checking first), been rejected before delivery, or never been sent. Contact Active8 and we can run a full message trace.</p></div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">&#8505;</div>
+        <div>
+          <div class="callout-title">Quarantine keeps messages for 30 days</div>
+          <div class="callout-body">After 30 days, held messages are permanently deleted and cannot be recovered by anyone &mdash; including Microsoft. If a user mentions a missing email from &ldquo;a few weeks ago&rdquo;, check quarantine sooner rather than later.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 4 -->
+  <div id="step4">
+    <div class="section-heading">
+      <div class="step-badge badge-green">4</div>
+      <div>
+        <div class="step-meta">Step 04 of 05</div>
+        <div class="step-title">Release Messages &amp; Manage Senders</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>Select the message and click <strong>Release</strong>. As superuser you can release mail held for <strong>any user</strong>, and for messages with several recipients you can release to all of them or only some.</p></div>
+        <div class="step"><div class="step-num">2</div><p>During release you may be offered <strong>&ldquo;Report to Microsoft&rdquo;</strong> options &mdash; reporting a wrongly-held message as a false positive helps tune the filtering for everyone. Use it when the message was clearly legitimate.</p></div>
+        <div class="step"><div class="step-num">3</div><p>The released message lands in the recipient&rsquo;s <strong>inbox</strong>, usually within a few minutes. The quarantine entry stays in the list but shows as <em>Released</em> &mdash; a message can only be released once.</p></div>
+        <div class="step"><div class="step-num">4</div><p>To stop a nuisance sender, select one of their messages and choose <strong>Block sender</strong>. This blocks them for that recipient. For an organisation-wide block or allow &mdash; or a sender who is <em>repeatedly</em> wrongly quarantined &mdash; contact Active8: we maintain the tenant-wide allow/block list centrally so it&rsquo;s done safely and expires reviewed entries properly.</p></div>
+      </div>
+
+      <div style="margin-top:18px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Quarantine reason</th>
+              <th>Who can release it</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Spam / bulk mail</td>
+              <td><span class="ok-pill">✓ User or superuser</span></td>
+            </tr>
+            <tr>
+              <td>Phishing (standard confidence)</td>
+              <td><span class="ok-pill">✓ Superuser</span> &nbsp;(users may only be able to <em>request</em> release, depending on your organisation&rsquo;s policy)</td>
+            </tr>
+            <tr>
+              <td>High-confidence phishing</td>
+              <td><span class="no-pill">✗ Active8 / admin only</span></td>
+            </tr>
+            <tr>
+              <td>Malware &amp; blocked attachment types</td>
+              <td><span class="no-pill">✗ Active8 / admin only</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="lost-alert in-card">
+        <div class="lost-alert-icon">&#9888;</div>
+        <div>
+          <strong>A release is final &mdash; there&rsquo;s no &ldquo;un-release&rdquo;</strong>
+          <p>Once released, the message is in the user&rsquo;s inbox and any links or attachments are live. If you release something and then have second thoughts, tell the recipient not to open it and contact Active8 immediately.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 5 -->
+  <div id="step5">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">5</div>
+      <div>
+        <div class="step-meta">Step 05 of 05</div>
+        <div class="step-title">Report Suspicious Email</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>Anything suspicious that <em>does</em> reach an inbox should be reported with the <strong>Report</strong> button, built into Outlook (desktop, web and mobile) &mdash; select the message, then choose <strong>Report</strong> &rarr; <strong>Report phishing</strong> (or <em>Report junk</em> for plain spam).</p></div>
+        <div class="step"><div class="step-num">2</div><p>Reporting sends the message to Microsoft and to the monitored security mailbox, and Defender automatically opens an investigation &mdash; it checks whether the same message reached anyone else and flags what should be removed.</p></div>
+        <div class="step"><div class="step-num">3</div><p>Make this the standard habit across your team: <strong>report, don&rsquo;t forward</strong>. Forwarding a phish around the office (&ldquo;is this real?&rdquo;) multiplies the risk; reporting it quietly deals with every copy at once.</p></div>
+        <div class="step"><div class="step-num">4</div><p>If someone has already <strong>clicked a link or entered their password</strong>, that&rsquo;s an incident, not a report &mdash; call Active8 straight away so we can secure the account.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPLETION BANNER -->
+  <div class="completion-banner">
+    <div class="completion-inner">
+      <div class="completion-icon">&#10003;</div>
+      <div class="completion-eyebrow">You&rsquo;re Set</div>
+      <h2>That&rsquo;s the whole routine</h2>
+      <p>Digest for the everyday, portal for the deep-dives, release only what you trust, and report anything that smells wrong. Everything else &mdash; the filtering rules, the tenant-wide lists, the locked-down categories &mdash; is handled for you.</p>
+      <div class="completion-pills">
+        <div class="cpill-lime">&#10003; Digest daily</div>
+        <div class="cpill-lime">&#10003; Portal for anything missing</div>
+        <div class="cpill-lime">&#10003; Report, don&rsquo;t forward</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div id="how">
+    <div class="section-heading">
+      <div class="step-badge badge-lime">✓</div>
+      <div>
+        <div class="step-meta">Worth Knowing</div>
+        <div class="step-title">What Defender Is Doing Behind the Scenes</div>
+      </div>
+    </div>
+
+    <div class="app-trust-banner">
+      <div class="card-label">Managed Protection</div>
+      <h2>Most of the work happens before you ever see it</h2>
+      <p>Every inbound message is checked for spam, spoofing, impersonation of your colleagues and domains, malicious attachments and dangerous links &mdash; and protection doesn&rsquo;t stop at delivery. Knowing the moving parts helps explain the odd thing users notice.</p>
+
+      <div class="trust-grid">
+        <div class="trust-card pro">
+          <div class="trust-card-label">Handled Automatically</div>
+          <div class="trust-card-title">You&rsquo;ll rarely notice any of this</div>
+          <ul>
+            <li><strong>Safe Attachments</strong> opens every attachment in a Microsoft sandbox before delivery &mdash; this is why an email with an attachment can arrive a minute or two after one without</li>
+            <li><strong>Safe Links</strong> rewrites links so they&rsquo;re re-checked at the moment of click &mdash; hovering a link may show a long <code style="font-family:'Courier New',monospace;">safelinks.protection.outlook.com</code> address; that&rsquo;s normal</li>
+            <li><strong>Zero-hour purge</strong> retro-removes messages from inboxes if Microsoft learns they were malicious <em>after</em> delivery &mdash; mail can legitimately &ldquo;disappear&rdquo;</li>
+            <li>Impersonation checks watch for lookalikes of your key people and domains</li>
+          </ul>
+        </div>
+        <div class="trust-card con">
+          <div class="trust-card-label">Where You Come In</div>
+          <div class="trust-card-title">The judgement calls Defender leaves to people</div>
+          <ul>
+            <li>Releasing wrongly-held mail your team is genuinely expecting</li>
+            <li>Spotting the &ldquo;missing email&rdquo; pattern &mdash; digest first, then quarantine search</li>
+            <li>Reporting suspicious messages so investigations start early</li>
+            <li>Telling Active8 about repeat offenders &mdash; both nuisance senders and legitimate ones that keep getting caught</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="privacy-callout">
+        <div class="privacy-callout-icon">🛡</div>
+        <div>
+          <div class="privacy-callout-title">Why you can&rsquo;t release everything</div>
+          <p>Malware and high-confidence phishing are the two categories attackers most rely on someone releasing in a hurry. Microsoft locks these to administrators <strong style="color:rgba(255,255,255,0.9);">by design</strong>, and Active8 reviews any request to release one. It&rsquo;s a deliberate speed bump &mdash; the small delay is the protection working, not a fault.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TROUBLESHOOTING -->
+  <div id="troubleshoot">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">!</div>
+      <div>
+        <div class="step-meta">If Something Goes Wrong</div>
+        <div class="step-title">Troubleshooting</div>
+      </div>
+    </div>
+
+    <div class="faq-wrap">
+      <div class="faq-header">
+        <h2>Common Questions &amp; Fixes</h2>
+        <p>Click any problem to expand the fix</p>
+      </div>
+      <details>
+        <summary>A legitimate email keeps getting quarantined every time</summary>
+        <div class="faq-answer">Release it as normal and use the <strong>Report to Microsoft &rarr; not junk</strong> option during release. If the same sender is caught repeatedly, contact Active8 with the sender&rsquo;s address &mdash; we&rsquo;ll add a proper tenant-level allow entry. Please don&rsquo;t ask the sender to keep resending; each copy will be caught the same way.</div>
+      </details>
+      <details>
+        <summary>I released a message but it hasn&rsquo;t appeared in the inbox</summary>
+        <div class="faq-answer">Allow up to 15 minutes, and have the user check their <strong>Junk Email folder</strong> &mdash; release puts the message back into normal delivery, and Outlook&rsquo;s own junk filter can still act on it. The quarantine entry will show <em>Released</em> once processed. Still missing after that? Contact Active8 with the subject line and time.</div>
+      </details>
+      <details>
+        <summary>A user says an email never arrived, and it&rsquo;s not in quarantine</summary>
+        <div class="faq-answer">Check the user&rsquo;s <strong>Junk Email folder</strong> and their <strong>blocked senders list</strong> in Outlook first. If it&rsquo;s genuinely nowhere, contact Active8 with the sender address, expected date and recipient &mdash; we can run a message trace that shows exactly what happened to it, including whether it was rejected before delivery or never sent at all.</div>
+      </details>
+      <details>
+        <summary>The digest email isn&rsquo;t arriving</summary>
+        <div class="faq-answer">First: a digest is only sent when there is something to report &mdash; a quiet day means no digest, which is normal. If mail is visibly sitting in the user&rsquo;s quarantine but no digest ever arrives, check the digest itself hasn&rsquo;t been swept into Junk, then contact Active8 to verify the notification settings.</div>
+      </details>
+      <details>
+        <summary>I only see a &ldquo;Request release&rdquo; button, not &ldquo;Release&rdquo;</summary>
+        <div class="faq-answer">Two possibilities. If a <em>user</em> sees this, your organisation is set up for request-and-approve: their request lands with the superuser/Active8 for a decision &mdash; working as intended. If <em>you</em> see it as the superuser on ordinary spam, your Quarantine Administrator role isn&rsquo;t active &mdash; contact Active8. (On malware and high-confidence phish, no one but an admin ever gets a release button.)</div>
+      </details>
+      <details>
+        <summary>An email &ldquo;disappeared&rdquo; from an inbox after it had arrived</summary>
+        <div class="faq-answer">That&rsquo;s almost certainly <strong>zero-hour auto purge</strong>: Microsoft reclassified the message as spam or phishing after delivery and moved it to Junk or quarantine retrospectively. Check quarantine for it. If it was genuinely legitimate, release it and report it as a false positive.</div>
+      </details>
+      <details>
+        <summary>Links in emails look strange &mdash; they all start with safelinks.protection.outlook.com</summary>
+        <div class="faq-answer">This is <strong>Safe Links</strong> working as designed. The original destination is still there at the end of the address, and the link is checked for danger at the moment it&rsquo;s clicked. Nothing is wrong and nothing needs changing &mdash; users can click as normal.</div>
+      </details>
+      <details>
+        <summary>A user was restricted from sending email</summary>
+        <div class="faq-answer">Defender restricts a mailbox that suddenly sends far more mail than normal &mdash; the classic sign of a compromised account, though a genuine bulk send (e.g. a newsletter to hundreds of recipients) can also trigger it. Active8 is alerted automatically when this happens. Don&rsquo;t ask the user to keep trying; contact us and we&rsquo;ll investigate and lift the restriction if all is well.</div>
+      </details>
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="help-section">
+    <h2>Need help?</h2>
+    <p class="help-sub">IT Service Management &middot; Active8 Managed Technologies</p>
+    <div class="rmm-note">
+      <div>&#8505;</div>
+      <div>When contacting us about a quarantined or missing email, include the <strong>sender address</strong>, <strong>recipient address</strong>, <strong>subject line</strong> and roughly <strong>when it was sent</strong> &mdash; with those four things we can usually trace it in minutes.</div>
+    </div>
+    <div class="contact-grid" style="margin-top:20px;">
+      <a href="mailto:ITSupport@a8mt.co.uk" class="contact-card">
+        <div class="contact-icon-wrap">📧</div>
+        <div>
+          <div class="contact-label">Email</div>
+          <div class="contact-value">ITSupport@a8mt.co.uk</div>
+        </div>
+      </a>
+      <a href="tel:03339997355" class="contact-card">
+        <div class="contact-icon-wrap">📞</div>
+        <div>
+          <div class="contact-label">Phone</div>
+          <div class="contact-value">0333 999 7355</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+</main>
+
+<footer style="background:linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);border-top:1px solid rgba(194,224,0,0.2);padding:18px 40px;text-align:center;">
+  <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">Prepared by <span style="color:rgba(255,255,255,0.85);">Active8 Managed Technologies Limited</span> &middot; IT Service Management</div>
+  <div style="font-family:'Courier New',Consolas,monospace;font-size:10px;color:rgba(255,255,255,0.32);margin-top:5px;">v1.0 &middot; July 2026 &middot; This article is maintained by the Active 8 IT team.</div>
+</footer>
+
+<script>
+(function(){
+  function sendHeight(){
+    var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+    window.parent.postMessage({type:'a8-iframe-resize', height:h}, '*');
+    try { if(window.frameElement) window.frameElement.style.height = (h+20)+'px'; } catch(e){}
+  }
+  // Fire immediately, on load, on resize, and via ResizeObserver
+  sendHeight();
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+  if(window.ResizeObserver){ new ResizeObserver(sendHeight).observe(document.body); }
+  // Retry every 300ms for 12 seconds to survive any parent-side load race
+  var attempts = 0;
+  var timer = setInterval(function(){
+    sendHeight();
+    if(++attempts >= 40) clearInterval(timer);
+  }, 300);
+})();
+</script>
+
+</body>
+</html>
