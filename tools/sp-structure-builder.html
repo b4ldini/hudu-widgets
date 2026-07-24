@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>SharePoint Structure Planner</title>
+<title>SharePoint Structure Planner — Active8 Managed Technologies</title>
 <style>
   :root{
     --paper:#F6F7F9; --panel:#FFFFFF; --panel-2:#EFF1F5;
@@ -323,6 +323,7 @@
 <div class="wrap">
   <header class="app">
     <div class="brand">
+      <div style="font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:4px">Active8 Managed Technologies</div>
       <h1>SharePoint Structure Planner</h1>
       <div class="sub">Sketch how you'd like your files organised after the move, and who should be able to see what. No SharePoint knowledge needed — every term is explained as you go, and the checker keeps your plan on track.</div>
     </div>
@@ -347,7 +348,7 @@
         <li><strong>Make your groups.</strong> In <strong>Access groups</strong>, click people's names to say who belongs in each group.</li>
         <li><strong>Decide who can see what.</strong> Click <em>details</em> on a site to click its owners and tick which groups use it. If everyone on the site can see a library, leave it as "same as site"; if it's for a smaller circle, mark it restricted and tick the group(s) who should have it.</li>
         <li><strong>Watch the health check</strong> on the right — it flags anything that would cause problems later, and tells you how to fix it.</li>
-        <li><strong>Send it back to us.</strong> When you're happy, use <strong>Copy as text</strong> and paste the whole thing into an email — it's a readable summary with a "plan data" code at the bottom that lets us load your design exactly as you built it. Please keep that code intact. (Prefer something shorter? <strong>Copy share code</strong> gives just the code on its own — pasting it into <em>Load a plan</em> recreates everything.) Your draft also saves automatically in this browser, so you can come back to it.</li>
+        <li><strong>Send it back to us.</strong> When you're happy, use <strong>Copy as text</strong> and paste the whole thing into an email to your Active8 contact — replying to the message that sent you this link is perfect. It's a readable summary with a "plan data" code at the bottom that lets us load your design exactly as you built it. Please keep that code intact. (Prefer something shorter? <strong>Copy share code</strong> gives just the code on its own — pasting it into <em>Load a plan</em> recreates everything.) Your draft also saves automatically in this browser, so you can come back to it.</li>
       </ol>
       <p>One rule this planner enforces: <strong>access is decided on whole libraries, never on individual folders</strong>. If one folder needs to be private (say, salaries within HR), it should become its own library — the planner will guide you when that happens.</p>
     </div>
@@ -395,7 +396,7 @@
           <button class="btn" id="importJson">Load a plan</button>
           <button class="btn danger" id="resetAll">Start over</button>
         </div>
-        <p class="small">Your draft saves automatically in this browser. "Copy as text" gives a readable outline to paste straight into an email — it includes a plan-data code at the bottom, so the email alone is enough for us. "Copy share code" gives just that code on its own — anyone can paste it into <em>Load a plan</em> to recreate your exact design. "Download plan file" saves the outline as a plain text file.</p>
+        <p class="small">Your draft saves automatically in this browser. "Copy as text" gives a readable outline to paste straight into an email — it includes a plan-data code at the bottom, so the email alone is enough for us. "Copy share code" gives just that code on its own — anyone can paste it into <em>Load a plan</em> to recreate your exact design. "Download plan file" saves the outline as a plain text file. Email your plan to your usual Active8 contact — replying to the message that sent you this link works perfectly. Not sure who to send it to? Use <strong>ITSupport@a8mt.co.uk</strong>.</p>
         <input type="file" id="fileInput" accept=".txt,.json,text/plain,application/json" hidden>
       </section>
 
@@ -410,6 +411,8 @@
       </section>
     </aside>
   </div>
+
+  <div style="margin-top:26px;text-align:center;font-size:12px;color:var(--muted)">Prepared for you by <strong>Active8 Managed Technologies</strong> &middot; 0333 999 7355 &middot; ITSupport@a8mt.co.uk</div>
 </div>
 
 <div class="toast" id="toast" role="status"></div>
@@ -1231,6 +1234,7 @@
     var lines = [];
     var d = new Date();
     lines.push("PLANNED SHAREPOINT STRUCTURE");
+    lines.push("Prepared for Active8 Managed Technologies");
     lines.push("Drafted " + d.toLocaleDateString(undefined,{day:"numeric",month:"long",year:"numeric"}));
     lines.push("");
     if(state.people.length){
@@ -1420,7 +1424,7 @@
       a.download = "sharepoint-structure-plan.txt";
       document.body.appendChild(a); a.click();
       setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 400);
-      toast("Plan file downloaded — attach it to an email to us");
+      toast("Plan file downloaded — attach it to your email back to Active8");
     });
   });
 
