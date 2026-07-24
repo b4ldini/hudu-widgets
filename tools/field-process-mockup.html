@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FieldFlow — Field Job Reporting (Mockup)</title>
+<style>
+  :root{
+    color-scheme: light;
+    --page:#f9f9f7; --surface:#fcfcfb;
+    --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
+    --grid:#e1e0d9; --border:rgba(11,11,11,0.10);
+    --s1:#2a78d6; --s2:#eb6834;
+    --good:#0ca30c; --warn:#fab219; --serious:#ec835a; --critical:#d03b3b;
+    --good-text:#006300;
+    --radius:10px;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--page); color:var(--ink); font-size:15px; line-height:1.5;}
+  header{background:var(--surface); border-bottom:1px solid var(--grid); padding:14px 28px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;}
+  header h1{font-size:19px; font-weight:700;}
+  header .sub{color:var(--ink2); font-size:13px;}
+  .mock-chip{margin-left:auto; font-size:12px; font-weight:600; color:var(--ink2); border:1px solid var(--border); border-radius:999px; padding:3px 12px; background:var(--page);}
+  nav{display:flex; gap:4px; padding:10px 28px 0; background:var(--surface); border-bottom:1px solid var(--grid); flex-wrap:wrap;}
+  nav button{border:none; background:none; font:inherit; font-size:14px; font-weight:600; color:var(--ink2); padding:10px 16px; cursor:pointer; border-bottom:3px solid transparent; border-radius:6px 6px 0 0;}
+  nav button:hover{background:var(--page);}
+  nav button.active{color:var(--s1); border-bottom-color:var(--s1);}
+  main{max-width:1180px; margin:0 auto; padding:26px 28px 60px;}
+  .tab{display:none;}
+  .tab.active{display:block;}
+  h2{font-size:20px; margin-bottom:4px;}
+  .lede{color:var(--ink2); margin-bottom:22px; max-width:70ch;}
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px;}
+  .grid{display:grid; gap:14px;}
+
+  /* ---- Process flow ---- */
+  .flow{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:26px;}
+  .step{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; position:relative;}
+  .step .n{display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; background:var(--s1); color:#fff; font-weight:700; font-size:13px; margin-bottom:8px;}
+  .step h3{font-size:14.5px; margin-bottom:4px;}
+  .step p{font-size:13px; color:var(--ink2);}
+  .step .feeds{margin-top:8px; font-size:12px; font-weight:600;}
+  .feeds .at{color:var(--s1);}
+  .feeds .hu{color:var(--s2);}
+  .gate{border-left:4px solid var(--critical);}
+  .problem-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin-top:8px;}
+  .problem-row .card{border-left:4px solid var(--serious);}
+  .problem-row .card.fix{border-left-color:var(--good);}
+  .problem-row h4{font-size:13.5px; margin-bottom:3px;}
+  .problem-row p{font-size:13px; color:var(--ink2);}
+
+  /* ---- Scheduler ---- */
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  th{text-align:left; color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.04em; border-bottom:1px solid var(--grid); padding:8px 10px;}
+  td{border-bottom:1px solid var(--grid); padding:9px 10px; vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  .num{font-variant-numeric:tabular-nums; text-align:right;}
+  th.num{text-align:right;}
+  .status{display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; border-radius:999px; padding:2px 10px; white-space:nowrap;}
+  .st-done{background:rgba(12,163,12,.12); color:var(--good-text);}
+  .st-prog{background:rgba(42,120,214,.12); color:#1c5cab;}
+  .st-hold{background:rgba(250,178,25,.18); color:#6b4a00;}
+  .st-not{background:var(--page); color:var(--ink2); border:1px solid var(--grid);}
+  .st-flag{background:rgba(208,59,59,.12); color:#8f1f1f;}
+  .two-col{display:grid; grid-template-columns:1.4fr 1fr; gap:16px; align-items:start;}
+  @media(max-width:900px){.two-col{grid-template-columns:1fr;}}
+  .callout{border-left:4px solid var(--s1); background:var(--surface); border-radius:8px; padding:12px 16px; font-size:13.5px; margin-top:12px;}
+  .callout b{color:var(--s1);}
+  .tmpl-phase{display:flex; justify-content:space-between; font-size:13.5px; padding:7px 4px; border-bottom:1px dashed var(--grid);}
+  .tmpl-phase:last-child{border-bottom:none;}
+  .tmpl-phase span:last-child{color:var(--ink2); font-variant-numeric:tabular-nums;}
+
+  /* ---- Technician phone ---- */
+  .tech-wrap{display:grid; grid-template-columns:390px 1fr; gap:24px; align-items:start;}
+  @media(max-width:900px){.tech-wrap{grid-template-columns:1fr;}}
+  .phone{background:#111; border-radius:34px; padding:12px; box-shadow:0 12px 30px rgba(0,0,0,.18); max-width:390px;}
+  .screen{background:var(--page); border-radius:24px; overflow:hidden; height:720px; display:flex; flex-direction:column;}
+  .app-head{background:var(--s1); color:#fff; padding:14px 16px 12px;}
+  .app-head .co{font-weight:700; font-size:16px;}
+  .app-head .ref{font-size:12.5px; opacity:.9;}
+  .app-head .meta{display:flex; gap:10px; margin-top:8px; font-size:11.5px;}
+  .app-head .meta span{background:rgba(255,255,255,.16); border-radius:6px; padding:2px 8px;}
+  .app-body{flex:1; overflow-y:auto; padding:12px;}
+  .phase{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:11px 12px; margin-bottom:9px;}
+  .phase .top{display:flex; justify-content:space-between; align-items:center; gap:8px;}
+  .phase .name{font-size:13.5px; font-weight:600;}
+  .phase .hrs{font-size:11.5px; color:var(--muted); font-variant-numeric:tabular-nums; margin-top:2px;}
+  .phase .note{font-size:12px; color:var(--ink2); margin-top:6px; border-top:1px dashed var(--grid); padding-top:6px;}
+  .pbtns{display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;}
+  .btn{font:inherit; font-size:12.5px; font-weight:600; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--ink); padding:6px 11px; cursor:pointer;}
+  .btn:hover{background:var(--page);}
+  .btn.primary{background:var(--s1); border-color:var(--s1); color:#fff;}
+  .btn.primary:hover{background:#1c5cab;}
+  .btn.danger{background:#fff; border-color:var(--critical); color:var(--critical);}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+  .qa{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:4px 0 10px;}
+  .qa .btn{padding:9px 8px; text-align:center;}
+  .gatebox{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px; margin-top:4px;}
+  .gatebox h4{font-size:13px; margin-bottom:8px;}
+  .gate-item{display:flex; align-items:center; gap:8px; font-size:12.5px; padding:4px 0;}
+  .gate-item .tick{width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0;}
+  .tick.ok{background:var(--good); color:#fff;}
+  .tick.no{background:var(--page); border:1.5px solid var(--muted); color:var(--muted);}
+  .checkout{width:100%; margin-top:10px; padding:11px; font-size:14px; border-radius:10px;}
+  .side-note{font-size:13px; color:var(--ink2); margin-top:14px;}
+  .demo-hints{font-size:13.5px;}
+  .demo-hints li{margin-bottom:8px; margin-left:18px;}
+
+  /* ---- Surface laptop ---- */
+  .laptop{max-width:1080px; margin:0 auto 14px;}
+  .lscreen{border:14px solid #16161a; border-bottom-width:20px; border-radius:16px 16px 4px 4px; background:var(--page); box-shadow:0 16px 36px rgba(0,0,0,.20); overflow:hidden;}
+  .deck{height:16px; background:linear-gradient(#e3e3e6,#b7b7bd); border-radius:0 0 12px 12px; margin:0 -14px; position:relative;}
+  .deck::after{content:""; position:absolute; left:50%; top:0; transform:translateX(-50%); width:130px; height:7px; background:#9d9da5; border-radius:0 0 8px 8px;}
+  .s-top{background:var(--s1); color:#fff; padding:10px 16px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; font-size:13px;}
+  .s-top .logo{font-weight:800; font-size:15px;}
+  .s-top .job{font-weight:600;}
+  .s-top .chips{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap;}
+  .s-top .chips span{background:rgba(255,255,255,.16); border-radius:6px; padding:2px 9px; font-size:12px; white-space:nowrap;}
+  .s-cols{display:grid; grid-template-columns:250px 1fr 280px; gap:0; height:600px;}
+  @media(max-width:980px){.s-cols{grid-template-columns:1fr; height:auto;}}
+  .s-col{padding:14px; overflow-y:auto; border-right:1px solid var(--grid);}
+  .s-col:last-child{border-right:none;}
+  .s-col-title{font-size:11.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;}
+  .ph-row{display:flex; justify-content:space-between; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:8px 10px; margin-bottom:7px;}
+  .ph-row.sel{border-color:var(--s1); box-shadow:0 0 0 1px var(--s1);}
+  .ph-row .ph-name{font-size:12.5px; font-weight:600;}
+  .ph-row .hrs{font-size:11px; color:var(--muted); font-variant-numeric:tabular-nums;}
+  .s-ph-head h4{font-size:16px;}
+  .s-ph-head .hrs{font-size:12.5px; color:var(--muted); font-variant-numeric:tabular-nums;}
+  .ev-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:10px; margin:12px 0;}
+  .ev-tile{background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px; font-size:11.5px; display:flex; flex-direction:column; gap:2px;}
+  .ev-tile span{font-size:26px;}
+  .ev-tile b{font-size:12px;}
+  .ev-tile i{color:var(--muted); font-style:normal;}
+  .ev-empty{grid-column:1/-1; border:1.5px dashed var(--grid); border-radius:10px; padding:18px; text-align:center; color:var(--muted); font-size:13px;}
+  .s-note{font-size:12.5px; color:var(--ink2); border-top:1px dashed var(--grid); padding-top:10px; margin-top:10px;}
+  .s-done-msg{font-size:14.5px; font-weight:600; color:var(--good-text); padding:24px 6px;}
+  .tel{font-size:12.5px; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:7px 10px; margin-bottom:6px;}
+  .s-col .btn{width:100%; margin-top:6px; text-align:left;}
+  .s-col .btn.checkout{text-align:center;}
+  .surface-notes{max-width:1080px; margin:0 auto;}
+  .demo-controls{max-width:1080px; margin:0 auto 14px; display:flex; gap:8px; align-items:center; font-size:13px; color:var(--ink2); flex-wrap:wrap;}
+  .checkin-prompt{text-align:center; padding:40px 10px;}
+  .checkin-prompt p{color:var(--ink2); font-size:13.5px; margin-bottom:12px;}
+
+  /* ---- Live feed ---- */
+  .feed-wrap{display:grid; grid-template-columns:1.25fr 1fr; gap:16px; align-items:start;}
+  @media(max-width:900px){.feed-wrap{grid-template-columns:1fr;}}
+  .panel-title{display:flex; align-items:center; gap:8px; font-size:15px; font-weight:700; margin-bottom:10px;}
+  .dot{width:10px; height:10px; border-radius:50%;}
+  .feed-item{display:flex; gap:10px; padding:9px 2px; border-bottom:1px solid var(--grid); font-size:13.5px;}
+  .feed-item:last-child{border-bottom:none;}
+  .feed-item .t{color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; font-size:12.5px; padding-top:1px;}
+  .feed-item .icon{flex-shrink:0;}
+  .feed-item.new{animation:flash 1.6s ease-out;}
+  @keyframes flash{0%{background:rgba(42,120,214,.14);}100%{background:transparent;}}
+  .hudu-card{border:1px solid var(--border); border-left:4px solid var(--s2); border-radius:8px; padding:10px 12px; margin-bottom:9px; font-size:13px; background:var(--surface);}
+  .hudu-card b{display:block; font-size:13.5px;}
+  .hudu-card .k{color:var(--muted); font-size:12px;}
+  .photo-chip{display:inline-block; background:var(--page); border:1px solid var(--grid); border-radius:6px; padding:2px 8px; font-size:12px; margin-top:4px;}
+
+  /* ---- Reports ---- */
+  .tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:20px;}
+  .tile{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px;}
+  .tile .label{font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em;}
+  .tile .value{font-size:30px; font-weight:700; margin-top:2px;}
+  .tile .delta{font-size:12.5px; color:var(--ink2); margin-top:2px;}
+  .tile .delta.bad{color:var(--critical); font-weight:600;}
+  .tile .delta.goodv{color:var(--good-text); font-weight:600;}
+  .chart-card{margin-bottom:20px;}
+  .legend{display:flex; gap:18px; font-size:12.5px; color:var(--ink2); margin:6px 0 14px;}
+  .legend span{display:inline-flex; align-items:center; gap:6px;}
+  .sw{width:12px; height:12px; border-radius:3px; display:inline-block;}
+  .bar-group{margin-bottom:16px;}
+  .bar-group .g-label{font-size:13px; font-weight:600; margin-bottom:5px;}
+  .bar-row{display:flex; align-items:center; gap:10px; margin-bottom:2px;}
+  .bar-track{flex:1; height:16px; position:relative;}
+  .bar{height:14px; border-radius:0 4px 4px 0; position:relative;}
+  .bar-row .v{font-size:12.5px; color:var(--ink2); font-variant-numeric:tabular-nums; width:56px;}
+  .anom li{margin-left:18px; margin-bottom:6px; font-size:13.5px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>FieldFlow</h1>
+  <span class="sub">Field job scheduling, evidence &amp; reporting — Autotask + Hudu connected</span>
+  <span class="mock-chip">MOCKUP · sample data</span>
+</header>
+<nav>
+  <button class="active" data-tab="process">1 · The Process</button>
+  <button data-tab="sched">2 · Scheduler (office)</button>
+  <button data-tab="surface">3 · Technician (Surface)</button>
+  <button data-tab="tech">4 · Technician (phone)</button>
+  <button data-tab="live">5 · Live Job Feed</button>
+  <button data-tab="report">6 · Reports</button>
+</nav>
+<main>
+
+<!-- ================= PROCESS ================= -->
+<section class="tab active" id="tab-process">
+  <h2>One app in the field — reporting becomes a by-product</h2>
+  <p class="lede">Today, reporting is a separate chore done after the job — so it doesn't happen. In this model the technician works <em>through</em> the app, and every action automatically becomes the Autotask ticket note, the Hudu record and the report row. The tech cannot check out until the closeout gate is satisfied.</p>
+
+  <div class="flow">
+    <div class="step"><span class="n">1</span><h3>Schedule the job</h3><p>Office builds the job from a template — phases &amp; planned hours (same structure as the Job Scope Sheet).</p><div class="feeds"><span class="at">→ Autotask ticket created</span></div></div>
+    <div class="step"><span class="n">2</span><h3>Tech checks in</h3><p>Arrival timestamped on site. Clock starts — actual time is measured, not recalled.</p><div class="feeds"><span class="at">→ ticket note</span></div></div>
+    <div class="step"><span class="n">3</span><h3>Work the phases</h3><p>Start / complete each phase in the app. Evidence photo required per phase.</p><div class="feeds"><span class="at">→ notes + time entries</span> · <span class="hu">→ photos to Hudu</span></div></div>
+    <div class="step"><span class="n">4</span><h3>Credentials captured</h3><p>New device or account passwords go into a structured form on the spot.</p><div class="feeds"><span class="hu">→ Hudu password entry (right company)</span></div></div>
+    <div class="step"><span class="n">5</span><h3>Problems flagged</h3><p>Anything found on site is flagged with photo + note — it can't stay in the tech's head.</p><div class="feeds"><span class="at">→ flagged note / follow-up ticket</span></div></div>
+    <div class="step gate"><span class="n">6</span><h3>Closeout gate</h3><p>No check-out until phases are complete or flagged, evidence &amp; credentials are in, and the customer has signed. Unfinished job? Reason required → reattendance ticket auto-raised.</p><div class="feeds"><span class="at">→ closure or follow-up ticket</span></div></div>
+    <div class="step"><span class="n">7</span><h3>Reports build themselves</h3><p>Job Log &amp; Combined Report generated live — planned vs actual, variance, anomalies.</p><div class="feeds">→ management dashboard</div></div>
+  </div>
+
+  <h2 style="font-size:17px;">What this fixes</h2>
+  <div class="problem-row">
+    <div class="card"><h4>Problems not reported</h4><p>Flagging is one tap with a photo — and the gate asks "any problems?" before checkout.</p></div>
+    <div class="card"><h4>Jobs left incomplete silently</h4><p>Can't check out with open phases unless a reason is given — which auto-raises the reattendance ticket.</p></div>
+    <div class="card"><h4>Autotask not updated</h4><p>Ticket, notes and time entries are generated from the tech's actions. Zero after-job admin.</p></div>
+    <div class="card"><h4>Credentials missing from Hudu</h4><p>Credential capture is a gate item — the job cannot close with credentials pending.</p></div>
+    <div class="card fix"><h4>Evidence on demand</h4><p>Photos are taken as work completes and filed to the right company automatically. No chasing.</p></div>
+    <div class="card fix"><h4>True job costing</h4><p>Timestamps give honest actual hours per phase — the variance data in the reporting pack, automatically.</p></div>
+  </div>
+</section>
+
+<!-- ================= SCHEDULER ================= -->
+<section class="tab" id="tab-sched">
+  <h2>Scheduler — the office view</h2>
+  <p class="lede">Jobs are built from templates (Onboarding / Project) with the phase breakdown and planned hours — exactly the Job Scope Sheet, digitised. Saving a job creates the Autotask ticket automatically.</p>
+  <div class="two-col">
+    <div class="card">
+      <div class="panel-title">Job board</div>
+      <table>
+        <thead><tr><th>Job Ref</th><th>Customer</th><th>Type</th><th>Engineer</th><th>Target</th><th class="num">Planned hrs</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>ONB-2026-014</td><td>Acme Retail Ltd</td><td>Onboarding</td><td>J. Smith</td><td>26 Jun</td><td class="num">55</td><td><span class="status st-done">✔ Completed</span></td></tr>
+          <tr><td>PRJ-2026-047</td><td>Bright Law LLP</td><td>Project</td><td>R. Patel</td><td>22 Jul</td><td class="num">37</td><td><span class="status st-prog">● In Progress</span></td></tr>
+          <tr><td>PRJ-2026-051</td><td>Harbour Dental</td><td>Project</td><td>J. Smith</td><td>07 Aug</td><td class="num">18</td><td><span class="status st-not">Not Started</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div class="card">
+        <div class="panel-title">New job — from "Project" template</div>
+        <div style="font-size:13.5px; color:var(--ink2); margin-bottom:8px;">Phases pre-loaded; office sets planned hours &amp; dates:</div>
+        <div class="tmpl-phase"><span>1 · Scoping &amp; Client Approval</span><span>7 h</span></div>
+        <div class="tmpl-phase"><span>2 · Procurement &amp; Scheduling</span><span>5 h</span></div>
+        <div class="tmpl-phase"><span>3 · Pre-Implementation Prep</span><span>4 h</span></div>
+        <div class="tmpl-phase"><span>4 · Implementation / Build</span><span>12 h</span></div>
+        <div class="tmpl-phase"><span>5 · Testing &amp; Documentation</span><span>6 h</span></div>
+        <div class="tmpl-phase"><span>6 · Client Sign-off &amp; Closure</span><span>3 h</span></div>
+      </div>
+      <div class="callout">On save → <b>Autotask ticket T20260703.0047</b> created against Bright Law LLP, assigned R. Patel, with the scope in the description. Every app event from here lands on that ticket.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TECHNICIAN — SURFACE ================= -->
+<section class="tab" id="tab-surface">
+  <h2>Technician — the 4G Surface Book in the field</h2>
+  <p class="lede">The full-screen layout on the Surface Books we're issuing. Everything is visible at once — phases, evidence, and the closeout gate — and the device feeds telemetry automatically: GPS confirms the tech is at the right site, 4G keeps everything syncing live, and the camera captures the required photo evidence. Same live demo as the phone view: actions here appear instantly in the <b>Live Job Feed</b> tab.</p>
+
+  <div class="demo-controls">
+    <span>Demo controls:</span>
+    <button class="btn" onclick="resetDemo('fresh')">▶ Fresh job — run start to finish</button>
+    <button class="btn" onclick="resetDemo('mid')">⏩ Reset to mid-job (default)</button>
+  </div>
+
+  <div class="laptop">
+    <div class="lscreen">
+      <div class="s-top">
+        <span class="logo">FieldFlow</span>
+        <span class="job">Bright Law LLP · PRJ-2026-047 · Autotask T20260703.0047</span>
+        <span class="chips" id="surfaceChips"></span>
+      </div>
+      <div class="s-cols" id="surfaceApp"></div>
+    </div>
+    <div class="deck"></div>
+  </div>
+
+  <div class="card surface-notes">
+    <div class="panel-title">Why the Surface works for this</div>
+    <ul class="demo-hints" style="list-style:disc;">
+      <li><b>Location fed automatically</b> — check-in/check-out are geo-stamped and the app confirms the device is at the scheduled site. Arrival, time on site, and departure need no honesty system.</li>
+      <li><b>Photos still mandatory</b> — captured on the Surface camera (or synced from a phone), filed to the right Hudu company on the spot. A phase cannot complete without its evidence.</li>
+      <li><b>4G = live sync</b> — the office sees ticket notes and Hudu records the moment they happen; if signal drops, actions queue and sync when it returns.</li>
+      <li><b>Touchscreen sign-off</b> — the tech hands the Surface to the customer to sign; the signature lands on the ticket.</li>
+      <li><b>Big screen, no excuses</b> — the closeout gate is permanently on screen. The tech can always see exactly what stands between them and leaving site.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= TECHNICIAN ================= -->
+<section class="tab" id="tab-tech">
+  <h2>Technician — phone layout (alternative / companion)</h2>
+  <p class="lede">The same app on a phone — useful when a tech is up a ladder or in a comms cabinet where the Surface isn't practical. Both devices share the same job state. This is R. Patel's live job at Bright Law. Try it: complete the phases (photo required), add the credential, flag a problem — then watch the <b>Live Job Feed</b> tab fill in on its own. The check-out button stays locked until the closeout gate is green.</p>
+  <div class="tech-wrap">
+    <div class="phone"><div class="screen">
+      <div class="app-head">
+        <div class="co">Bright Law LLP</div>
+        <div class="ref">PRJ-2026-047 · Autotask T20260703.0047</div>
+        <div class="meta" id="phoneMeta"></div>
+      </div>
+      <div class="app-body">
+        <div id="phases"></div>
+        <div class="qa">
+          <button class="btn" id="btnCred" onclick="addCred()">🔑 Add credential</button>
+          <button class="btn" onclick="flagProblem()">⚠ Flag a problem</button>
+        </div>
+        <div class="gatebox">
+          <h4>Closeout gate — required before leaving site</h4>
+          <div id="gate"></div>
+          <button class="btn" id="btnSign" onclick="sign()" style="margin-top:8px;">✍ Capture customer signature</button>
+          <button class="btn primary checkout" id="btnOut" onclick="checkout()" disabled>Check out — locked</button>
+          <button class="btn danger checkout" id="btnAbort" onclick="cantFinish()">Can't finish — flag &amp; raise reattendance</button>
+        </div>
+      </div>
+    </div></div>
+    <div>
+      <div class="card demo-hints">
+        <div class="panel-title">Demo script (2 minutes)</div>
+        <ol>
+          <li><b>Phase 4</b> is in progress — tap <i>📷 Take photo</i>, then <i>Complete</i>. Note the phase can't complete without evidence.</li>
+          <li>Start and complete <b>phases 5 and 6</b> the same way.</li>
+          <li>Tap <b>🔑 Add credential</b> — the switch password goes straight to Hudu against Bright Law.</li>
+          <li>Tap <b>⚠ Flag a problem</b> — the faulty patch panel port is logged and a follow-up ticket is raised. Nothing stays in the tech's head.</li>
+          <li>Capture the <b>signature</b> — the gate goes green and <b>Check out</b> unlocks.</li>
+          <li>Open the <b>Live Job Feed</b> tab — everything you just did is already in Autotask and Hudu.</li>
+        </ol>
+        <p class="side-note">Also try <i>Can't finish</i> — a reason is required and a reattendance ticket is raised automatically. There is no way to leave site silently.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LIVE FEED ================= -->
+<section class="tab" id="tab-live">
+  <h2>Live job feed — what the office sees</h2>
+  <p class="lede">Every app action arrives here in real time as Autotask ticket notes and Hudu records. Nobody phones the tech to ask how it's going.</p>
+  <div class="feed-wrap">
+    <div class="card">
+      <div class="panel-title"><span class="dot" style="background:var(--s1);"></span>Autotask · T20260703.0047 — Bright Law LLP</div>
+      <div id="feed"></div>
+    </div>
+    <div class="card">
+      <div class="panel-title"><span class="dot" style="background:var(--s2);"></span>Hudu · Bright Law LLP</div>
+      <div id="hudu">
+        <div class="hudu-card"><b>📷 Evidence — Phase 3 prep</b><span class="k">Comms room before works · 22 Jul 16:41</span><span class="photo-chip">photo_0231.jpg</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= REPORTS ================= -->
+<section class="tab" id="tab-report">
+  <h2>Combined report — builds itself</h2>
+  <p class="lede">The management pack from the spreadsheet, generated live from job data. No one compiles it.</p>
+  <div class="tiles">
+    <div class="tile"><div class="label">Total jobs</div><div class="value">3</div><div class="delta">1 completed · 1 in progress · 1 not started</div></div>
+    <div class="tile"><div class="label">First-visit completion</div><div class="value">50%</div><div class="delta bad">▼ the KPI this process fixes</div></div>
+    <div class="tile"><div class="label">Planned vs actual hrs</div><div class="value">92 / 88</div><div class="delta">across active &amp; completed jobs</div></div>
+    <div class="tile"><div class="label">Open anomalies</div><div class="value" id="anomCount">4</div><div class="delta">all flagged from site, with photos</div></div>
+    <div class="tile"><div class="label">Credentials captured</div><div class="value" id="credCount">6</div><div class="delta goodv">▲ 100% of jobs closed with creds in Hudu</div></div>
+  </div>
+
+  <div class="card chart-card">
+    <div class="panel-title">Planned vs actual hours by job</div>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--s1);"></span>Planned</span>
+      <span><span class="sw" style="background:var(--s2);"></span>Actual</span>
+    </div>
+    <div class="bar-group">
+      <div class="g-label">ONB-2026-014 · Acme Retail — Completed</div>
+      <div class="bar-row" title="Planned: 55 hours"><div class="bar-track"><div class="bar" style="background:var(--s1); width:73%;"></div></div><span class="v">55 h</span></div>
+      <div class="bar-row" title="Actual: 62 hours (+7 over plan)"><div class="bar-track"><div class="bar" style="background:var(--s2); width:83%;"></div></div><span class="v">62 h</span></div>
+    </div>
+    <div class="bar-group">
+      <div class="g-label">PRJ-2026-047 · Bright Law — In Progress</div>
+      <div class="bar-row" title="Planned: 37 hours"><div class="bar-track"><div class="bar" style="background:var(--s1); width:49%;"></div></div><span class="v">37 h</span></div>
+      <div class="bar-row" title="Actual so far: 26 hours"><div class="bar-track"><div class="bar" style="background:var(--s2); width:35%;"></div></div><span class="v">26 h</span></div>
+    </div>
+    <div style="font-size:12.5px; color:var(--muted);">Hours captured from phase start/stop timestamps — not from memory at the end of the week.</div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="panel-title">Job log</div>
+      <table>
+        <thead><tr><th>Job Ref</th><th>Customer</th><th>Engineer</th><th class="num">Planned</th><th class="num">Actual</th><th class="num">Variance</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>ONB-2026-014</td><td>Acme Retail Ltd</td><td>J. Smith</td><td class="num">55</td><td class="num">62</td><td class="num" style="color:var(--critical); font-weight:600;">+7</td><td><span class="status st-done">✔ Completed</span></td></tr>
+          <tr><td>PRJ-2026-047</td><td>Bright Law LLP</td><td>R. Patel</td><td class="num">37</td><td class="num">26</td><td class="num">—</td><td><span class="status st-prog">● In Progress</span></td></tr>
+          <tr><td>PRJ-2026-051</td><td>Harbour Dental</td><td>J. Smith</td><td class="num">18</td><td class="num">0</td><td class="num">—</td><td><span class="status st-not">Not Started</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="panel-title">Anomalies flagged from site</div>
+      <ul class="anom" id="anomList">
+        <li><span class="status st-flag">⚠ open</span> Firewall firmware out of date — patch scheduled <span style="color:var(--muted);">(Acme)</span></li>
+        <li><span class="status st-flag">⚠ open</span> Unmanaged switch found, not on asset list <span style="color:var(--muted);">(Acme)</span></li>
+        <li><span class="status st-flag">⚠ open</span> Backup restore test failed first attempt <span style="color:var(--muted);">(Acme)</span></li>
+        <li><span class="status st-flag">⚠ open</span> Cabling run more complex than survey <span style="color:var(--muted);">(Bright Law)</span></li>
+      </ul>
+      <p style="font-size:12.5px; color:var(--muted); margin-top:8px;">Each anomaly links to its photo evidence and its follow-up ticket.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<script>
+/* ---------- tabs ---------- */
+document.querySelectorAll('nav button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById('tab-'+b.dataset.tab).classList.add('active');
+  });
+});
+
+/* ---------- demo state ---------- */
+function initialState(mode){
+  const mid = mode === 'mid';
+  return {
+    mode,
+    checkedIn: mid,
+    checkInTime: mid ? '08:02' : null,
+    phases: [
+      {n:1, name:'Scoping & Client Approval',   plan:7,  actual:mid?8:0, status:mid?'done':'not', note:mid?'Client added guest Wi-Fi requirement mid-scoping.':'', photo:false},
+      {n:2, name:'Procurement & Scheduling',    plan:5,  actual:mid?5:0, status:mid?'done':'not', note:mid?'Preferred switch out of stock; equivalent substituted.':'', photo:false},
+      {n:3, name:'Pre-Implementation Prep',     plan:4,  actual:mid?5:0, status:mid?'done':'not', note:'', photo:false},
+      {n:4, name:'Implementation / Build',      plan:12, actual:mid?8:0, status:mid?'prog':'not', note:'', photo:false},
+      {n:5, name:'Testing & Documentation',     plan:6,  actual:0, status:'not', note:'', photo:false},
+      {n:6, name:'Client Sign-off & Closure',   plan:3,  actual:0, status:'not', note:'', photo:false}
+    ],
+    credAdded:false, problemFlagged:false, signed:false, checkedOut:false,
+    evidence: mid ? [{phase:3, file:'photo_0231.jpg', label:'Comms room before works'}] : []
+  };
+}
+let state = initialState('mid');
+
+function now(){
+  const d = new Date();
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+
+/* ---------- feed ---------- */
+function seedFeedItems(){
+  if(state.mode === 'fresh') return [
+    ['—','🎫','Job scheduled by office — Autotask ticket T20260703.0047 created for Bright Law LLP, assigned R. Patel']
+  ];
+  return [
+    ['08:02','📍','Tech checked in on site (R. Patel) — geo-stamped'],
+    ['08:05','▶','Phase 4 Implementation / Build — started'],
+    ['10:31','📝','Note: cabling run more complex than survey suggested; +1h flagged'],
+    ['12:14','⏱','Time entry: 4.0h logged against phase 4']
+  ];
+}
+function renderSeed(){
+  const f = document.getElementById('feed');
+  f.innerHTML = seedFeedItems().map(x=>`<div class="feed-item"><span class="t">${x[0]}</span><span class="icon">${x[1]}</span><span>${x[2]}</span></div>`).join('');
+}
+function addFeed(icon, text){
+  const f = document.getElementById('feed');
+  const el = document.createElement('div');
+  el.className = 'feed-item new';
+  el.innerHTML = `<span class="t">${now()}</span><span class="icon">${icon}</span><span>${text}</span>`;
+  f.appendChild(el);
+}
+function addHudu(title, sub, chip){
+  const h = document.getElementById('hudu');
+  const el = document.createElement('div');
+  el.className = 'hudu-card';
+  el.style.animation = 'flash 1.6s ease-out';
+  el.innerHTML = `<b>${title}</b><span class="k">${sub}</span>` + (chip?`<span class="photo-chip">${chip}</span>`:'');
+  h.appendChild(el);
+}
+
+/* ---------- phases ---------- */
+function renderPhases(){
+  document.getElementById('phoneMeta').innerHTML = state.checkedIn
+    ? `<span>✔ Checked in ${state.checkInTime}</span><span>${state.mode==='mid' ? 'On site 6h 12m' : 'Clock running'}</span>`
+    : `<span>Scheduled today</span><span>Not checked in</span>`;
+  const checkinCard = state.checkedIn ? '' :
+    `<div class="phase" style="border-color:var(--s1); box-shadow:0 0 0 1px var(--s1);">
+      <div class="name">Arrived at Bright Law LLP?</div>
+      <div class="pbtns"><button class="btn primary" onclick="checkIn()">📍 Check in — geo-stamp arrival</button></div>
+    </div>`;
+  const wrap = document.getElementById('phases');
+  wrap.innerHTML = checkinCard + state.phases.map(p=>{
+    let badge, btns='';
+    if(p.status==='done') badge = '<span class="status st-done">✔ Completed</span>';
+    else if(p.status==='prog'){
+      badge = '<span class="status st-prog">● In Progress</span>';
+      btns = `<div class="pbtns">
+        <button class="btn" onclick="takePhoto(${p.n})" ${p.photo?'disabled':''}>${p.photo?'📷 Photo attached ✔':'📷 Take photo'}</button>
+        <button class="btn primary" onclick="completePhase(${p.n})" ${p.photo?'':'disabled'}>Complete</button>
+      </div>`;
+    } else {
+      badge = '<span class="status st-not">Not started</span>';
+      btns = `<div class="pbtns"><button class="btn" onclick="startPhase(${p.n})">▶ Start phase</button></div>`;
+    }
+    return `<div class="phase">
+      <div class="top"><div><div class="name">${p.n} · ${p.name}</div>
+      <div class="hrs">Planned ${p.plan}h · Actual ${p.actual}h</div></div>${badge}</div>
+      ${p.note?`<div class="note">${p.note}</div>`:''}${btns}
+    </div>`;
+  }).join('');
+  renderGate();
+}
+function startPhase(n){
+  if(!state.checkedIn){ alert('Check in first — arrival must be geo-stamped before work can start.'); return; }
+  const p = state.phases.find(x=>x.n===n);
+  p.status='prog';
+  addFeed('▶', `Phase ${n} ${p.name} — started (geo-stamped on site)`);
+  renderAll();
+}
+function takePhoto(n){
+  const p = state.phases.find(x=>x.n===n);
+  p.photo = true;
+  state.evidence.push({phase:n, file:`photo_02${40+n}.jpg`, label:p.name});
+  addHudu(`📷 Evidence — Phase ${n}`, `${p.name} · uploaded from site`, `photo_02${40+n}.jpg`);
+  addFeed('📷', `Photo evidence attached for phase ${n} (filed to Hudu → Bright Law LLP)`);
+  renderAll();
+}
+function completePhase(n){
+  const p = state.phases.find(x=>x.n===n);
+  p.status='done';
+  p.actual = p.actual || p.plan;
+  addFeed('✔', `Phase ${n} ${p.name} — completed. Time entry ${p.actual}h posted.`);
+  renderAll();
+}
+
+/* ---------- quick actions ---------- */
+function addCred(){
+  if(state.credAdded) return;
+  state.credAdded = true;
+  document.getElementById('btnCred').textContent = '🔑 Credential saved ✔';
+  document.getElementById('btnCred').disabled = true;
+  addHudu('🔑 Password — Core switch (1st floor comms)', 'admin / ••••••••• · created from site', 'Hudu → Bright Law → Passwords');
+  addFeed('🔑', 'Credential captured for new core switch — stored in Hudu (never in the ticket)');
+  renderAll();
+}
+function flagProblem(){
+  if(state.problemFlagged) return;
+  state.problemFlagged = true;
+  addFeed('⚠', '<b>Problem flagged:</b> patch panel port 12 faulty — photo attached. Follow-up ticket T20260724.0112 raised.');
+  addHudu('📷 Evidence — problem', 'Patch panel port 12 faulty', 'photo_0249.jpg');
+  const li = document.createElement('li');
+  li.innerHTML = '<span class="status st-flag">⚠ open</span> Patch panel port 12 faulty — follow-up raised <span style="color:var(--muted);">(Bright Law)</span>';
+  document.getElementById('anomList').appendChild(li);
+  document.getElementById('anomCount').textContent = '5';
+  renderAll();
+}
+function sign(){
+  state.signed = true;
+  const b = document.getElementById('btnSign');
+  b.textContent = '✍ Signed — A. Whitfield (Bright Law)';
+  b.disabled = true;
+  addFeed('✍', 'Customer sign-off captured on screen — A. Whitfield');
+  renderAll();
+}
+
+/* ---------- gate ---------- */
+function gateItems(){
+  const allDone = state.phases.every(p=>p.status==='done');
+  const evid = state.phases.filter(p=>p.n>=4).every(p=>p.photo===true);
+  const items = [
+    ['All phases completed (or formally flagged)', allDone],
+    ['Evidence photos uploaded for today\'s phases', evid],
+    ['Credentials captured to Hudu', state.credAdded],
+    ['Problems check — flagged or confirmed none', state.problemFlagged],
+    ['Customer signature', state.signed]
+  ];
+  return { items, ok: items.every(i=>i[1]) };
+}
+function gateHtml(){
+  return gateItems().items.map(i=>
+    `<div class="gate-item"><span class="tick ${i[1]?'ok':'no'}">${i[1]?'✔':'·'}</span>${i[0]}</div>`).join('');
+}
+function renderGate(){
+  document.getElementById('gate').innerHTML = gateHtml();
+  const ok = gateItems().ok;
+  const btn = document.getElementById('btnOut');
+  if(state.checkedOut){ btn.textContent='✔ Checked out — job closed'; btn.disabled=true; }
+  else { btn.disabled = !ok; btn.textContent = ok ? 'Check out — close job' : 'Check out — locked'; }
+}
+function checkout(){
+  state.checkedOut = true;
+  addFeed('🏁','Tech checked out — geo-stamped leaving site. Job closed complete; total site time posted to ticket. Combined Report updated.');
+  renderAll();
+}
+
+/* ---------- Surface Book view ---------- */
+function renderSurface(){
+  const el = document.getElementById('surfaceApp');
+  if(!el) return;
+  document.getElementById('surfaceChips').innerHTML = state.checkedIn
+    ? `<span>📶 4G (EE)</span><span>📍 GPS ✔ on site</span><span>⟳ sync live</span><span>🕐 ${state.mode==='mid' ? 'on site 6h 12m' : 'checked in '+state.checkInTime}</span>`
+    : `<span>📶 4G (EE)</span><span>📍 Not at site yet</span><span>⟳ sync live</span>`;
+  const active = state.phases.find(p=>p.status==='prog') || state.phases.find(p=>p.status==='not');
+
+  const rows = state.phases.map(p=>{
+    const badge = p.status==='done' ? '<span class="status st-done">✔ Done</span>'
+      : p.status==='prog' ? '<span class="status st-prog">● Now</span>'
+      : '<span class="status st-not">Queued</span>';
+    return `<div class="ph-row ${active && p.n===active.n ? 'sel':''}">
+      <div><div class="ph-name">${p.n} · ${p.name}</div>
+      <div class="hrs">Plan ${p.plan}h · Actual ${p.actual}h</div></div>${badge}</div>`;
+  }).join('');
+
+  let detail;
+  if(!state.checkedIn){
+    detail = `<div class="checkin-prompt">
+      <h4>Good morning, R. Patel</h4>
+      <p>Today's job: <b>Bright Law LLP</b> — network refresh, 6 phases, 37 planned hours.<br>
+      Check in to start — arrival is geo-stamped and posted to the ticket automatically.</p>
+      <button class="btn primary" style="width:auto;" onclick="checkIn()">📍 Check in — geo-stamp arrival</button></div>`;
+  } else if(!active){
+    detail = `<div class="s-done-msg">✔ All phases complete — the closeout gate on the right closes the job.</div>`;
+  } else {
+    const ev = state.evidence.filter(e=>e.phase===active.n);
+    const tiles = ev.length
+      ? ev.map(e=>`<div class="ev-tile"><span>📷</span><b>${e.file}</b><i>${e.label} → Hudu ✔</i></div>`).join('')
+      : '<div class="ev-empty">No evidence yet — a photo is required before this phase can be completed.</div>';
+    const btns = active.status==='prog'
+      ? `<button class="btn" onclick="takePhoto(${active.n})" ${active.photo?'disabled':''}>${active.photo?'📷 Photo attached ✔':'📷 Capture photo (Surface camera)'}</button>
+         <button class="btn primary" onclick="completePhase(${active.n})" ${active.photo?'':'disabled'}>✔ Complete phase</button>`
+      : `<button class="btn primary" onclick="startPhase(${active.n})">▶ Start phase ${active.n}</button>`;
+    detail = `<div class="s-ph-head"><h4>Phase ${active.n} · ${active.name}</h4>
+      <span class="hrs">Planned ${active.plan}h · Actual so far ${active.actual}h — timed automatically</span></div>
+      <div class="s-col-title" style="margin-top:12px;">Evidence for this phase</div>
+      <div class="ev-grid">${tiles}</div>
+      <div class="pbtns">${btns}</div>
+      <div class="s-note">📝 Site note (posts straight to the ticket): <i>${active.note || 'e.g. "second cable tray added above suspended ceiling"'}</i></div>`;
+  }
+
+  const g = gateItems();
+  const signBtn = state.signed
+    ? `<button class="btn" disabled>✍ Signed — A. Whitfield ✔</button>`
+    : `<button class="btn" onclick="sign()">✍ Customer signs on touchscreen</button>`;
+  const outBtn = state.checkedOut
+    ? `<button class="btn primary checkout" disabled>✔ Checked out — job closed</button>`
+    : `<button class="btn primary checkout" onclick="checkout()" ${g.ok?'':'disabled'}>${g.ok?'Check out — close job':'Check out — locked'}</button>`;
+
+  el.innerHTML = `
+    <div class="s-col"><div class="s-col-title">Job phases — Bright Law LLP</div>${rows}</div>
+    <div class="s-col">${detail}</div>
+    <div class="s-col">
+      <div class="s-col-title">Device telemetry — automatic</div>
+      ${state.checkedIn
+        ? `<div class="tel">📍 12 Chancery Lane, London — matches scheduled site ✔</div>
+           <div class="tel">🕐 Checked in ${state.checkInTime}${state.mode==='mid' ? ' · on site 6h 12m' : ' · clock running'}</div>
+           <div class="tel">📶 4G (EE) connected · all changes synced</div>`
+        : `<div class="tel">📍 En route — site check-in pending</div>
+           <div class="tel">📶 4G (EE) connected · ready to sync</div>`}
+      <div class="s-col-title" style="margin-top:12px;">Quick actions</div>
+      <button class="btn" onclick="addCred()" ${state.credAdded?'disabled':''}>${state.credAdded?'🔑 Credential saved to Hudu ✔':'🔑 Add credential → Hudu'}</button>
+      <button class="btn" onclick="flagProblem()" ${state.problemFlagged?'disabled':''}>${state.problemFlagged?'⚠ Problem flagged ✔':'⚠ Flag a problem'}</button>
+      <div class="s-col-title" style="margin-top:12px;">Closeout gate</div>
+      ${gateHtml()}
+      ${signBtn}
+      ${outBtn}
+      <button class="btn danger" onclick="cantFinish()">Can't finish — raise reattendance</button>
+    </div>`;
+}
+function renderAll(){ renderPhases(); renderSurface(); }
+
+/* ---------- check-in & demo reset ---------- */
+function checkIn(){
+  state.checkedIn = true;
+  state.checkInTime = now();
+  addFeed('📍','Tech checked in on site (R. Patel) — geo-stamped, location matches scheduled site');
+  renderAll();
+}
+const huduSeedHtml = document.getElementById('hudu').innerHTML;
+const anomSeedHtml = document.getElementById('anomList').innerHTML;
+function resetDemo(mode){
+  state = initialState(mode);
+  renderSeed();
+  document.getElementById('hudu').innerHTML = mode==='mid'
+    ? huduSeedHtml
+    : '<div class="ev-empty">Nothing filed yet — records appear here as the tech works.</div>';
+  document.getElementById('anomList').innerHTML = anomSeedHtml;
+  document.getElementById('anomCount').textContent = '4';
+  const bc = document.getElementById('btnCred'); bc.textContent = '🔑 Add credential'; bc.disabled = false;
+  const bs = document.getElementById('btnSign'); bs.textContent = '✍ Capture customer signature'; bs.disabled = false;
+  renderAll();
+}
+function cantFinish(){
+  const reason = prompt('Reason required — why can\'t the job be completed today?', 'Awaiting part: replacement patch panel');
+  if(!reason) return;
+  addFeed('🔁', `<b>Job not completed:</b> ${reason}. Reattendance ticket T20260724.0113 auto-raised and scheduled. Office notified.`);
+  alert('Reattendance ticket raised automatically with your reason and photos.\n\nNo silent walk-offs — the office knows before you leave the car park.');
+}
+
+renderSeed();
+renderAll();
+</script>
+</body>
+</html>
