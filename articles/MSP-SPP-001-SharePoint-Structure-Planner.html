@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SharePoint Structure Planner – Customer Design Before Migration</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background: #f7f9fc;
+  }
+
+  /* NAV */
+  .sticky-nav {
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  }
+
+  .sticky-nav-inner {
+    padding: 0 40px;
+    display: flex;
+    align-items: stretch;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .sticky-nav-inner::-webkit-scrollbar { display: none; }
+
+  .nav-link {
+    padding: 0 14px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #888;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+    border-radius: 0;
+    position: relative;
+  }
+
+  .nav-link:hover {
+    color: #1a3a8f;
+    background: rgba(37,87,183,0.06);
+    border-bottom-color: #2557b7;
+  }
+
+  .nav-link:active {
+    background: rgba(37,87,183,0.12);
+  }
+
+  .nav-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .num-blue  { background: rgba(37,87,183,0.12); color: #2557b7; }
+  .num-green { background: rgba(0,122,61,0.12);  color: #007a3d; }
+  .num-lime  { background: rgba(194,224,0,0.2);  color: #6b8500; }
+
+  /* PAGE BODY */
+  .page-body { padding: 44px 40px 72px; }
+
+  /* OVERVIEW CARD */
+  .overview-card {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
+    border-radius: 12px;
+    padding: 30px 34px;
+    margin-bottom: 20px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .overview-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(194,224,0,0.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .card-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.38);
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .overview-card p {
+    color: rgba(255,255,255,0.8);
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .pill-row { display: flex; gap: 8px; flex-wrap: wrap; position: relative; margin-top: 18px; }
+
+  .pill {
+    padding: 4px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  /* SECTION HEADING */
+  .section-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .step-badge {
+    flex-shrink: 0;
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 20px;
+    color: white;
+  }
+
+  .badge-blue  { background: #2557b7; }
+  .badge-green { background: #007a3d; }
+  .badge-lime  { background: #8aaa00; }
+
+  .step-meta {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 4px;
+  }
+
+  .step-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 21px;
+    font-weight: 400;
+    color: #1a1a1a;
+    line-height: 1.2;
+  }
+
+  /* CONTENT CARD */
+  .content-card {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+    padding: 22px 26px 26px;
+  }
+
+  /* STEPS */
+  .steps { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #f7f9fc;
+    border-radius: 8px;
+    padding: 11px 14px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .step-num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: rgba(37,87,183,0.1);
+    color: #2557b7;
+    border: 1px solid rgba(37,87,183,0.2);
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step p { font-size: 13px; padding-top: 3px; }
+
+  code.inline-code {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 12px;
+    background: rgba(37,87,183,0.07);
+    border: 1px solid rgba(37,87,183,0.15);
+    padding: 1px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  /* AMBER ALERT */
+  .lost-alert {
+    border-radius: 8px;
+    padding: 13px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    margin-bottom: 44px;
+  }
+
+  .lost-alert.in-card { margin-top: 20px; margin-bottom: 0; }
+  .lost-alert-icon { font-size: 15px; flex-shrink: 0; margin-top: 2px; color: #d97706; }
+  .lost-alert strong { display: block; font-size: 13px; font-weight: 600; margin-bottom: 3px; color: #92400e; }
+  .lost-alert p { font-size: 13px; color: #78350f; line-height: 1.6; }
+
+  /* CALLOUT */
+  .callout {
+    padding: 13px 16px;
+    margin-top: 14px;
+    border-radius: 8px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .callout-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .callout-title { font-weight: 600; font-size: 13px; margin-bottom: 3px; }
+  .callout-body  { font-size: 13px; line-height: 1.6; }
+  .callout-info  { background: #eff6ff; border: 1px solid #bfdbfe; }
+  .callout-info .callout-icon  { color: #2563eb; }
+  .callout-info .callout-title { color: #1e40af; }
+  .callout-info .callout-body  { color: #1e3a5f; }
+
+  /* TRUST BANNER */
+  .app-trust-banner {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 60%, #1e4aa0 100%);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 48px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(30,74,160,0.25);
+  }
+
+  .app-trust-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(194,224,0,0.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .app-trust-banner h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 21px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .app-trust-banner > p {
+    color: rgba(255,255,255,0.78);
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 22px;
+    position: relative;
+  }
+
+  .trust-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  .trust-card {
+    border-radius: 8px;
+    padding: 16px 18px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+
+  .trust-card-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .trust-card.pro .trust-card-label { color: #c2e000; }
+  .trust-card.con .trust-card-label { color: rgba(255,160,120,0.9); }
+
+  .trust-card-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 14px;
+    color: white;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+
+  .trust-card ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+  .trust-card ul li {
+    font-size: 13px;
+    color: rgba(255,255,255,0.68);
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    line-height: 1.5;
+  }
+
+  .trust-card ul li::before { font-weight: 700; font-size: 11px; flex-shrink: 0; margin-top: 1px; }
+  .trust-card.pro ul li::before { content: '✓'; color: #c2e000; }
+  .trust-card.con ul li::before { content: '!'; color: rgba(255,140,100,0.9); }
+
+  .privacy-callout {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 18px 20px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    position: relative;
+  }
+
+  .privacy-callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+
+  .privacy-callout-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 15px;
+    color: white;
+    margin-bottom: 8px;
+  }
+
+  .privacy-callout p { font-size: 13px; color: rgba(255,255,255,0.68); line-height: 1.65; }
+  .privacy-callout p + p { margin-top: 8px; }
+
+  /* DIVIDER */
+  .divider { margin: 34px 0; display: flex; align-items: center; gap: 14px; }
+  .divider-line { flex: 1; height: 1px; background: rgba(0,0,0,0.1); }
+  .divider-arrow { color: #bbb; font-size: 14px; }
+
+  /* REQUIREMENTS TABLE */
+  .id-table-wrap {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+
+  .id-table-intro { padding: 16px 22px 0; }
+  .id-table-intro p { font-size: 14px; line-height: 1.6; padding-bottom: 14px; border-bottom: 1px solid rgba(0,0,0,0.08); }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    background: #f7f9fc;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #888;
+    padding: 10px 22px;
+    text-align: left;
+    border-bottom: 2px solid rgba(0,0,0,0.08);
+  }
+
+  tbody tr { border-bottom: 1px solid rgba(0,0,0,0.07); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 14px 22px; font-size: 14px; vertical-align: middle; line-height: 1.5; }
+
+  .req-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+    background: rgba(37,87,183,0.1);
+    color: #2557b7;
+  }
+
+  /* FAQ / TROUBLESHOOTING */
+  .faq-wrap {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+
+  .faq-header {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
+    padding: 18px 26px;
+  }
+
+  .faq-header h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 2px;
+  }
+
+  .faq-header p {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.42);
+    letter-spacing: 0.06em;
+  }
+
+  details { border-bottom: 1px solid rgba(0,0,0,0.08); }
+  details:last-child { border-bottom: none; }
+
+  summary {
+    padding: 15px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    list-style: none;
+    user-select: none;
+  }
+
+  summary::-webkit-details-marker { display: none; }
+  summary:hover { background: #f7f9fc; }
+  summary::after { content: '+'; font-size: 20px; font-weight: 300; color: #bbb; flex-shrink: 0; }
+  details[open] summary::after { content: '×'; color: #2557b7; }
+  details[open] summary { color: #2557b7; background: #f7f9fc; }
+
+  .faq-answer {
+    padding: 4px 22px 16px;
+    font-size: 14px;
+    line-height: 1.7;
+    background: #f7f9fc;
+    color: #333;
+  }
+
+  /* HELP SECTION */
+  .help-section {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 60%, #1e4aa0 100%);
+    border-radius: 12px;
+    padding: 32px 34px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 44px;
+    color: white;
+    box-shadow: 0 4px 22px rgba(30,74,160,0.3);
+  }
+
+  .help-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 80% 20%, rgba(194,224,0,0.1) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .help-section h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 21px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 5px;
+    position: relative;
+  }
+
+  .help-sub {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 22px;
+    position: relative;
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    position: relative;
+    margin-bottom: 12px;
+  }
+
+  .contact-card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 14px 16px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .contact-card:hover { background: rgba(255,255,255,0.12); border-color: rgba(194,224,0,0.35); }
+
+  .contact-icon-wrap {
+    width: 38px; height: 38px;
+    border-radius: 8px;
+    background: rgba(194,224,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+
+  .contact-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #c2e000;
+    margin-bottom: 3px;
+  }
+
+  .contact-value { font-size: 13px; font-weight: 600; color: white; }
+
+  .rmm-note {
+    background: rgba(194,224,0,0.08);
+    border: 1px solid rgba(194,224,0,0.2);
+    border-radius: 8px;
+    padding: 13px 16px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.72);
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    position: relative;
+  }
+
+  .rmm-note strong { color: #c2e000; }
+
+  /* COMPLETION BANNER */
+  .completion-banner {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
+    border-radius: 12px;
+    padding: 36px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 4px 22px rgba(30,74,160,0.28);
+  }
+
+  .completion-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(194,224,0,0.18) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .completion-inner { position: relative; z-index: 1; }
+
+  .completion-icon {
+    width: 52px; height: 52px;
+    background: rgba(194,224,0,0.2);
+    border: 2px solid rgba(194,224,0,0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    font-size: 22px;
+    color: #c2e000;
+  }
+
+  .completion-eyebrow {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(194,224,0,0.75);
+    margin-bottom: 10px;
+  }
+
+  .completion-banner h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 23px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 12px;
+  }
+
+  .completion-banner p { font-size: 14px; color: rgba(255,255,255,0.6); max-width: 460px; margin: 0 auto 20px; line-height: 1.7; }
+
+  .completion-pills { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+
+  .cpill-lime {
+    background: rgba(194,224,0,0.15);
+    border: 1px solid rgba(194,224,0,0.35);
+    border-radius: 20px;
+    padding: 4px 13px;
+    font-size: 12px;
+    color: #c2e000;
+    font-weight: 500;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 640px) {
+    .sticky-nav-inner { padding: 0 14px; }
+    .page-body       { padding: 28px 14px 56px; }
+
+    .overview-card,
+    .app-trust-banner,
+    .help-section,
+    .completion-banner { padding: 20px 16px; }
+
+    .content-card { padding: 16px 16px 20px; }
+
+    .trust-grid,
+    .contact-grid { grid-template-columns: 1fr; }
+
+    .privacy-callout { flex-direction: column; gap: 10px; }
+
+    summary   { padding: 13px 16px; }
+    .faq-answer { padding: 4px 16px 14px; }
+    .faq-header { padding: 14px 18px; }
+
+    .completion-pills { flex-direction: column; align-items: center; }
+
+    thead th,
+    tbody td { padding: 10px 14px; }
+  }
+
+  @media (max-width: 380px) {
+    .step-title { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sticky-nav">
+  <div class="sticky-nav-inner">
+    <a class="nav-link" href="#need"><span class="nav-num num-lime">?</span> What You'll Need</a>
+    <a class="nav-link" href="#step1"><span class="nav-num num-blue">1</span> Send the Planner</a>
+    <a class="nav-link" href="#step2"><span class="nav-num num-green">2</span> Customer Designs</a>
+    <a class="nav-link" href="#step3"><span class="nav-num num-blue">3</span> Receive the Plan</a>
+    <a class="nav-link" href="#step4"><span class="nav-num num-green">4</span> Load &amp; Review</a>
+    <a class="nav-link" href="#step5"><span class="nav-num num-blue">5</span> Build From the Plan</a>
+    <a class="nav-link" href="#tool"><span class="nav-num num-lime">🛠</span> Use the Tool</a>
+    <a class="nav-link" href="#why"><span class="nav-num num-lime">✓</span> Built-In Rules</a>
+    <a class="nav-link" href="#troubleshoot"><span class="nav-num num-blue">!</span> Troubleshooting</a>
+  </div>
+</nav>
+
+<main class="page-body">
+
+  <!-- OVERVIEW -->
+  <div class="overview-card">
+    <div class="card-label">Article Overview</div>
+    <p>Before a file-server-to-SharePoint migration starts, the customer needs to decide <strong>where their files should live</strong> and <strong>who should be able to see what</strong>. The <strong>SharePoint Structure Planner</strong> lets them do that themselves: a single web page where they sketch Sites &rarr; Document Libraries &rarr; Folders, add the people who need access, and group them &mdash; while a live <strong>health check</strong> nags the design into SharePoint best-practice shape. No SharePoint knowledge is needed on their side; every term is explained in plain English as they go.</p>
+    <p>This guide covers the full round trip: sending the planner to the customer, what they do with it, getting their plan back by email, loading it into the planner yourself to review, and turning the agreed plan into the migration design. The planner is embedded <a href="#tool" style="color:#c2e000;text-decoration:none;">in the middle of this article</a>, so you can review a returned plan without leaving the page.</p>
+    <div class="pill-row">
+      <div class="pill"><span class="dot" style="background:#c2e000;"></span> Customer-facing tool</div>
+      <div class="pill"><span class="dot" style="background:#4d8cff;"></span> Sites &middot; Libraries &middot; Folders &middot; Access groups</div>
+      <div class="pill"><span class="dot" style="background:#4ade80;"></span> Runs entirely in the browser</div>
+      <div class="pill"><span class="dot" style="background:rgba(255,255,255,0.4);"></span> Plan comes back as a simple email</div>
+    </div>
+  </div>
+
+  <div class="lost-alert">
+    <div class="lost-alert-icon">&#9888;</div>
+    <div>
+      <strong>The customer&rsquo;s plan never reaches us automatically</strong>
+      <p>The planner saves the draft in the customer&rsquo;s own browser &mdash; on that machine, in that browser, only. Nothing is uploaded anywhere. Until the customer clicks <strong>&ldquo;Copy as text&rdquo;</strong> and emails us the result (or sends the plan file), we have nothing. Make sure they know the job isn&rsquo;t finished until they&rsquo;ve sent the plan back.</p>
+    </div>
+  </div>
+
+  <!-- WHAT YOU'LL NEED -->
+  <div id="need">
+    <div class="section-heading">
+      <div class="step-badge badge-lime">?</div>
+      <div>
+        <div class="step-meta">Preparation</div>
+        <div class="step-title">What You&rsquo;ll Need</div>
+      </div>
+    </div>
+
+    <div class="id-table-wrap">
+      <div class="id-table-intro">
+        <p>The planner does the heavy lifting &mdash; you mostly need the right contact on the customer side and a rough idea of what&rsquo;s being migrated.</p>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Requirement</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="req-pill">🛠 Structure Planner</span></td>
+            <td>Embedded <a href="#tool" style="color:#2557b7;">in the middle of this article</a> &mdash; or open it full-screen at <a href="https://b4ldini.github.io/hudu-widgets/tools/sp-structure-builder.html" target="_blank" rel="noopener" style="color:#2557b7;">b4ldini.github.io/hudu-widgets/tools/sp-structure-builder.html</a></td>
+          </tr>
+          <tr>
+            <td><span class="req-pill">👤 Customer contact</span></td>
+            <td>Someone on the customer side who knows how their teams work and files things &mdash; an office manager is usually better than their IT contact</td>
+          </tr>
+          <tr>
+            <td><span class="req-pill">💻 Any modern browser</span></td>
+            <td>The planner is one self-contained web page &mdash; nothing to install, works in Edge/Chrome/Safari, and the plan never leaves the customer&rsquo;s machine until they email it</td>
+          </tr>
+          <tr>
+            <td><span class="req-pill">📁 Migration scope</span></td>
+            <td>A rough picture of the customer&rsquo;s current file server layout, so you can sanity-check the returned plan against what actually exists</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 1 -->
+  <div id="step1">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">1</div>
+      <div>
+        <div class="step-meta">Step 01 of 05</div>
+        <div class="step-title">Send the Planner to the Customer</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>Email the customer the planner link: <a href="https://b4ldini.github.io/hudu-widgets/tools/sp-structure-builder.html" target="_blank" rel="noopener" style="color:#2557b7;"><code class="inline-code">b4ldini.github.io/hudu-widgets/tools/sp-structure-builder.html</code></a>. It opens in any browser with nothing to install or sign in to.</p></div>
+        <div class="step"><div class="step-num">2</div><p>If the customer can&rsquo;t reach external links, attach the HTML file itself instead &mdash; it&rsquo;s a single self-contained file that works opened straight from their Downloads folder, even offline.</p></div>
+        <div class="step"><div class="step-num">3</div><p>Tell them what we need in one line: <em>&ldquo;Sketch how you&rsquo;d like your files organised after the move and who should see what &mdash; the page explains everything as you go. When you&rsquo;re done, click <strong>Copy as text</strong> and paste the result into a reply to us.&rdquo;</em></p></div>
+        <div class="step"><div class="step-num">4</div><p>Point them at the built-in <strong>how-to at the top of the planner</strong> &mdash; it has a plain-English glossary (what a site, library and folder actually are) so you shouldn&rsquo;t need to explain SharePoint concepts yourself.</p></div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">&#8505;</div>
+        <div>
+          <div class="callout-title">Aimed at non-technical people on purpose</div>
+          <div class="callout-body">The planner never shows raw SharePoint jargon without explaining it &mdash; filing-cabinet analogies, tooltips on every term, and guidance notes in every panel. It&rsquo;s safe to hand to an office manager with no briefing call.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 2 -->
+  <div id="step2">
+    <div class="section-heading">
+      <div class="step-badge badge-green">2</div>
+      <div>
+        <div class="step-meta">Step 02 of 05</div>
+        <div class="step-title">What the Customer Does (So You Can Support Them)</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p><strong>Map the structure.</strong> They click <strong>+ Add a site</strong> for each broad area of the business, add document libraries inside each site, and folders inside libraries for everyday filing.</p></div>
+        <div class="step"><div class="step-num">2</div><p><strong>Add people once.</strong> The <strong>People</strong> panel is a directory &mdash; each person (name or email) is typed once, then clicked into place everywhere else as a pill. Bulk add with a comma-separated list works too.</p></div>
+        <div class="step"><div class="step-num">3</div><p><strong>Group the people.</strong> In <strong>Access groups</strong>, they build named sets of people and tick which groups can see each site or restricted library. Technical <code class="inline-code">spo-</code> group names are auto-generated &mdash; customers rarely have to invent one.</p></div>
+        <div class="step"><div class="step-num">4</div><p><strong>Follow the health check.</strong> The panel on the right flags anything against best practice &mdash; missing owners, folders that should be libraries, groups with no members &mdash; and says how to fix each one. A clean health check means a plan we can build from.</p></div>
+        <div class="step"><div class="step-num">5</div><p>Their draft <strong>autosaves in the browser</strong> as they work, so they can close the tab and come back to it later on the same machine.</p></div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">&#8505;</div>
+        <div>
+          <div class="callout-title">Restricted folders get promoted, not permissioned</div>
+          <div class="callout-body">If the customer marks a folder as &ldquo;only some people should see this&rdquo;, the health check flags it and offers a one-click <strong>Make it a library</strong> button &mdash; because SharePoint permissions belong on whole libraries, not folders. The planner won&rsquo;t let a design rely on folder-level permissions.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 3 -->
+  <div id="step3">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">3</div>
+      <div>
+        <div class="step-meta">Step 03 of 05</div>
+        <div class="step-title">Receive the Plan Back</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>The customer clicks <strong>Copy as text</strong> under <strong>&ldquo;Finished? Send it back&rdquo;</strong> and pastes the result into an email to us. That&rsquo;s the whole handover &mdash; no attachment needed.</p></div>
+        <div class="step"><div class="step-num">2</div><p>The pasted text is a readable outline (sites, libraries, folders, owners, group membership) with a machine-readable <strong>plan-data code</strong> at the bottom between <code class="inline-code">===== PLAN DATA =====</code> markers. The code recreates their exact design.</p></div>
+        <div class="step"><div class="step-num">3</div><p>Alternatives that also work: <strong>Download plan file</strong> saves the same outline as <code class="inline-code">sharepoint-structure-plan.txt</code> to attach, and <strong>Copy share code</strong> gives just the bare code (starts <code class="inline-code">SPPLAN1.</code>) on its own.</p></div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">&#8505;</div>
+        <div>
+          <div class="callout-title">The email alone is enough</div>
+          <div class="callout-body">Don&rsquo;t ask the customer for screenshots or spreadsheets &mdash; the pasted outline carries everything, including the data block. Mangled line-wrapping from their mail client is fine; the planner copes with it when loading.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 4 -->
+  <div id="step4">
+    <div class="section-heading">
+      <div class="step-badge badge-green">4</div>
+      <div>
+        <div class="step-meta">Step 04 of 05</div>
+        <div class="step-title">Load &amp; Review the Plan Yourself</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>Scroll down to the <a href="#tool" style="color:#2557b7;"><strong>Structure Planner embedded in this article</strong></a> &mdash; or open it <a href="https://b4ldini.github.io/hudu-widgets/tools/sp-structure-builder.html" target="_blank" rel="noopener" style="color:#2557b7;">full-screen in its own tab</a> if you want more room.</p></div>
+        <div class="step"><div class="step-num">2</div><p>Click <strong>Load a plan</strong> and paste in the customer&rsquo;s <em>entire email</em> &mdash; signature, pleasantries and all. The planner finds and extracts the plan-data code itself. Choosing their <code class="inline-code">.txt</code> file or pasting a bare share code works the same way.</p></div>
+        <div class="step"><div class="step-num">3</div><p>Their design appears exactly as they built it. Walk the structure, check the <strong>health check</strong> is clean, and sanity-check it against the real file server &mdash; missing departments and one-person access groups are the usual catches.</p></div>
+        <div class="step"><div class="step-num">4</div><p>Agree any changes with the customer, make them in the planner, then <strong>Copy as text</strong> to send the revised plan back for their sign-off &mdash; same round trip in reverse.</p></div>
+      </div>
+
+      <div class="lost-alert in-card">
+        <div class="lost-alert-icon">&#9888;</div>
+        <div>
+          <strong>Loading a plan replaces whatever is in the planner</strong>
+          <p>The planner holds one draft per browser. If you already have a design open that you care about, click <strong>Copy share code</strong> and keep it somewhere first &mdash; then load the customer&rsquo;s plan.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 5 -->
+  <div id="step5">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">5</div>
+      <div>
+        <div class="step-meta">Step 05 of 05</div>
+        <div class="step-title">Turn the Agreed Plan Into the Migration Design</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>Each <strong>site</strong> in the plan becomes a SharePoint site, with the plan&rsquo;s two-plus named <strong>owners</strong> set as site owners.</p></div>
+        <div class="step"><div class="step-num">2</div><p>Each <strong>library</strong> becomes a document library, with access set <strong>at the library root</strong> using the plan&rsquo;s <code class="inline-code">spo-</code> groups &mdash; inherited from the site, or the specific groups listed for a restricted library. Folders inside migrate as-is, inheriting the library&rsquo;s access.</p></div>
+        <div class="step"><div class="step-num">3</div><p>The <strong>ACCESS GROUPS</strong> section of the plan text is your group-creation checklist: each <code class="inline-code">spo-</code> group with its full membership list, ready to create in Entra ID / Microsoft 365.</p></div>
+        <div class="step"><div class="step-num">4</div><p>Folder <strong>notes</strong> in the plan (e.g. &ldquo;move contents of X here&rdquo;) carry the customer&rsquo;s mapping hints from the old file server &mdash; fold them into the migration mapping document.</p></div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">&#8505;</div>
+        <div>
+          <div class="callout-title">The plan is the design input, not an automated build</div>
+          <div class="callout-body">Nothing is provisioned automatically &mdash; the plan tells you what to build and who goes in which group. Provision the sites, libraries and groups following our standard SharePoint migration process.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- THE TOOL -->
+  <div id="tool">
+    <div class="section-heading">
+      <div class="step-badge badge-lime">🛠</div>
+      <div>
+        <div class="step-meta">Work Here</div>
+        <div class="step-title">The SharePoint Structure Planner</div>
+      </div>
+    </div>
+
+    <div class="content-card" style="padding:0;overflow:hidden;">
+      <iframe
+        src="../tools/sp-structure-builder.html"
+        style="width:100%;height:1050px;border:none;display:block;background:#fff;"
+        title="SharePoint Structure Planner"
+        loading="lazy"
+      ></iframe>
+    </div>
+  </div>
+
+  <!-- COMPLETION BANNER -->
+  <div class="completion-banner">
+    <div class="completion-inner">
+      <div class="completion-icon">&#10003;</div>
+      <div class="completion-eyebrow">Plan Agreed</div>
+      <h2>A migration design the customer already owns</h2>
+      <p>The customer has designed &mdash; and signed off &mdash; where everything will live and who can see what, before a single file moves. The plan text doubles as the build checklist for sites, libraries and access groups.</p>
+      <div class="completion-pills">
+        <div class="cpill-lime">&#10003; Best practice enforced by the health check</div>
+        <div class="cpill-lime">&#10003; Access groups ready to create in M365</div>
+        <div class="cpill-lime">&#10003; Whole plan travels in a plain email</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUILT-IN RULES -->
+  <div id="why">
+    <div class="section-heading">
+      <div class="step-badge badge-lime">✓</div>
+      <div>
+        <div class="step-meta">Worth Knowing</div>
+        <div class="step-title">The Best-Practice Rules Built Into the Planner</div>
+      </div>
+    </div>
+
+    <div class="app-trust-banner">
+      <div class="card-label">Guardrails By Design</div>
+      <h2>The customer can&rsquo;t easily design something we&rsquo;d refuse to build</h2>
+      <p>The planner encodes SharePoint permissions best practice (based on the University of Cambridge UIS guidance) directly into its health check and its data model &mdash; the usual migration design mistakes are either flagged loudly or simply impossible to express.</p>
+
+      <div class="trust-grid">
+        <div class="trust-card pro">
+          <div class="trust-card-label">Enforced By The Health Check</div>
+          <div class="trust-card-title">What the customer is steered towards</div>
+          <ul>
+            <li>Permissions set only at <strong>library root</strong> &mdash; restricted folders get promoted to their own library with one click</li>
+            <li>At least <strong>two owners</strong> named on every site</li>
+            <li>Group names follow the <code style="font-family:'Courier New',monospace;">spo-&lt;site&gt;-&lt;function&gt;</code> convention &mdash; auto-generated, so it&rsquo;s the default</li>
+            <li>Shallow folder nesting &mdash; anything deeper than three levels is flagged for findability and path-length limits</li>
+          </ul>
+        </div>
+        <div class="trust-card con">
+          <div class="trust-card-label">Impossible To Express</div>
+          <div class="trust-card-title">Mistakes the tool won&rsquo;t let them draw</div>
+          <ul>
+            <li>Folder-level permissions &mdash; folders have no permissions field at all</li>
+            <li>Nested sites &mdash; sites are top-level only (related sites get linked by hubs, which we handle)</li>
+            <li>Broken permission inheritance and person-by-person sharing &mdash; access is only ever groups on libraries and sites</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="privacy-callout">
+        <div class="privacy-callout-icon">🔒</div>
+        <div>
+          <div class="privacy-callout-title">Nothing is uploaded anywhere</div>
+          <p>The planner is a single HTML file with no server behind it. The customer&rsquo;s draft lives in <strong style="color:rgba(255,255,255,0.9);">their browser only</strong> and reaches us exclusively as the text they choose to email. There&rsquo;s no account, no login, and nothing for us to secure.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TROUBLESHOOTING -->
+  <div id="troubleshoot">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">!</div>
+      <div>
+        <div class="step-meta">If Something Goes Wrong</div>
+        <div class="step-title">Troubleshooting</div>
+      </div>
+    </div>
+
+    <div class="faq-wrap">
+      <div class="faq-header">
+        <h2>Common Problems &amp; Fixes</h2>
+        <p>Click any problem to expand the fix</p>
+      </div>
+      <details>
+        <summary>The customer says their draft has disappeared</summary>
+        <div class="faq-answer">Drafts autosave <em>per browser, per machine</em> &mdash; if they switched from Chrome to Edge, moved to another computer, opened the emailed file from a different folder, or cleared browsing data, they&rsquo;ll see a blank planner. If they ever sent us (or saved) a plan text or share code, <strong>Load a plan</strong> restores it exactly. Encourage customers to click <strong>Copy share code</strong> at the end of each session as a cheap backup.</div>
+      </details>
+      <details>
+        <summary>Pasting the customer&rsquo;s email into &ldquo;Load a plan&rdquo; does nothing</summary>
+        <div class="faq-answer">Make sure the paste includes the full block between the <code style="font-family:'Courier New',monospace;">===== PLAN DATA =====</code> markers &mdash; forwarding chains sometimes truncate it. Hard line-wrapping is fine; the planner strips it. If the email really is incomplete, ask the customer for the <strong>Download plan file</strong> attachment or a fresh <strong>Copy share code</strong>.</div>
+      </details>
+      <details>
+        <summary>An old plan file has a different-looking data block or raw JSON</summary>
+        <div class="faq-answer">Plans from earlier versions of the tool (including raw-JSON <code style="font-family:'Courier New',monospace;">----- PLAN DATA -----</code> blocks) still load &mdash; the planner upgrades old formats automatically. Just paste or open them as normal.</div>
+      </details>
+      <details>
+        <summary>&ldquo;Download plan file&rdquo; doesn&rsquo;t download anything</summary>
+        <div class="faq-answer">Some embedded or sandboxed views block file downloads. Use <strong>Copy as text</strong> instead (it carries the same data), or open the planner full-screen in its own tab where downloads work normally.</div>
+      </details>
+      <details>
+        <summary>The customer wants one folder visible to only a few people</summary>
+        <div class="faq-answer">That&rsquo;s the design decision the planner exists to catch. Have them tick <strong>&ldquo;only some people should see this&rdquo;</strong> on the folder &mdash; the health check then offers <strong>Make it a library</strong>, which converts it to a sibling restricted library with its own auto-named <code style="font-family:'Courier New',monospace;">spo-</code> group. SharePoint permissions belong at library root; we don&rsquo;t build folder-level permissions.</div>
+      </details>
+      <details>
+        <summary>I loaded a customer plan and lost the design I was working on</summary>
+        <div class="faq-answer">The planner keeps one draft per browser, and loading replaces it. If you copied a share code of the earlier design, paste it into <strong>Load a plan</strong> to get it back. Otherwise check whether it was ever exported (sent in an email, saved as a plan file) &mdash; any of those restores it. For future reviews, grab the share code before loading anything.</div>
+      </details>
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="help-section">
+    <h2>Need help?</h2>
+    <p class="help-sub">IT Service Management &middot; Active8 Managed Technologies</p>
+    <div class="rmm-note">
+      <div>&#8505;</div>
+      <div>If a customer&rsquo;s plan won&rsquo;t load or the planner misbehaves, contact IT Support with the <strong>customer&rsquo;s plan text or share code</strong> included &mdash; it&rsquo;s needed to reproduce the problem.</div>
+    </div>
+    <div class="contact-grid" style="margin-top:20px;">
+      <a href="mailto:ITSupport@a8mt.co.uk" class="contact-card">
+        <div class="contact-icon-wrap">📧</div>
+        <div>
+          <div class="contact-label">Email</div>
+          <div class="contact-value">ITSupport@a8mt.co.uk</div>
+        </div>
+      </a>
+      <a href="tel:03339997355" class="contact-card">
+        <div class="contact-icon-wrap">📞</div>
+        <div>
+          <div class="contact-label">Phone</div>
+          <div class="contact-value">0333 999 7355</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+</main>
+
+<footer style="background:linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);border-top:1px solid rgba(194,224,0,0.2);padding:18px 40px;text-align:center;">
+  <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">Prepared by <span style="color:rgba(255,255,255,0.85);">Active8 Managed Technologies Limited</span> &middot; IT Service Management</div>
+  <div style="font-family:'Courier New',Consolas,monospace;font-size:10px;color:rgba(255,255,255,0.32);margin-top:5px;">v1.0 &middot; July 2026 &middot; This article is maintained by the Active 8 IT team.</div>
+</footer>
+
+<script>
+(function(){
+  function sendHeight(){
+    var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+    window.parent.postMessage({type:'a8-iframe-resize', height:h}, '*');
+    try { if(window.frameElement) window.frameElement.style.height = (h+20)+'px'; } catch(e){}
+  }
+  // Fire immediately, on load, on resize, and via ResizeObserver
+  sendHeight();
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+  if(window.ResizeObserver){ new ResizeObserver(sendHeight).observe(document.body); }
+  // Retry every 300ms for 12 seconds to survive any parent-side load race
+  var attempts = 0;
+  var timer = setInterval(function(){
+    sendHeight();
+    if(++attempts >= 40) clearInterval(timer);
+  }, 300);
+})();
+</script>
+
+</body>
+</html>

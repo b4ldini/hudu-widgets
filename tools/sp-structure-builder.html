@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SharePoint Structure Planner</title>
+<style>
+  :root{
+    --paper:#F6F7F9; --panel:#FFFFFF; --panel-2:#EFF1F5;
+    --ink:#1D2530; --muted:#5C6878; --line:#DCE1E9; --line-soft:#E8ECF2;
+    --site:#2F5FA8; --site-bg:#E7EEF9; --site-line:#B9CCE9;
+    --lib:#1E7A6C; --lib-bg:#E2F1EC; --lib-line:#AFD6CC;
+    --fold:#8A671F; --fold-bg:#F6EEDB; --fold-line:#E0CC9A;
+    --grp:#7A4FA3; --grp-bg:#F0E9F8; --grp-line:#D5C2EA;
+    --ok:#2E7D46; --ok-bg:#E4F1E7;
+    --warn:#A85410; --warn-bg:#FBEDDD;
+    --bad:#B3352E; --bad-bg:#F9E6E4;
+    --accent:#2F5FA8; --accent-ink:#FFFFFF;
+    --shadow:0 1px 3px rgba(29,37,48,.08), 0 4px 16px rgba(29,37,48,.06);
+    --radius:10px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#14181F; --panel:#1C222C; --panel-2:#232B37;
+      --ink:#E6EAF0; --muted:#94A1B2; --line:#303A48; --line-soft:#28313E;
+      --site:#82AAE4; --site-bg:#22304A; --site-line:#3A5378;
+      --lib:#5FC2AF; --lib-bg:#1B3A34; --lib-line:#2C5A50;
+      --fold:#D9AE5F; --fold-bg:#3B331F; --fold-line:#5C4E2C;
+      --grp:#BC93E0; --grp-bg:#33254A; --grp-line:#544073;
+      --ok:#6FBF85; --ok-bg:#20342A;
+      --warn:#E39A55; --warn-bg:#3D2E1E;
+      --bad:#E08078; --bad-bg:#402425;
+      --accent:#6B99D8; --accent-ink:#0F1520;
+      --shadow:0 1px 3px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#F6F7F9; --panel:#FFFFFF; --panel-2:#EFF1F5;
+    --ink:#1D2530; --muted:#5C6878; --line:#DCE1E9; --line-soft:#E8ECF2;
+    --site:#2F5FA8; --site-bg:#E7EEF9; --site-line:#B9CCE9;
+    --lib:#1E7A6C; --lib-bg:#E2F1EC; --lib-line:#AFD6CC;
+    --fold:#8A671F; --fold-bg:#F6EEDB; --fold-line:#E0CC9A;
+    --grp:#7A4FA3; --grp-bg:#F0E9F8; --grp-line:#D5C2EA;
+    --ok:#2E7D46; --ok-bg:#E4F1E7;
+    --warn:#A85410; --warn-bg:#FBEDDD;
+    --bad:#B3352E; --bad-bg:#F9E6E4;
+    --accent:#2F5FA8; --accent-ink:#FFFFFF;
+    --shadow:0 1px 3px rgba(29,37,48,.08), 0 4px 16px rgba(29,37,48,.06);
+  }
+  :root[data-theme="dark"]{
+    --paper:#14181F; --panel:#1C222C; --panel-2:#232B37;
+    --ink:#E6EAF0; --muted:#94A1B2; --line:#303A48; --line-soft:#28313E;
+    --site:#82AAE4; --site-bg:#22304A; --site-line:#3A5378;
+    --lib:#5FC2AF; --lib-bg:#1B3A34; --lib-line:#2C5A50;
+    --fold:#D9AE5F; --fold-bg:#3B331F; --fold-line:#5C4E2C;
+    --grp:#BC93E0; --grp-bg:#33254A; --grp-line:#544073;
+    --ok:#6FBF85; --ok-bg:#20342A;
+    --warn:#E39A55; --warn-bg:#3D2E1E;
+    --bad:#E08078; --bad-bg:#402425;
+    --accent:#6B99D8; --accent-ink:#0F1520;
+    --shadow:0 1px 3px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,sans-serif;
+    font-size:15px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:"Cascadia Code",Consolas,ui-monospace,monospace}
+
+  .wrap{max-width:1280px;margin:0 auto;padding:20px 24px 64px}
+
+  /* ---------- header ---------- */
+  header.app{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
+    flex-wrap:wrap;padding:8px 0 18px;border-bottom:1px solid var(--line);margin-bottom:20px;
+  }
+  .brand h1{font-size:22px;font-weight:650;margin:0;letter-spacing:-.01em;text-wrap:balance}
+  .brand .sub{color:var(--muted);font-size:13.5px;margin-top:2px;max-width:56ch}
+  .stats{display:flex;gap:8px;flex-wrap:wrap}
+  .stat{
+    background:var(--panel);border:1px solid var(--line);border-radius:8px;
+    padding:6px 12px;text-align:center;min-width:70px;
+  }
+  .stat b{display:block;font-size:18px;font-variant-numeric:tabular-nums;line-height:1.2}
+  .stat span{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+
+  /* ---------- help strip ---------- */
+  .howto{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:0;margin-bottom:20px;box-shadow:var(--shadow);overflow:hidden;
+  }
+  .howto summary{
+    cursor:pointer;padding:12px 18px;font-weight:600;font-size:14px;list-style:none;
+    display:flex;align-items:center;gap:10px;user-select:none;
+  }
+  .howto summary::-webkit-details-marker{display:none}
+  .howto summary .chev{transition:transform .15s;color:var(--muted);font-size:12px}
+  .howto[open] summary .chev{transform:rotate(90deg)}
+  .howto .body{padding:0 18px 16px;color:var(--muted);font-size:14px;max-width:78ch}
+  .howto .body ol{margin:6px 0 10px;padding-left:22px}
+  .howto .body li{margin:4px 0}
+  .howto .body strong{color:var(--ink)}
+
+  /* ---------- layout ---------- */
+  .cols{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:20px;align-items:start}
+  @media (max-width:960px){.cols{grid-template-columns:1fr}}
+
+  /* ---------- tree canvas ---------- */
+  .canvas{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:16px 16px 20px;min-height:300px;
+  }
+  .canvas-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+  .canvas-head h2{font-size:15px;margin:0;font-weight:650}
+  .canvas-head .hint{font-size:12.5px;color:var(--muted)}
+
+  .empty{
+    border:1.5px dashed var(--line);border-radius:var(--radius);
+    padding:36px 20px;text-align:center;color:var(--muted);font-size:14px;
+  }
+
+  ul.tree{list-style:none;margin:0;padding:0}
+  ul.tree ul{list-style:none;margin:0;padding-left:26px;border-left:1.5px solid var(--line-soft);margin-left:15px}
+
+  .node{margin:4px 0}
+  .row{
+    display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:8px;
+    border:1px solid transparent;position:relative;
+  }
+  .row:hover{background:var(--panel-2)}
+  .row.flash{background:var(--warn-bg);border-color:var(--warn)}
+
+  .chip{
+    font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    padding:3px 8px;border-radius:5px;flex:none;line-height:1.3;border:1px solid;
+  }
+  .chip.site{color:var(--site);background:var(--site-bg);border-color:var(--site-line)}
+  .chip.library{color:var(--lib);background:var(--lib-bg);border-color:var(--lib-line)}
+  .chip.folder{color:var(--fold);background:var(--fold-bg);border-color:var(--fold-line)}
+  .chip.group{color:var(--grp);background:var(--grp-bg);border-color:var(--grp-line)}
+
+  .nname{
+    font-weight:560;font-size:14.5px;cursor:text;padding:2px 6px;border-radius:5px;
+    min-width:40px;outline:none;
+  }
+  .row .nname:hover{background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
+  .nname:focus{background:var(--paper);box-shadow:inset 0 0 0 1.5px var(--accent)}
+  .site > .row .nname{font-size:15.5px;font-weight:650}
+
+  .meta-inline{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;min-width:0}
+  .meta-inline .tag{color:var(--lib)}
+  .meta-inline .miss{color:var(--bad);font-weight:600}
+  .badge-flag{
+    font-size:11px;font-weight:600;color:var(--warn);background:var(--warn-bg);
+    border:1px solid var(--warn);border-radius:5px;padding:1px 7px;flex:none;
+  }
+
+  .acts{display:flex;gap:2px;margin-left:auto;opacity:0;transition:opacity .12s;flex:none}
+  .row:hover .acts,.row:focus-within .acts{opacity:1}
+  .acts button{
+    border:none;background:transparent;color:var(--muted);cursor:pointer;
+    border-radius:5px;padding:3px 7px;font-size:12.5px;line-height:1.4;
+    font-family:inherit;
+  }
+  .acts button:hover{background:var(--paper);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+  .acts button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+  .acts button.del:hover{color:var(--bad);background:var(--bad-bg);box-shadow:inset 0 0 0 1px var(--bad)}
+  .acts button.addb{color:var(--accent);font-weight:600}
+
+  /* details drawer per node */
+  .drawer{
+    margin:2px 0 6px 34px;padding:10px 14px;border:1px solid var(--line);
+    border-radius:8px;background:var(--paper);font-size:13px;
+    display:grid;gap:8px;
+  }
+  .drawer label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:650;margin-bottom:3px}
+  .drawer input[type=text], .drawer textarea{
+    width:100%;border:1px solid var(--line);border-radius:6px;background:var(--panel);
+    color:var(--ink);padding:6px 9px;font:inherit;font-size:13.5px;
+  }
+  .drawer input:focus,.drawer textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent)}
+  .drawer .fieldnote{font-size:12px;color:var(--muted);margin-top:3px}
+  .drawer .fieldnote .mono{font-size:11.5px}
+  .drawer .radio-row{display:flex;gap:14px;flex-wrap:wrap;font-size:13.5px}
+  .drawer .radio-row label{display:flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0;font-weight:450;font-size:13.5px;color:var(--ink);margin:0;cursor:pointer}
+  .drawer .check-row{display:flex;align-items:flex-start;gap:8px;font-size:13.5px}
+  .drawer .check-row input{margin-top:3px}
+  .drawer .warn-note{
+    background:var(--warn-bg);border:1px solid var(--warn);color:var(--ink);
+    border-radius:6px;padding:8px 11px;font-size:12.5px;line-height:1.45;
+  }
+  .suggest-btn{
+    border:1px solid var(--line);background:var(--panel);color:var(--accent);
+    border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600;
+  }
+  .suggest-btn:hover{border-color:var(--accent)}
+
+  /* ---------- access groups panel ---------- */
+  .grow{
+    border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:8px 0;
+    display:grid;gap:8px;background:var(--paper);
+  }
+  .grow.flash{background:var(--warn-bg);border-color:var(--warn)}
+  .grow .g-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .grow .g-head input[type=text]{
+    flex:1;min-width:160px;border:1px solid var(--line);border-radius:6px;background:var(--panel);
+    color:var(--ink);padding:5px 9px;font-family:"Cascadia Code",Consolas,ui-monospace,monospace;
+    font-size:13px;font-weight:600;
+  }
+  .grow textarea{
+    width:100%;border:1px solid var(--line);border-radius:6px;background:var(--panel);
+    color:var(--ink);padding:6px 9px;font:inherit;font-size:13.5px;min-height:44px;resize:vertical;
+  }
+  .grow input:focus,.grow textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent)}
+  .grow label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:650;margin-bottom:3px}
+  .grow .g-use{font-size:12px;color:var(--muted)}
+  .grow .cnt{color:var(--muted);font-size:12px;flex:none}
+  /* people pills */
+  .ppills{display:flex;flex-wrap:wrap;gap:6px}
+  button.ppill{
+    border:1px solid var(--line);background:var(--panel);color:var(--ink);
+    border-radius:999px;padding:4px 12px;font-size:13px;cursor:pointer;font-family:inherit;line-height:1.4;
+  }
+  button.ppill:hover{border-color:var(--accent)}
+  button.ppill:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+  button.ppill.on{background:var(--grp-bg);border-color:var(--grp);color:var(--grp);font-weight:650}
+  button.ppill.on::before{content:"\2713\00a0"}
+  .person{
+    display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);
+    background:var(--paper);border-radius:999px;padding:3px 4px 3px 12px;font-size:13.5px;
+  }
+  .person .pname{outline:none;padding:1px 4px;border-radius:5px;min-width:24px;cursor:text}
+  .person .pname:hover{background:var(--panel);box-shadow:inset 0 0 0 1px var(--line)}
+  .person .pname:focus{background:var(--panel);box-shadow:inset 0 0 0 1.5px var(--accent)}
+  .person button.px{border:none;background:transparent;color:var(--muted);cursor:pointer;border-radius:50%;padding:2px 7px;font-size:12px;font-family:inherit}
+  .person button.px:hover{color:var(--bad);background:var(--bad-bg)}
+  .padd{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .padd input{
+    flex:1;min-width:200px;border:1px solid var(--line);border-radius:8px;background:var(--panel);
+    color:var(--ink);padding:8px 12px;font:inherit;font-size:13.5px;
+  }
+  .padd input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent)}
+
+  .pick-list{display:grid;gap:5px}
+  .pick-list label{display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-weight:450;font-size:13.5px;color:var(--ink);margin:0;cursor:pointer}
+  .pick-list .mono{font-size:12.5px}
+  .pick-list .cnt{color:var(--muted);font-size:12px}
+
+  /* ---------- sidebar ---------- */
+  .side{display:grid;gap:16px;position:sticky;top:16px}
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:16px 18px;
+  }
+  .card h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700}
+
+  .checks{display:grid;gap:7px;margin:0;padding:0;list-style:none}
+  .checks li{
+    display:flex;gap:9px;align-items:flex-start;font-size:13px;line-height:1.45;
+    padding:7px 10px;border-radius:7px;border:1px solid var(--line-soft);
+  }
+  .checks li .ic{flex:none;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:10.5px;font-weight:800;margin-top:1px}
+  .checks li.ok{background:var(--ok-bg);border-color:transparent}
+  .checks li.ok .ic{background:var(--ok);color:var(--paper)}
+  .checks li.warn{background:var(--warn-bg);border-color:transparent}
+  .checks li.warn .ic{background:var(--warn);color:var(--paper)}
+  .checks li.info .ic{background:var(--panel-2);color:var(--muted);border:1px solid var(--line)}
+  .checks li button.jump{
+    background:none;border:none;padding:0;color:var(--accent);cursor:pointer;font:inherit;
+    text-decoration:underline;text-underline-offset:2px;
+  }
+
+  .btnrow{display:grid;gap:8px}
+  .btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    border-radius:8px;padding:9px 14px;font-size:13.5px;font-weight:600;cursor:pointer;
+    border:1px solid var(--line);background:var(--panel-2);color:var(--ink);font-family:inherit;
+    transition:filter .1s;
+  }
+  .btn:hover{filter:brightness(.97)}
+  :root[data-theme="dark"] .btn:hover, .btn:hover{filter:brightness(1.05)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .btn.danger:hover{border-color:var(--bad);color:var(--bad)}
+  .side .small{font-size:12px;color:var(--muted);margin:8px 0 0}
+
+  .legend{display:grid;gap:8px;font-size:13px}
+  .legend .lrow{display:flex;gap:9px;align-items:baseline}
+  .legend .lrow .chip{margin-top:1px}
+  .legend .lrow span.desc{color:var(--muted);font-size:12.5px}
+
+  .toast{
+    position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(8px);
+    background:var(--ink);color:var(--paper);border-radius:8px;padding:9px 18px;
+    font-size:13.5px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;
+    box-shadow:var(--shadow);z-index:50;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  dialog.export{
+    border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);color:var(--ink);
+    max-width:680px;width:92vw;padding:20px;box-shadow:var(--shadow);
+  }
+  dialog.export::backdrop{background:rgba(10,14,20,.45)}
+  dialog.export h3{margin:0 0 10px;font-size:16px}
+  dialog.export pre{
+    background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px;
+    font-size:12.5px;line-height:1.55;overflow-x:auto;max-height:50vh;white-space:pre;
+  }
+  dialog .dlg-row{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="app">
+    <div class="brand">
+      <h1>SharePoint Structure Planner</h1>
+      <div class="sub">Sketch how you'd like your files organised after the move, and who should be able to see what. No SharePoint knowledge needed — every term is explained as you go, and the checker keeps your plan on track.</div>
+    </div>
+    <div class="stats" id="stats" aria-live="polite"></div>
+  </header>
+
+  <details class="howto">
+    <summary><span class="chev">&#9654;</span> How this works — please read before you start</summary>
+    <div class="body">
+      <p style="margin:10px 0 4px"><strong>First, the words you'll see.</strong> SharePoint (the system your files are moving to) has its own names for things:</p>
+      <ul style="margin:4px 0 12px;padding-left:22px">
+        <li><strong>Site</strong> — a separate area for one part of your organisation (Finance, HR, Operations…). Think of it as a filing cabinet with its own keyholders.</li>
+        <li><strong>Library</strong> (short for document library) — a section inside a site, like a drawer in that cabinet. <em>This is the level where "who can open it" is decided.</em></li>
+        <li><strong>Folder</strong> — ordinary folders inside a library, just like the ones you have today. Anyone who can open the library can open all of its folders.</li>
+        <li><strong>Group</strong> — a named list of people, e.g. "the finance team". Access is given to groups rather than to individuals one at a time, so someone joining or leaving is a single change.</li>
+        <li><strong>Owners</strong> — the people responsible for a site, who decide who else is allowed in. Every site needs at least two, so there's always someone available.</li>
+      </ul>
+      <p style="margin:10px 0 4px"><strong>What to do:</strong></p>
+      <ol>
+        <li><strong>Map your structure.</strong> Add a site for each broad area, libraries inside each site, and folders inside libraries for everyday filing.</li>
+        <li><strong>Add your people.</strong> In the <strong>People</strong> panel below the structure, type each person once — a name or an email address. You'll never need to type them again.</li>
+        <li><strong>Make your groups.</strong> In <strong>Access groups</strong>, click people's names to say who belongs in each group.</li>
+        <li><strong>Decide who can see what.</strong> Click <em>details</em> on a site to click its owners and tick which groups use it. If everyone on the site can see a library, leave it as "same as site"; if it's for a smaller circle, mark it restricted and tick the group(s) who should have it.</li>
+        <li><strong>Watch the health check</strong> on the right — it flags anything that would cause problems later, and tells you how to fix it.</li>
+        <li><strong>Send it back to us.</strong> When you're happy, use <strong>Copy as text</strong> and paste the whole thing into an email — it's a readable summary with a "plan data" code at the bottom that lets us load your design exactly as you built it. Please keep that code intact. (Prefer something shorter? <strong>Copy share code</strong> gives just the code on its own — pasting it into <em>Load a plan</em> recreates everything.) Your draft also saves automatically in this browser, so you can come back to it.</li>
+      </ol>
+      <p>One rule this planner enforces: <strong>access is decided on whole libraries, never on individual folders</strong>. If one folder needs to be private (say, salaries within HR), it should become its own library — the planner will guide you when that happens.</p>
+    </div>
+  </details>
+
+  <div class="cols">
+    <div style="display:grid;gap:20px;min-width:0">
+      <main class="canvas" aria-label="Structure tree">
+        <div class="canvas-head">
+          <h2>Your planned structure</h2>
+          <span class="hint">Click any name to rename it · hover a row for actions</span>
+        </div>
+        <div id="tree"></div>
+      </main>
+
+      <section class="canvas" aria-label="People">
+        <div class="canvas-head">
+          <h2>People — everyone who needs access</h2>
+          <span class="hint">Type each person once — after that you just click their name</span>
+        </div>
+        <div id="people"></div>
+      </section>
+
+      <section class="canvas" aria-label="Access groups">
+        <div class="canvas-head">
+          <h2>Access groups — who can see what</h2>
+          <span class="hint">Click names to put people in a group — the spo-… label is just the technical name we'll use when we build it</span>
+        </div>
+        <div id="groups"></div>
+      </section>
+    </div>
+
+    <aside class="side">
+      <section class="card" aria-label="Health check">
+        <h3>Health check</h3>
+        <ul class="checks" id="checks"></ul>
+      </section>
+
+      <section class="card" aria-label="Send your plan">
+        <h3>Finished? Send it back</h3>
+        <div class="btnrow">
+          <button class="btn primary" id="copyText">Copy as text</button>
+          <button class="btn" id="shareCode">Copy share code</button>
+          <button class="btn" id="dlJson">Download plan file</button>
+          <button class="btn" id="importJson">Load a plan</button>
+          <button class="btn danger" id="resetAll">Start over</button>
+        </div>
+        <p class="small">Your draft saves automatically in this browser. "Copy as text" gives a readable outline to paste straight into an email — it includes a plan-data code at the bottom, so the email alone is enough for us. "Copy share code" gives just that code on its own — anyone can paste it into <em>Load a plan</em> to recreate your exact design. "Download plan file" saves the outline as a plain text file.</p>
+        <input type="file" id="fileInput" accept=".txt,.json,text/plain,application/json" hidden>
+      </section>
+
+      <section class="card" aria-label="What the levels mean">
+        <h3>What the levels mean</h3>
+        <div class="legend">
+          <div class="lrow"><span class="chip site">Site</span><span class="desc">A separate area for one part of the organisation — like a filing cabinet for Finance or HR, with its own keyholders.</span></div>
+          <div class="lrow"><span class="chip library">Library</span><span class="desc">A section inside a site — a drawer in the cabinet. "Who can open it" is decided here.</span></div>
+          <div class="lrow"><span class="chip folder">Folder</span><span class="desc">Ordinary folders, like today. Everyone who can open the library sees all of them.</span></div>
+          <div class="lrow"><span class="chip group">Group</span><span class="desc">A named list of people. Click names to build groups, then tick groups to give access.</span></div>
+        </div>
+      </section>
+    </aside>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<dialog class="export" id="exportDlg">
+  <h3 id="exportTitle">Your plan as text</h3>
+  <pre id="exportPre"></pre>
+  <div class="dlg-row">
+    <button class="btn" id="dlgClose">Close</button>
+    <button class="btn primary" id="dlgCopy">Copy to clipboard</button>
+  </div>
+</dialog>
+
+<dialog class="export" id="importDlg">
+  <h3>Load a plan</h3>
+  <p style="font-size:13.5px;color:var(--muted);margin:0 0 10px;max-width:60ch">Choose a plan file downloaded from this tool, or paste below — a share code, or a whole email containing the "plan data" section. This replaces the current draft.</p>
+  <div style="margin:0 0 10px"><button type="button" class="btn" id="importFileBtn" style="width:auto;padding:7px 14px">Choose a plan file&hellip;</button></div>
+  <textarea id="importTa" spellcheck="false" placeholder="…or paste a share code or plan data here" style="width:100%;min-height:140px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);padding:10px 12px;font-family:'Cascadia Code',Consolas,ui-monospace,monospace;font-size:12px"></textarea>
+  <div class="dlg-row">
+    <button class="btn" id="importClose">Cancel</button>
+    <button class="btn primary" id="importGo">Load</button>
+  </div>
+</dialog>
+
+<dialog class="export" id="confirmDlg">
+  <h3 id="confirmMsg" style="font-size:15px;font-weight:600;max-width:52ch"></h3>
+  <div class="dlg-row">
+    <button class="btn" id="confirmNo">Cancel</button>
+    <button class="btn primary" id="confirmYes">Yes, do it</button>
+  </div>
+</dialog>
+
+<script>
+(function(){
+  "use strict";
+  var STORE_KEY = "sp-structure-planner-v1";
+  var MAX_FOLDER_DEPTH = 3;
+
+  /* ---------- state ---------- */
+  function uid(){ return "n" + Math.random().toString(36).slice(2,10); }
+
+  function seed(){
+    return { sites:[
+      { id:uid(), type:"site", name:"Example Site — rename me", ownerIds:[], memberGroupIds:[], open:false, children:[
+        { id:uid(), type:"library", name:"General Documents", access:"inherit", groupIds:[], open:false, children:[
+          { id:uid(), type:"folder", name:"Policies", note:"", diffAccess:false, open:false, children:[] },
+          { id:uid(), type:"folder", name:"Templates", note:"", diffAccess:false, open:false, children:[] }
+        ]},
+        { id:uid(), type:"library", name:"Team Working Files", access:"inherit", groupIds:[], open:false, children:[] }
+      ]}
+    ], groups:[], people:[] };
+  }
+
+  /* older plans: restricted access was a comma list of group names on the library
+     ("groups"), owners and group members were free-text strings, and there was no
+     top-level people list — convert all of that on load */
+  function migrate(st){
+    if(!st || !Array.isArray(st.sites)) return st;
+    if(!Array.isArray(st.groups)) st.groups = [];
+    if(!Array.isArray(st.people)) st.people = [];
+    function findOrCreateGroup(name){
+      var g = null;
+      st.groups.forEach(function(x){ if(x.name.toLowerCase() === name.toLowerCase()) g = x; });
+      if(!g){ g = { id:uid(), name:name, personIds:[] }; st.groups.push(g); }
+      return g;
+    }
+    function findOrCreatePerson(name){
+      var p = null;
+      st.people.forEach(function(x){ if(x.name.toLowerCase() === name.toLowerCase()) p = x; });
+      if(!p){ p = { id:uid(), name:name }; st.people.push(p); }
+      return p;
+    }
+    st.sites.forEach(function(site){
+      if(!Array.isArray(site.memberGroupIds)) site.memberGroupIds = [];
+      if(!Array.isArray(site.ownerIds)){
+        site.ownerIds = ownersList(site.owners).map(function(nm){ return findOrCreatePerson(nm).id; });
+      }
+      delete site.owners;
+      (site.children||[]).forEach(function(lib){
+        if(!Array.isArray(lib.groupIds)){
+          lib.groupIds = [];
+          if(lib.access === "custom"){
+            groupsList(lib.groups).forEach(function(nm){ lib.groupIds.push(findOrCreateGroup(nm).id); });
+          }
+        }
+        delete lib.groups;
+      });
+    });
+    st.groups.forEach(function(g){
+      if(!Array.isArray(g.personIds)){
+        g.personIds = groupsList(g.members).map(function(nm){ return findOrCreatePerson(nm).id; });
+      }
+      delete g.members;
+    });
+    return st;
+  }
+
+  var state;
+  try {
+    var raw = localStorage.getItem(STORE_KEY);
+    state = raw ? JSON.parse(raw) : seed();
+    if(!state || !Array.isArray(state.sites)) state = seed();
+  } catch(e){ state = seed(); }
+  state = migrate(state);
+
+  function save(){
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e){}
+  }
+
+  /* ---------- tree helpers ---------- */
+  function walk(nodes, fn, depth, parent){
+    depth = depth || 0;
+    nodes.forEach(function(n, i){
+      fn(n, depth, parent || null, nodes, i);
+      if(n.children && n.children.length) walk(n.children, fn, depth + 1, n);
+    });
+  }
+  function findNode(id){
+    var hit = null;
+    walk(state.sites, function(n, d, p, arr, i){
+      if(n.id === id) hit = { node:n, parent:p, arr:arr, index:i, depth:d };
+    });
+    return hit;
+  }
+  function slug(s){
+    return (s||"").toLowerCase().replace(/&/g,"and").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"") || "name";
+  }
+  function ownersList(s){
+    return (s||"").split(/[,;]+/).map(function(x){return x.trim();}).filter(Boolean);
+  }
+  function groupsList(s){
+    return (s||"").split(/[,;\n]+/).map(function(x){return x.trim();}).filter(Boolean);
+  }
+  function groupById(id){
+    var hit = null;
+    state.groups.forEach(function(g){ if(g.id === id) hit = g; });
+    return hit;
+  }
+  function groupNames(ids){
+    return (ids||[]).map(function(id){ var g = groupById(id); return g ? g.name : null; }).filter(Boolean);
+  }
+  function personById(id){
+    var hit = null;
+    state.people.forEach(function(p){ if(p.id === id) hit = p; });
+    return hit;
+  }
+  function personNames(ids){
+    return (ids||[]).map(function(id){ var p = personById(id); return p ? p.name : null; }).filter(Boolean);
+  }
+  function personUsage(pid){
+    var uses = [];
+    state.groups.forEach(function(g){ if((g.personIds||[]).indexOf(pid) !== -1) uses.push("the group " + g.name); });
+    state.sites.forEach(function(s){ if((s.ownerIds||[]).indexOf(pid) !== -1) uses.push("the owners of " + s.name); });
+    return uses;
+  }
+  function memberCount(g){ return (g.personIds||[]).length; }
+  function peopleWord(n){ return n + (n === 1 ? " person" : " people"); }
+  function groupUsage(gid){
+    var uses = [];
+    state.sites.forEach(function(site){
+      if((site.memberGroupIds||[]).indexOf(gid) !== -1) uses.push(site.name + " (whole site)");
+      (site.children||[]).forEach(function(lib){
+        if(lib.access === "custom" && (lib.groupIds||[]).indexOf(gid) !== -1) uses.push(site.name + " / " + lib.name + " (library)");
+      });
+    });
+    return uses;
+  }
+  function uniqueGroupName(base){
+    var nm = base, k = 2;
+    function taken(n2){
+      var t = false;
+      state.groups.forEach(function(g){ if(g.name === n2) t = true; });
+      return t;
+    }
+    while(taken(nm)) nm = base + "-" + (k++);
+    return nm;
+  }
+  function esc(s){
+    return (s||"").replace(/[&<>"]/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];
+    });
+  }
+
+  /* ---------- validation ---------- */
+  function analyse(){
+    var res = {
+      sites:0, libs:0, folders:0, maxDepth:0,
+      sitesMissingOwners:[], deepFolders:[], flaggedFolders:[],
+      badGroupNames:[], emptySites:[],
+      libsNoGroup:[], emptyGroups:[], unusedGroups:[]
+    };
+    state.groups.forEach(function(g){
+      if(!/^spo-/i.test(g.name)) res.badGroupNames.push(g);
+      if(!memberCount(g)) res.emptyGroups.push(g);
+      if(!groupUsage(g.id).length) res.unusedGroups.push(g);
+    });
+    state.sites.forEach(function(site){
+      res.sites++;
+      if((site.ownerIds||[]).length < 2) res.sitesMissingOwners.push(site);
+      var libCount = 0;
+      (site.children||[]).forEach(function(lib){
+        libCount++; res.libs++;
+        if(lib.access === "custom" && !(lib.groupIds||[]).length){
+          res.libsNoGroup.push({ lib:lib, site:site });
+        }
+        function folders(nodes, depth){
+          nodes.forEach(function(f){
+            res.folders++;
+            if(depth > res.maxDepth) res.maxDepth = depth;
+            if(depth > MAX_FOLDER_DEPTH) res.deepFolders.push(f);
+            if(f.diffAccess) res.flaggedFolders.push({ folder:f, lib:lib, site:site });
+            if(f.children && f.children.length) folders(f.children, depth+1);
+          });
+        }
+        folders(lib.children||[], 1);
+      });
+      if(libCount === 0) res.emptySites.push(site);
+    });
+    return res;
+  }
+
+  /* ---------- rendering ---------- */
+  var treeEl = document.getElementById("tree");
+  var statsEl = document.getElementById("stats");
+  var checksEl = document.getElementById("checks");
+
+  function actBtn(label, title, cls){
+    return '<button type="button" class="'+(cls||"")+'" data-act="'+title+'" title="'+label+'">'+label+'</button>';
+  }
+
+  function renderNode(n, depth){
+    var li = document.createElement("li");
+    li.className = "node " + n.type;
+    li.dataset.id = n.id;
+
+    var row = document.createElement("div");
+    row.className = "row";
+    row.id = "row-" + n.id;
+
+    var chipLabel = n.type === "site" ? "Site" : n.type === "library" ? "Library" : "Folder";
+    var chipTitle = n.type === "site"
+      ? "A separate area for one part of the organisation, with its own owners and people"
+      : n.type === "library"
+      ? "A section inside a site — who can open it is decided at this level"
+      : "An ordinary folder — everyone who can open the library can see it";
+    var metaHtml = "";
+    if(n.type === "site"){
+      var ow = personNames(n.ownerIds);
+      metaHtml = ow.length >= 2
+        ? '<span class="meta-inline">owners: '+esc(ow.join(", "))+'</span>'
+        : '<span class="meta-inline"><span class="miss">needs 2 owners</span></span>';
+    } else if(n.type === "library"){
+      metaHtml = n.access === "custom"
+        ? '<span class="meta-inline"><span class="tag">restricted: '+esc(groupNames(n.groupIds).join(", ") || "no group picked yet")+'</span></span>'
+        : '<span class="meta-inline">access: same as site</span>';
+    } else if(n.diffAccess){
+      metaHtml = '<span class="badge-flag">needs own access — make it a library</span>';
+    }
+
+    var acts = "";
+    if(n.type === "site"){
+      acts += actBtn("+ Library","addLibrary","addb");
+    } else if(n.type === "library"){
+      acts += actBtn("+ Folder","addFolder","addb");
+    } else {
+      acts += actBtn("+ Subfolder","addFolder","addb");
+    }
+    acts += actBtn("details","details");
+    acts += actBtn("&#8593;","up") + actBtn("&#8595;","down");
+    acts += actBtn("&#10005;","del","del");
+
+    row.innerHTML =
+      '<span class="chip '+n.type+'" title="'+chipTitle+'">'+chipLabel+'</span>' +
+      '<span class="nname" contenteditable="true" spellcheck="false" role="textbox" aria-label="'+chipLabel+' name">'+esc(n.name)+'</span>' +
+      metaHtml +
+      '<span class="acts">'+acts+'</span>';
+
+    li.appendChild(row);
+
+    if(n.open){
+      li.appendChild(renderDrawer(n));
+    }
+
+    if(n.children && n.children.length){
+      var ul = document.createElement("ul");
+      n.children.forEach(function(c){ ul.appendChild(renderNode(c, depth+1)); });
+      li.appendChild(ul);
+    }
+    return li;
+  }
+
+  function peoplePickerHtml(ids){
+    if(!state.people.length){
+      return '<div class="fieldnote">No people added yet — add them in the <strong>People</strong> panel below the structure, then click their names here.</div>';
+    }
+    return '<div class="ppills">' + state.people.map(function(p){
+      var on = (ids||[]).indexOf(p.id) !== -1;
+      return '<button type="button" class="ppill'+(on?" on":"")+'" data-ppick="'+p.id+'" title="'+(on?"Click to remove":"Click to add")+'">'+esc(p.name)+'</button>';
+    }).join("") + '</div>';
+  }
+
+  function groupPickerHtml(n){
+    var ids = n.type === "site" ? (n.memberGroupIds||[]) : (n.groupIds||[]);
+    var rows = state.groups.map(function(g){
+      return '<label><input type="checkbox" data-field="pickGroup" data-gid="'+g.id+'" '+(ids.indexOf(g.id)!==-1?"checked":"")+'> ' +
+        '<span class="mono">'+esc(g.name)+'</span> <span class="cnt">('+peopleWord(memberCount(g))+')</span></label>';
+    }).join("");
+    return '<div class="pick-list">' + rows +
+      '<div><button type="button" class="suggest-btn" data-act="newGroup">+ New group</button></div></div>';
+  }
+
+  function renderDrawer(n){
+    var d = document.createElement("div");
+    d.className = "drawer";
+    if(n.type === "site"){
+      d.innerHTML =
+        '<div><label>Who looks after this area? Click at least two names</label>' + peoplePickerHtml(n.ownerIds) +
+        '<div class="fieldnote">These are the site’s <strong>owners</strong> — the people in charge of this area, who decide who else gets access. There must be at least two, so someone is always available.</div></div>' +
+        '<div><label>Who can use this site?</label>' + groupPickerHtml(n) +
+        '<div class="fieldnote">Everyone in the ticked groups can use this site and any of its libraries set to “same as site”. Build the groups in the <strong>Access groups</strong> panel below the structure.</div></div>';
+    } else if(n.type === "library"){
+      var inh = n.access !== "custom";
+      d.innerHTML =
+        '<div><label>Who can use this library?</label>' +
+        '<div class="radio-row">' +
+          '<label><input type="radio" name="acc-'+n.id+'" data-field="access" value="inherit" '+(inh?"checked":"")+'> Same people as the site</label>' +
+          '<label><input type="radio" name="acc-'+n.id+'" data-field="access" value="custom" '+(!inh?"checked":"")+'> A restricted group</label>' +
+        '</div></div>' +
+        (!inh ?
+          '<div><label>Which groups can see it?</label>' + groupPickerHtml(n) +
+          '<div class="fieldnote">Only people in the ticked groups will be able to open this library. Don’t worry about the technical <span class="mono">spo-…</span> names — we set those up behind the scenes; just make sure the right people are in the group, in the <strong>Access groups</strong> panel.</div></div>'
+        : '') +
+        '<div class="fieldnote">Who-can-open-it is decided here, on the whole library — never on individual folders inside it. That keeps access simple and safe.</div>';
+    } else {
+      d.innerHTML =
+        '<div><label for="note-'+n.id+'">Notes (optional)</label>' +
+        '<input type="text" id="note-'+n.id+'" data-field="note" value="'+esc(n.note||"")+'" placeholder="e.g. move contents of old K:\\Shared\\Projects here">' + '</div>' +
+        '<div class="check-row"><input type="checkbox" id="dif-'+n.id+'" data-field="diffAccess" '+(n.diffAccess?"checked":"")+'>' +
+        '<label for="dif-'+n.id+'" style="text-transform:none;letter-spacing:0;font-weight:450;font-size:13.5px;color:var(--ink)">Only some people should see this folder</label></div>' +
+        (n.diffAccess ?
+          '<div class="warn-note"><strong>This folder should become its own library.</strong> SharePoint permissions are set on whole libraries, not folders — restricting a single folder is fragile and against best practice. Use the <em>Make it a library</em> button, or if the audience is very different (e.g. management only), it may deserve its own site — we’ll advise. ' +
+          '<div style="margin-top:8px"><button type="button" class="suggest-btn" data-act="promote">Make it a library</button></div></div>'
+        : '');
+    }
+    return d;
+  }
+
+  function render(){
+    // tree
+    treeEl.innerHTML = "";
+    if(!state.sites.length){
+      var e = document.createElement("div");
+      e.className = "empty";
+      e.innerHTML = 'Nothing here yet. Add your first site to begin — one per broad area of the organisation.';
+      treeEl.appendChild(e);
+    } else {
+      var ul = document.createElement("ul");
+      ul.className = "tree";
+      state.sites.forEach(function(s){ ul.appendChild(renderNode(s, 0)); });
+      treeEl.appendChild(ul);
+    }
+    var addSite = document.createElement("div");
+    addSite.style.marginTop = "14px";
+    addSite.innerHTML = '<button type="button" class="btn" id="addSiteBtn" style="width:auto;padding:8px 16px">+ Add a site</button>';
+    treeEl.appendChild(addSite);
+
+    renderPeople();
+    renderGroups();
+
+    // stats
+    var a = analyse();
+    statsEl.innerHTML =
+      '<div class="stat"><b>'+a.sites+'</b><span>sites</span></div>' +
+      '<div class="stat"><b>'+a.libs+'</b><span>libraries</span></div>' +
+      '<div class="stat"><b>'+a.folders+'</b><span>folders</span></div>' +
+      '<div class="stat"><b>'+state.people.length+'</b><span>people</span></div>' +
+      '<div class="stat"><b>'+state.groups.length+'</b><span>groups</span></div>';
+
+    renderChecks(a);
+    save();
+  }
+
+  var peopleEl = document.getElementById("people");
+  function renderPeople(){
+    peopleEl.innerHTML = "";
+    if(!state.people.length){
+      var e = document.createElement("div");
+      e.className = "empty";
+      e.innerHTML = 'No one added yet. List everyone who will be using the files — a name or email address each. You only type each person once; after that you just click their name to give them access.';
+      peopleEl.appendChild(e);
+    } else {
+      var wrapP = document.createElement("div");
+      wrapP.style.cssText = "display:flex;flex-wrap:wrap;gap:8px";
+      state.people.forEach(function(p){
+        var sp = document.createElement("span");
+        sp.className = "person";
+        sp.dataset.pid = p.id;
+        sp.innerHTML =
+          '<span class="pname" contenteditable="true" spellcheck="false" role="textbox" aria-label="Person name">'+esc(p.name)+'</span>' +
+          '<button type="button" class="px" data-pdel="'+p.id+'" title="Remove this person everywhere">&#10005;</button>';
+        wrapP.appendChild(sp);
+      });
+      peopleEl.appendChild(wrapP);
+    }
+    var add = document.createElement("div");
+    add.className = "padd";
+    add.innerHTML =
+      '<input type="text" id="newPersonInput" placeholder="Type a name or email address — add several at once with commas" aria-label="Add a person">' +
+      '<button type="button" class="btn" id="addPersonBtn" style="width:auto;padding:8px 16px">+ Add</button>';
+    peopleEl.appendChild(add);
+  }
+
+  var groupsEl = document.getElementById("groups");
+  function renderGroups(){
+    groupsEl.innerHTML = "";
+    if(!state.groups.length){
+      var e = document.createElement("div");
+      e.className = "empty";
+      e.innerHTML = 'No groups yet. A group is a named set of people — add one here, or use <em>+ New group</em> inside a site or restricted library’s details.';
+      groupsEl.appendChild(e);
+    } else {
+      state.groups.forEach(function(g){
+        var div = document.createElement("div");
+        div.className = "grow";
+        div.id = "row-" + g.id;
+        div.dataset.gid = g.id;
+        var uses = groupUsage(g.id);
+        div.innerHTML =
+          '<div class="g-head"><span class="chip group" title="A named list of people — access is given to groups, not one person at a time">Group</span>' +
+          '<input type="text" id="gname-'+g.id+'" data-gfield="name" value="'+esc(g.name)+'" aria-label="Group name" placeholder="spo-site-function" title="The technical name we’ll use when we set this up — fine to leave as suggested">' +
+          '<span class="cnt">'+peopleWord(memberCount(g))+'</span>' +
+          '<span class="acts" style="opacity:1"><button type="button" class="del" data-gact="del" title="Delete group">&#10005;</button></span></div>' +
+          '<div><label>Who is in this group? Click a name to add or remove them</label>' + peoplePickerHtml(g.personIds) + '</div>' +
+          '<div class="g-use">'+(uses.length
+            ? 'Gives access to: '+esc(uses.join("  ·  "))
+            : 'Not used anywhere yet — tick this group in a site or restricted library’s details.')+'</div>';
+        groupsEl.appendChild(div);
+      });
+    }
+    var add = document.createElement("div");
+    add.style.marginTop = "10px";
+    add.innerHTML = '<button type="button" class="btn" id="addGroupBtn" style="width:auto;padding:8px 16px">+ Add a group</button>';
+    groupsEl.appendChild(add);
+  }
+
+  function checkItem(status, html){
+    var ic = status === "ok" ? "&#10003;" : status === "warn" ? "!" : "i";
+    return '<li class="'+status+'"><span class="ic">'+ic+'</span><span>'+html+'</span></li>';
+  }
+  function jump(id, label){
+    return '<button type="button" class="jump" data-jump="'+id+'">'+esc(label)+'</button>';
+  }
+
+  function renderChecks(a){
+    var out = "";
+
+    if(!a.sites){
+      out += checkItem("info","Add a site to start the health check.");
+      checksEl.innerHTML = out; return;
+    }
+
+    if(!state.people.length){
+      out += checkItem("info","Add the people who’ll use this in the <strong>People</strong> panel — you can then click their names to make someone an owner or put them in a group.");
+    }
+
+    out += a.sitesMissingOwners.length
+      ? checkItem("warn","<strong>Every site needs at least 2 owners</strong> (the people in charge of that area). Missing: " +
+          a.sitesMissingOwners.map(function(s){ return jump(s.id, s.name); }).join(", ") +
+          " — click <em>details</em> on the site and click two names.")
+      : checkItem("ok","Every site has at least 2 named owners.");
+
+    out += a.flaggedFolders.length
+      ? checkItem("warn","<strong>" + a.flaggedFolders.length + " folder" + (a.flaggedFolders.length>1?"s":"") +
+          " need" + (a.flaggedFolders.length>1?"":"s") + " restricted access:</strong> " +
+          a.flaggedFolders.map(function(f){ return jump(f.folder.id, f.folder.name); }).join(", ") +
+          ". Folders can’t have their own permissions — promote each to a library.")
+      : checkItem("ok","No folders need their own permissions — access lives at library level, as it should.");
+
+    out += a.deepFolders.length
+      ? checkItem("warn","<strong>Filing nested deeper than " + MAX_FOLDER_DEPTH + " levels:</strong> " +
+          a.deepFolders.slice(0,6).map(function(f){ return jump(f.id, f.name); }).join(", ") +
+          (a.deepFolders.length>6 ? " +" + (a.deepFolders.length-6) + " more" : "") +
+          ". Deep nesting makes files hard to find and can hit SharePoint’s path-length limits — consider flattening or splitting into another library.")
+      : checkItem("ok","Folder nesting stays within " + MAX_FOLDER_DEPTH + " levels.");
+
+    if(a.libsNoGroup.length){
+      out += checkItem("warn","<strong>Restricted libraries with no group picked:</strong> " +
+          a.libsNoGroup.map(function(x){ return jump(x.lib.id, x.lib.name); }).join(", ") +
+          " — open the library’s details and tick a group, or create one.");
+    }
+
+    if(state.groups.length){
+      out += a.emptyGroups.length
+        ? checkItem("warn","<strong>Groups with nobody in them yet:</strong> " +
+            a.emptyGroups.slice(0,6).map(function(g){ return jump(g.id, g.name); }).join(", ") +
+            (a.emptyGroups.length>6 ? " +" + (a.emptyGroups.length-6) + " more" : "") +
+            " — click names into them in the Access groups panel.")
+        : checkItem("ok","Every group has its people listed.");
+
+      out += a.badGroupNames.length
+        ? checkItem("warn","<strong>Group names off-convention:</strong> " +
+            a.badGroupNames.slice(0,5).map(function(g){ return jump(g.id, g.name); }).join(", ") +
+            ". Groups should follow <span class=\"mono\">spo-&lt;site&gt;-&lt;function&gt;</span>.")
+        : checkItem("ok","Group names follow the <span class=\"mono\">spo-…</span> convention.");
+
+      if(a.unusedGroups.length){
+        out += checkItem("info","Groups not used anywhere yet: " +
+            a.unusedGroups.slice(0,6).map(function(g){ return jump(g.id, g.name); }).join(", ") +
+            ". Tick them in a site or restricted library’s details, or delete them.");
+      }
+    }
+
+    out += a.emptySites.length
+      ? checkItem("warn","<strong>Sites with no libraries yet:</strong> " +
+          a.emptySites.map(function(s){ return jump(s.id, s.name); }).join(", ") + ".")
+      : checkItem("ok","Every site has at least one document library.");
+
+    out += checkItem("info","Handled for you by this planner: sites stay flat (related sites are linked with a hub, not nested), permission inheritance is never broken, and sharing stays owner-controlled.");
+
+    checksEl.innerHTML = out;
+  }
+
+  /* ---------- mutations ---------- */
+  function addSite(){
+    state.sites.push({ id:uid(), type:"site", name:"New Site", owners:"", memberGroupIds:[], open:true, children:[] });
+    render();
+  }
+  function addChild(n){
+    n.children = n.children || [];
+    if(n.type === "site"){
+      n.children.push({ id:uid(), type:"library", name:"New Library", access:"inherit", groupIds:[], open:false, children:[] });
+    } else {
+      n.children.push({ id:uid(), type:"folder", name:"New Folder", note:"", diffAccess:false, open:false, children:[] });
+    }
+    render();
+  }
+  function removeNode(id){
+    var hit = findNode(id);
+    if(!hit) return;
+    var kids = (hit.node.children||[]).length;
+    var msg = "Delete “" + hit.node.name + "”" + (kids ? " and everything inside it" : "") + "?";
+    askConfirm(msg, function(){
+      var h = findNode(id);
+      if(!h) return;
+      h.arr.splice(h.index, 1);
+      render();
+    });
+  }
+  function moveNode(id, dir){
+    var hit = findNode(id);
+    if(!hit) return;
+    var j = hit.index + dir;
+    if(j < 0 || j >= hit.arr.length) return;
+    hit.arr.splice(hit.index, 1);
+    hit.arr.splice(j, 0, hit.node);
+    render();
+  }
+  function promoteFolder(id){
+    var hit = findNode(id);
+    if(!hit) return;
+    // find the site + library that contain this folder
+    var site = null, lib = null;
+    state.sites.forEach(function(s){
+      walk([s], function(n){ if(n.id === id) site = s; });
+    });
+    if(!site) return;
+    (site.children||[]).forEach(function(l){
+      walk([l], function(n){ if(n.id === id) lib = l; });
+    });
+    // convert node to library and move it up beside its old library,
+    // with a real access group created and assigned for it
+    hit.arr.splice(hit.index, 1);
+    var g = { id:uid(), name:uniqueGroupName("spo-" + slug(site.name) + "-" + slug(hit.node.name)), personIds:[] };
+    state.groups.push(g);
+    var newLib = {
+      id: hit.node.id, type:"library", name: hit.node.name,
+      access:"custom", groupIds:[g.id],
+      open:true, children: hit.node.children || []
+    };
+    // any child folders keep their folder type — fine
+    var at = site.children.indexOf(lib);
+    site.children.splice(at >= 0 ? at + 1 : site.children.length, 0, newLib);
+    toast("Promoted to a restricted library — now add people to its new group below");
+    render();
+  }
+
+  /* ---------- events ---------- */
+  treeEl.addEventListener("click", function(ev){
+    var btn = ev.target.closest("button");
+    if(!btn) return;
+    if(btn.id === "addSiteBtn"){ addSite(); return; }
+    var li = btn.closest("li.node");
+    if(!li) return;
+    var id = li.dataset.id;
+    var act = btn.dataset.act;
+    var hit = findNode(id);
+    if(!hit) return;
+    if(btn.dataset.ppick){
+      // owner pills in a site's details drawer
+      if(hit.node.type === "site"){
+        hit.node.ownerIds = hit.node.ownerIds || [];
+        var ixp = hit.node.ownerIds.indexOf(btn.dataset.ppick);
+        if(ixp === -1) hit.node.ownerIds.push(btn.dataset.ppick);
+        else hit.node.ownerIds.splice(ixp, 1);
+        render();
+      }
+      return;
+    }
+    if(act === "addLibrary" || act === "addFolder"){ hit.node.open = false; addChild(hit.node); }
+    else if(act === "details"){ hit.node.open = !hit.node.open; render(); }
+    else if(act === "up"){ moveNode(id, -1); }
+    else if(act === "down"){ moveNode(id, 1); }
+    else if(act === "del"){ removeNode(id); }
+    else if(act === "newGroup"){
+      var site2 = state.sites.find(function(s){ var f=false; walk([s],function(n){ if(n.id===id) f=true; }); return f; });
+      var base = hit.node.type === "site"
+        ? "spo-" + slug(hit.node.name) + "-members"
+        : "spo-" + slug(site2 ? site2.name : "site") + "-" + slug(hit.node.name);
+      var g = { id:uid(), name:uniqueGroupName(base), personIds:[] };
+      state.groups.push(g);
+      if(hit.node.type === "site"){
+        hit.node.memberGroupIds = hit.node.memberGroupIds || [];
+        hit.node.memberGroupIds.push(g.id);
+      } else {
+        hit.node.groupIds = hit.node.groupIds || [];
+        hit.node.groupIds.push(g.id);
+      }
+      render();
+      toast("Group “" + g.name + "” created — click names into it in the Access groups panel");
+    }
+    else if(act === "promote"){ promoteFolder(id); }
+  });
+
+  // rename via contenteditable
+  treeEl.addEventListener("focusout", function(ev){
+    if(!ev.target.classList || !ev.target.classList.contains("nname")) return;
+    var li = ev.target.closest("li.node");
+    var hit = findNode(li.dataset.id);
+    if(!hit) return;
+    var v = ev.target.textContent.trim();
+    if(v && v !== hit.node.name){ hit.node.name = v; render(); }
+    else if(!v){ ev.target.textContent = hit.node.name; }
+  });
+  treeEl.addEventListener("keydown", function(ev){
+    if(ev.target.classList && ev.target.classList.contains("nname") && ev.key === "Enter"){
+      ev.preventDefault(); ev.target.blur();
+    }
+  });
+
+  // drawer fields
+  treeEl.addEventListener("input", function(ev){
+    var f = ev.target.dataset && ev.target.dataset.field;
+    if(!f) return;
+    var li = ev.target.closest("li.node");
+    var hit = findNode(li.dataset.id);
+    if(!hit) return;
+    if(f === "note"){ hit.node.note = ev.target.value; save(); }
+  });
+  treeEl.addEventListener("change", function(ev){
+    var f = ev.target.dataset && ev.target.dataset.field;
+    if(!f) return;
+    var li = ev.target.closest("li.node");
+    var hit = findNode(li.dataset.id);
+    if(!hit) return;
+    if(f === "access"){ hit.node.access = ev.target.value; render(); }
+    else if(f === "diffAccess"){ hit.node.diffAccess = ev.target.checked; render(); }
+    else if(f === "pickGroup"){
+      var gid = ev.target.dataset.gid;
+      var arr = hit.node.type === "site"
+        ? (hit.node.memberGroupIds = hit.node.memberGroupIds || [])
+        : (hit.node.groupIds = hit.node.groupIds || []);
+      var ix = arr.indexOf(gid);
+      if(ev.target.checked && ix === -1) arr.push(gid);
+      if(!ev.target.checked && ix !== -1) arr.splice(ix, 1);
+      render();
+    }
+  });
+
+  /* ---------- access groups panel events ---------- */
+  groupsEl.addEventListener("click", function(ev){
+    var btn = ev.target.closest("button");
+    if(!btn) return;
+    if(btn.id === "addGroupBtn"){
+      var g = { id:uid(), name:uniqueGroupName("spo-new-group"), personIds:[] };
+      state.groups.push(g);
+      render();
+      var el = document.getElementById("gname-" + g.id);
+      if(el){ el.focus(); el.select(); }
+      return;
+    }
+    if(btn.dataset.ppick){
+      var grow0 = btn.closest(".grow");
+      var gp = grow0 && groupById(grow0.dataset.gid);
+      if(!gp) return;
+      gp.personIds = gp.personIds || [];
+      var ixq = gp.personIds.indexOf(btn.dataset.ppick);
+      if(ixq === -1) gp.personIds.push(btn.dataset.ppick);
+      else gp.personIds.splice(ixq, 1);
+      render();
+      return;
+    }
+    if(btn.dataset.gact === "del"){
+      var grow = btn.closest(".grow");
+      var gid = grow && grow.dataset.gid;
+      var g2 = gid && groupById(gid);
+      if(!g2) return;
+      var uses = groupUsage(gid);
+      var msg = "Delete group “" + g2.name + "”?" +
+        (uses.length ? " It currently gives access to: " + uses.join(", ") + " — they’ll lose it." : "");
+      askConfirm(msg, function(){
+        state.groups = state.groups.filter(function(x){ return x.id !== gid; });
+        state.sites.forEach(function(site){
+          site.memberGroupIds = (site.memberGroupIds||[]).filter(function(x){ return x !== gid; });
+          (site.children||[]).forEach(function(lib){
+            lib.groupIds = (lib.groupIds||[]).filter(function(x){ return x !== gid; });
+          });
+        });
+        render();
+      });
+    }
+  });
+  groupsEl.addEventListener("input", function(ev){
+    var f = ev.target.dataset && ev.target.dataset.gfield;
+    if(!f) return;
+    var grow = ev.target.closest(".grow");
+    var g = grow && groupById(grow.dataset.gid);
+    if(!g) return;
+    if(f === "name"){ g.name = ev.target.value; debounceRender(); }
+  });
+
+  /* ---------- people panel events ---------- */
+  function addPeopleFrom(text){
+    var names = groupsList(text);
+    if(!names.length) return;
+    var added = 0;
+    names.forEach(function(nm){
+      var exists = false;
+      state.people.forEach(function(p){ if(p.name.toLowerCase() === nm.toLowerCase()) exists = true; });
+      if(!exists){ state.people.push({ id:uid(), name:nm }); added++; }
+    });
+    render();
+    toast(added
+      ? "Added — now click their name in a group, or make them a site owner"
+      : "Already in the list");
+  }
+  peopleEl.addEventListener("click", function(ev){
+    var btn = ev.target.closest("button");
+    if(!btn) return;
+    if(btn.id === "addPersonBtn"){
+      var inp = document.getElementById("newPersonInput");
+      if(inp){ addPeopleFrom(inp.value); var again = document.getElementById("newPersonInput"); if(again) again.focus(); }
+      return;
+    }
+    if(btn.dataset.pdel){
+      var pid = btn.dataset.pdel;
+      var p = personById(pid);
+      if(!p) return;
+      var uses = personUsage(pid);
+      var msg = "Remove “" + p.name + "”?" +
+        (uses.length ? " They’ll be taken out of " + uses.join(", ") + "." : "");
+      askConfirm(msg, function(){
+        state.people = state.people.filter(function(x){ return x.id !== pid; });
+        state.groups.forEach(function(g){ g.personIds = (g.personIds||[]).filter(function(x){ return x !== pid; }); });
+        state.sites.forEach(function(s){ s.ownerIds = (s.ownerIds||[]).filter(function(x){ return x !== pid; }); });
+        render();
+      });
+    }
+  });
+  peopleEl.addEventListener("keydown", function(ev){
+    if(ev.target.id === "newPersonInput" && ev.key === "Enter"){
+      ev.preventDefault();
+      addPeopleFrom(ev.target.value);
+      var again = document.getElementById("newPersonInput");
+      if(again) again.focus();
+    } else if(ev.target.classList && ev.target.classList.contains("pname") && ev.key === "Enter"){
+      ev.preventDefault(); ev.target.blur();
+    }
+  });
+  peopleEl.addEventListener("focusout", function(ev){
+    if(!ev.target.classList || !ev.target.classList.contains("pname")) return;
+    var sp = ev.target.closest(".person");
+    var p = sp && personById(sp.dataset.pid);
+    if(!p) return;
+    var v = ev.target.textContent.trim();
+    if(v && v !== p.name){ p.name = v; render(); }
+    else if(!v){ ev.target.textContent = p.name; }
+  });
+
+  var rTimer = null;
+  function debounceRender(){
+    save();
+    clearTimeout(rTimer);
+    rTimer = setTimeout(function(){
+      // re-render but keep focus context: only refresh checks + stats + inline meta
+      var active = document.activeElement;
+      var id = active && active.id;
+      var pos = active && active.selectionStart;
+      render();
+      if(id){
+        var el = document.getElementById(id);
+        if(el){ el.focus(); if(pos != null && el.setSelectionRange) el.setSelectionRange(pos, pos); }
+      }
+    }, 600);
+  }
+
+  // jump links in health check
+  checksEl.addEventListener("click", function(ev){
+    var b = ev.target.closest("button.jump");
+    if(!b) return;
+    var row = document.getElementById("row-" + b.dataset.jump);
+    if(!row) return;
+    row.scrollIntoView({ behavior:"smooth", block:"center" });
+    row.classList.add("flash");
+    setTimeout(function(){ row.classList.remove("flash"); }, 1600);
+  });
+
+  /* ---------- export / import ---------- */
+  function textExport(planCode){
+    var lines = [];
+    var d = new Date();
+    lines.push("PLANNED SHAREPOINT STRUCTURE");
+    lines.push("Drafted " + d.toLocaleDateString(undefined,{day:"numeric",month:"long",year:"numeric"}));
+    lines.push("");
+    if(state.people.length){
+      lines.push("PEOPLE: " + state.people.map(function(p){ return p.name; }).join(", "));
+      lines.push("");
+    }
+    state.sites.forEach(function(site){
+      var ow = personNames(site.ownerIds);
+      var mg = groupNames(site.memberGroupIds);
+      lines.push("SITE: " + site.name +
+        (ow.length ? "   [owners: " + ow.join(", ") + "]" : "   [owners: TO CONFIRM]") +
+        (mg.length ? "   [used by: " + mg.join(", ") + "]" : ""));
+      (site.children||[]).forEach(function(lib){
+        var acc = lib.access === "custom"
+          ? "restricted to: " + (groupNames(lib.groupIds).join(", ") || "TO CONFIRM")
+          : "same access as site";
+        lines.push("  LIBRARY: " + lib.name + "   [" + acc + "]");
+        function fold(nodes, ind){
+          nodes.forEach(function(f){
+            lines.push(ind + "- " + f.name +
+              (f.diffAccess ? "   [FLAG: needs own access]" : "") +
+              (f.note ? "   (" + f.note + ")" : ""));
+            if(f.children && f.children.length) fold(f.children, ind + "  ");
+          });
+        }
+        fold(lib.children||[], "    ");
+      });
+      lines.push("");
+    });
+    if(state.groups.length){
+      lines.push("ACCESS GROUPS — who is in each group");
+      state.groups.forEach(function(g){
+        var mem = personNames(g.personIds);
+        var uses = groupUsage(g.id);
+        lines.push("  GROUP: " + g.name);
+        lines.push("    people: " + (mem.length ? mem.join(", ") : "TO CONFIRM"));
+        if(uses.length) lines.push("    gives access to: " + uses.join("; "));
+      });
+      lines.push("");
+    }
+    lines.push("===== PLAN DATA — please keep this section in your email so we can load your plan =====");
+    lines.push(planCode || JSON.stringify(state));
+    lines.push("===== END PLAN DATA =====");
+    return lines.join("\n");
+  }
+
+  /* ---------- share code (seed) ----------
+     SPPLAN1.<base64url of deflate(JSON state)> — or SPPLAN0.<base64url of JSON>
+     as a fallback where CompressionStream isn't available. Decoding strips
+     whitespace so a code hard-wrapped by a mail client still loads. */
+  function bytesToB64u(bytes){
+    var bin = "";
+    for(var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+  function b64uToBytes(s){
+    s = s.replace(/-/g, "+").replace(/_/g, "/");
+    while(s.length % 4) s += "=";
+    var bin = atob(s);
+    var out = new Uint8Array(bin.length);
+    for(var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+  function pumpStream(stream, bytes, cb){
+    try{
+      var writer = stream.writable.getWriter();
+      writer.write(bytes).catch(function(){});
+      writer.close().catch(function(){});
+      var reader = stream.readable.getReader();
+      var chunks = [], total = 0;
+      (function pump(){
+        reader.read().then(function(r){
+          if(r.done){
+            var out = new Uint8Array(total), off = 0;
+            chunks.forEach(function(c){ out.set(c, off); off += c.length; });
+            cb(out); return;
+          }
+          chunks.push(r.value); total += r.value.length; pump();
+        }, function(){ cb(null); });
+      })();
+    }catch(e){ cb(null); }
+  }
+  function encodeSeed(cb){
+    var bytes = new TextEncoder().encode(JSON.stringify(state));
+    if(typeof CompressionStream === "undefined"){ cb("SPPLAN0." + bytesToB64u(bytes)); return; }
+    pumpStream(new CompressionStream("deflate"), bytes, function(out){
+      cb(out ? "SPPLAN1." + bytesToB64u(out) : "SPPLAN0." + bytesToB64u(bytes));
+    });
+  }
+  function validPlan(p){ return (p && Array.isArray(p.sites)) ? p : null; }
+  function decodeSeed(code, cb){
+    var m = /^SPPLAN([01])\.([A-Za-z0-9_\-]+)$/.exec(code || "");
+    if(!m){ cb(null); return; }
+    var bytes;
+    try{ bytes = b64uToBytes(m[2]); }catch(e){ cb(null); return; }
+    if(m[1] === "0"){
+      try{ cb(validPlan(JSON.parse(new TextDecoder().decode(bytes)))); }catch(e){ cb(null); }
+      return;
+    }
+    if(typeof DecompressionStream === "undefined"){ cb(null); return; }
+    pumpStream(new DecompressionStream("deflate"), bytes, function(out){
+      if(!out){ cb(null); return; }
+      try{ cb(validPlan(JSON.parse(new TextDecoder().decode(out)))); }catch(e){ cb(null); }
+    });
+  }
+  function seedCandidates(text){
+    var ix = (text || "").indexOf("SPPLAN");
+    if(ix === -1) return [];
+    var m = /^SPPLAN[01]\.[\sA-Za-z0-9_\-]+/.exec(text.slice(ix));
+    if(!m) return [];
+    var raw = m[0];
+    var cands = [
+      raw.replace(/\s+/g, ""),                           // wrapped by a mail client
+      raw.split(/\s+/)[0],                               // bare code with words after it
+      raw.split(/\r?\n\s*\r?\n/)[0].replace(/\s+/g, "")  // wrapped code, then a new paragraph
+    ];
+    return cands.filter(function(c, i){ return cands.indexOf(c) === i; });
+  }
+  function decodeSeedAttempts(cands, cb){
+    if(!cands.length){ cb(null); return; }
+    decodeSeed(cands[0], function(p){
+      if(p) cb(p); else decodeSeedAttempts(cands.slice(1), cb);
+    });
+  }
+
+  var toastEl = document.getElementById("toast");
+  var toastTimer;
+  function toast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove("show"); }, 2200);
+  }
+
+  /* in-page confirm (window.confirm is blocked in this embedded page) */
+  var confirmDlg = document.getElementById("confirmDlg");
+  var confirmCb = null;
+  function askConfirm(msg, onYes){
+    document.getElementById("confirmMsg").textContent = msg;
+    confirmCb = onYes;
+    confirmDlg.showModal();
+  }
+  document.getElementById("confirmYes").addEventListener("click", function(){
+    confirmDlg.close();
+    var cb = confirmCb; confirmCb = null;
+    if(cb) cb();
+  });
+  document.getElementById("confirmNo").addEventListener("click", function(){
+    confirmCb = null; confirmDlg.close();
+  });
+
+  var dlg = document.getElementById("exportDlg");
+  document.getElementById("copyText").addEventListener("click", function(){
+    encodeSeed(function(code){
+      document.getElementById("exportTitle").textContent = "Your plan as text";
+      document.getElementById("exportPre").textContent = textExport(code);
+      dlg.showModal();
+    });
+  });
+  document.getElementById("shareCode").addEventListener("click", function(){
+    encodeSeed(function(code){
+      document.getElementById("exportTitle").textContent = "Your plan as a share code";
+      document.getElementById("exportPre").textContent = code;
+      dlg.showModal();
+    });
+  });
+  document.getElementById("dlgClose").addEventListener("click", function(){ dlg.close(); });
+  document.getElementById("dlgCopy").addEventListener("click", function(){
+    var t = document.getElementById("exportPre").textContent;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(function(){ toast("Copied — paste it into an email"); dlg.close(); },
+        function(){ fallbackCopy(t); });
+    } else fallbackCopy(t);
+  });
+  function fallbackCopy(t){
+    var ta = document.createElement("textarea");
+    ta.value = t; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); toast("Copied — paste it into an email"); }catch(e){ toast("Copy failed — select the text and copy manually"); }
+    document.body.removeChild(ta); dlg.close();
+  }
+
+  document.getElementById("dlJson").addEventListener("click", function(){
+    encodeSeed(function(code){
+      var blob = new Blob([textExport(code)], { type:"text/plain" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "sharepoint-structure-plan.txt";
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+      toast("Plan file downloaded — attach it to an email to us");
+    });
+  });
+
+  var importDlg = document.getElementById("importDlg");
+  var importTa = document.getElementById("importTa");
+  var fileInput = document.getElementById("fileInput");
+  function parsePlan(text){
+    text = (text || "").trim();
+    var attempts = [];
+    attempts.push(text);
+    // plan data pasted inside a bigger email: extract from the first {"sites" to the last }
+    var start = text.indexOf('{"sites"');
+    if(start === -1) start = text.indexOf('{ "sites"');
+    var end = text.lastIndexOf("}");
+    if(start !== -1 && end > start){
+      var block = text.slice(start, end + 1);
+      attempts.push(block);
+      // email clients sometimes hard-wrap long lines; names can't contain newlines, so strip them
+      attempts.push(block.replace(/[\r\n]+\s*/g, ""));
+    }
+    for(var i = 0; i < attempts.length; i++){
+      try{
+        var parsed = JSON.parse(attempts[i]);
+        if(parsed && Array.isArray(parsed.sites)) return parsed;
+      }catch(e){}
+    }
+    return null;
+  }
+  function applyPlan(p){
+    state = migrate(p); render();
+    importDlg.close();
+    toast("Plan loaded");
+  }
+  function loadPlan(text){
+    var cands = seedCandidates(text);
+    if(cands.length){
+      decodeSeedAttempts(cands, function(p){
+        if(p){ applyPlan(p); return; }
+        var p2 = parsePlan(text);
+        if(p2) applyPlan(p2);
+        else toast("Couldn’t read that share code — check it copied completely, start to end");
+      });
+      return;
+    }
+    var parsed = parsePlan(text);
+    if(!parsed){ toast("Couldn’t find plan data in that — paste the whole email, the share code, or the plan file contents"); return; }
+    applyPlan(parsed);
+  }
+  document.getElementById("importJson").addEventListener("click", function(){
+    importTa.value = "";
+    importDlg.showModal();
+  });
+  document.getElementById("importClose").addEventListener("click", function(){ importDlg.close(); });
+  document.getElementById("importGo").addEventListener("click", function(){ loadPlan(importTa.value); });
+  document.getElementById("importFileBtn").addEventListener("click", function(){ fileInput.click(); });
+  fileInput.addEventListener("change", function(){
+    var f = fileInput.files && fileInput.files[0];
+    if(!f) return;
+    var r = new FileReader();
+    r.onload = function(){ loadPlan(r.result); fileInput.value = ""; };
+    r.readAsText(f);
+  });
+
+  document.getElementById("resetAll").addEventListener("click", function(){
+    askConfirm("Start over? This clears the whole draft in this browser. Use “Download plan file” first if you might want it back.", function(){
+      state = seed();
+      render();
+      toast("Cleared — starting fresh");
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
