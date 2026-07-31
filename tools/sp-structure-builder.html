@@ -113,6 +113,7 @@
   .canvas{
     background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
     box-shadow:var(--shadow);padding:16px 16px 20px;min-height:300px;
+    min-width:0;max-width:100%;
   }
   .canvas-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
   .canvas-head h2{font-size:15px;margin:0;font-weight:650}
@@ -146,6 +147,9 @@
   .nname{
     font-weight:560;font-size:14.5px;cursor:text;padding:2px 6px;border-radius:5px;
     min-width:40px;outline:none;
+    /* keep the name at natural width and let .meta-inline ellipsize first;
+       max-width + anywhere-wrap stop a huge name from pushing the row wide */
+    flex-shrink:0;max-width:70%;overflow-wrap:anywhere;
   }
   .row .nname:hover{background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
   .nname:focus{background:var(--paper);box-shadow:inset 0 0 0 1.5px var(--accent)}
@@ -364,7 +368,7 @@
   </details>
 
   <div class="cols">
-    <div style="display:grid;gap:20px;min-width:0">
+    <div style="display:grid;grid-template-columns:minmax(0,1fr);gap:20px;min-width:0">
       <main class="canvas" aria-label="Structure tree">
         <div class="canvas-head">
           <h2>Your planned structure</h2>
