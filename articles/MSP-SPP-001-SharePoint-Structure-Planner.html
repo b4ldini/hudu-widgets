@@ -907,9 +907,15 @@
       </div>
     </div>
 
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:0 0 12px;">
+      <p style="font-size:13px;color:#64748b;margin:0;">Working on a bigger plan? Open it full screen &mdash; your draft carries over automatically between this page and the full-screen view.</p>
+      <a href="https://b4ldini.github.io/hudu-widgets/tools/sp-structure-builder.html" target="_blank" rel="noopener" style="flex-shrink:0;display:inline-flex;align-items:center;gap:8px;background:#2557b7;color:#fff;font-size:13.5px;font-weight:600;padding:10px 18px;border-radius:8px;text-decoration:none;">&#x26F6; Open the planner full screen</a>
+    </div>
+
     <div class="content-card" style="padding:0;overflow:hidden;">
       <iframe
-        src="../tools/sp-structure-builder.html?v=2"
+        id="sppTool"
+        src="../tools/sp-structure-builder.html?v=3"
         style="width:100%;height:1050px;border:none;display:block;background:#fff;"
         title="SharePoint Structure Planner"
         loading="lazy"
@@ -1077,6 +1083,28 @@
     sendHeight();
     if(++attempts >= 40) clearInterval(timer);
   }, 300);
+})();
+
+(function(){
+  // Auto-size the planner iframe to fit its whole content (same origin on GitHub
+  // Pages), so the planner never scrolls inside a nested box: the health-check
+  // column stays fully visible and the page scrolls as one. If the document is
+  // unreachable (cross-origin host), the fixed fallback height above stays.
+  var frame = document.getElementById('sppTool');
+  if(!frame) return;
+  function fit(){
+    try {
+      var body = frame.contentDocument && frame.contentDocument.body;
+      if(!body) return;
+      var h = Math.ceil(body.getBoundingClientRect().height);
+      if(h > 400) frame.style.height = (h + 24) + 'px';
+    } catch(e){}
+  }
+  frame.addEventListener('load', function(){
+    fit();
+    try { new ResizeObserver(fit).observe(frame.contentDocument.body); } catch(e){}
+  });
+  setInterval(fit, 800);
 })();
 </script>
 

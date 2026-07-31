@@ -251,7 +251,15 @@
   .pick-list .cnt{color:var(--muted);font-size:12px}
 
   /* ---------- sidebar ---------- */
-  .side{display:grid;gap:16px;position:sticky;top:16px}
+  /* Sticky, but never taller than the viewport: when the cards outgrow the screen
+     (long health-check lists, small laptops, the 1050px article iframe) the sidebar
+     scrolls inside itself instead of freezing over the page with its bottom cut off. */
+  .side{
+    display:grid;gap:16px;position:sticky;top:16px;
+    max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);
+    overflow-y:auto;overscroll-behavior:contain;
+  }
+  @media (max-width:960px){.side{position:static;max-height:none;overflow:visible}}
   .card{
     background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
     box-shadow:var(--shadow);padding:16px 18px;
@@ -262,6 +270,7 @@
   .checks li{
     display:flex;gap:9px;align-items:flex-start;font-size:13px;line-height:1.45;
     padding:7px 10px;border-radius:7px;border:1px solid var(--line-soft);
+    overflow-wrap:anywhere;
   }
   .checks li .ic{flex:none;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:10.5px;font-weight:800;margin-top:1px}
   .checks li.ok{background:var(--ok-bg);border-color:transparent}
@@ -309,7 +318,7 @@
   dialog.export h3{margin:0 0 10px;font-size:16px}
   dialog.export pre{
     background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px;
-    font-size:12.5px;line-height:1.55;overflow-x:auto;max-height:50vh;white-space:pre;
+    font-size:12.5px;line-height:1.55;overflow-x:auto;max-height:min(50vh,420px);white-space:pre;
   }
   dialog .dlg-row{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
 
@@ -1360,9 +1369,38 @@
     });
   }
 
+  /* When embedded full-height in an article (the iframe is auto-sized to fit this
+     whole page, so the page itself never scrolls), the "viewport" is the entire tall
+     iframe — a centred dialog or bottom-anchored toast would appear far from where
+     the customer is working. Pin them near the last click instead. Standalone
+     windows and internally-scrolling embeds keep native placement. */
+  var lastClickY = 0;
+  document.addEventListener("pointerdown", function(e){ lastClickY = e.clientY; }, true);
+  function tallEmbed(){
+    return window.self !== window.top &&
+      window.innerHeight > 1200 &&
+      document.documentElement.scrollHeight <= window.innerHeight + 40;
+  }
+  function openDlg(d){
+    if(tallEmbed()){
+      d.style.top = Math.max(16, lastClickY - 140) + "px";
+      d.style.bottom = "auto";
+      d.style.margin = "0 auto";
+    } else {
+      d.style.top = ""; d.style.bottom = ""; d.style.margin = "";
+    }
+    d.showModal();
+  }
+
   var toastEl = document.getElementById("toast");
   var toastTimer;
   function toast(msg){
+    if(tallEmbed()){
+      toastEl.style.bottom = "auto";
+      toastEl.style.top = Math.max(60, lastClickY + 90) + "px";
+    } else {
+      toastEl.style.bottom = ""; toastEl.style.top = "";
+    }
     toastEl.textContent = msg;
     toastEl.classList.add("show");
     clearTimeout(toastTimer);
@@ -1375,7 +1413,7 @@
   function askConfirm(msg, onYes){
     document.getElementById("confirmMsg").textContent = msg;
     confirmCb = onYes;
-    confirmDlg.showModal();
+    openDlg(confirmDlg);
   }
   document.getElementById("confirmYes").addEventListener("click", function(){
     confirmDlg.close();
@@ -1391,14 +1429,14 @@
     encodeSeed(function(code){
       document.getElementById("exportTitle").textContent = "Your plan as text";
       document.getElementById("exportPre").textContent = textExport(code);
-      dlg.showModal();
+      openDlg(dlg);
     });
   });
   document.getElementById("shareCode").addEventListener("click", function(){
     encodeSeed(function(code){
       document.getElementById("exportTitle").textContent = "Your plan as a share code";
       document.getElementById("exportPre").textContent = code;
-      dlg.showModal();
+      openDlg(dlg);
     });
   });
   document.getElementById("dlgClose").addEventListener("click", function(){ dlg.close(); });
@@ -1475,7 +1513,7 @@
   }
   document.getElementById("importJson").addEventListener("click", function(){
     importTa.value = "";
-    importDlg.showModal();
+    openDlg(importDlg);
   });
   document.getElementById("importClose").addEventListener("click", function(){ importDlg.close(); });
   document.getElementById("importGo").addEventListener("click", function(){ loadPlan(importTa.value); });
