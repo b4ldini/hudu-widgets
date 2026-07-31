@@ -649,7 +649,36 @@
     font-weight: 500;
   }
 
-  /* RESPONSIVE */
+  /* FULL-SCREEN ESCAPE CHIP (shown only when embedded in a squeezed frame) */
+  .fullscreen-chip {
+    display: none;
+    position: fixed;
+    right: 14px;
+    bottom: 14px;
+    z-index: 200;
+    align-items: center;
+    gap: 7px;
+    background: #2557b7;
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 24px;
+    box-shadow: 0 4px 16px rgba(30,74,160,0.4);
+  }
+
+  .fullscreen-chip:hover { background: #1e4aa0; }
+
+  /* RESPONSIVE — squeezed column (e.g. Hudu public share view) */
+  @media (max-width: 980px) {
+    .page-body    { padding: 26px 16px 56px; }
+    .content-card { padding: 18px 16px 20px; }
+    .overview-card { padding: 22px 18px; }
+    #tool iframe  { height: 1300px !important; }
+    body.embedded .fullscreen-chip { display: inline-flex; }
+  }
+
   @media (max-width: 640px) {
     .sticky-nav-inner { padding: 0 14px; }
     .page-body       { padding: 28px 14px 56px; }
@@ -1061,6 +1090,8 @@
 
 </main>
 
+<a class="fullscreen-chip" href="https://b4ldini.github.io/hudu-widgets/articles/MSP-SPP-001-SharePoint-Structure-Planner.html" target="_blank" rel="noopener">&#x2922; Open full-screen</a>
+
 <footer style="background:linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);border-top:1px solid rgba(194,224,0,0.2);padding:18px 40px;text-align:center;">
   <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">Prepared by <span style="color:rgba(255,255,255,0.85);">Active8 Managed Technologies Limited</span> &middot; IT Service Management</div>
   <div style="font-family:'Courier New',Consolas,monospace;font-size:10px;color:rgba(255,255,255,0.32);margin-top:5px;">v2.0 &middot; July 2026 &middot; This article is maintained by the Active 8 IT team.</div>
@@ -1068,6 +1099,9 @@
 
 <script>
 (function(){
+  // Flag when this page is inside another page's iframe (e.g. Hudu) so the
+  // full-screen escape chip only appears where it's useful
+  try { if(window.self !== window.top) document.body.classList.add('embedded'); } catch(e){ document.body.classList.add('embedded'); }
   function sendHeight(){
     var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
     window.parent.postMessage({type:'a8-iframe-resize', height:h}, '*');
