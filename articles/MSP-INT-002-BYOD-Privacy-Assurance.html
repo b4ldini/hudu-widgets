@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What We Can and Cannot See on Your Device – Active8 Managed Technologies</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background: #f7f9fc;
+  }
+
+  /* NAV */
+  .sticky-nav {
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  }
+
+  .sticky-nav-inner {
+    padding: 0 40px;
+    display: flex;
+    align-items: stretch;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .sticky-nav-inner::-webkit-scrollbar { display: none; }
+
+  .nav-link {
+    padding: 0 14px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #888;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+    border-radius: 0;
+    position: relative;
+  }
+
+  .nav-link:hover {
+    color: #1a3a8f;
+    background: rgba(37,87,183,0.06);
+    border-bottom-color: #2557b7;
+  }
+
+  .nav-link:active { background: rgba(37,87,183,0.12); }
+
+  .nav-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .num-blue  { background: rgba(37,87,183,0.12); color: #2557b7; }
+  .num-green { background: rgba(0,122,61,0.12);  color: #007a3d; }
+  .num-lime  { background: rgba(194,224,0,0.2);  color: #6b8500; }
+
+  /* PAGE BODY */
+  .page-body { padding: 44px 40px 72px; }
+
+  /* OVERVIEW CARD */
+  .overview-card {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
+    border-radius: 12px;
+    padding: 30px 34px;
+    margin-bottom: 20px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .overview-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(194,224,0,0.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .card-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.38);
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .overview-card p {
+    color: rgba(255,255,255,0.8);
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .pill-row { display: flex; gap: 8px; flex-wrap: wrap; position: relative; margin-top: 18px; }
+
+  .pill {
+    padding: 4px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  /* SECTION HEADING */
+  .section-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .step-badge {
+    flex-shrink: 0;
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 20px;
+    color: white;
+  }
+
+  .badge-blue  { background: #2557b7; }
+  .badge-green { background: #007a3d; }
+  .badge-lime  { background: #8aaa00; }
+
+  .step-meta {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 4px;
+  }
+
+  .step-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 21px;
+    font-weight: 400;
+    color: #1a1a1a;
+    line-height: 1.2;
+  }
+
+  /* CONTENT CARD */
+  .content-card {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+    padding: 22px 26px 26px;
+  }
+
+  .content-card > p { font-size: 14px; line-height: 1.7; }
+  .content-card > p + p { margin-top: 12px; }
+
+  .card-sub {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #1a1a1a;
+    margin: 22px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .content-card > .card-sub:first-child { margin-top: 0; }
+
+  /* STEPS */
+  .steps { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #f7f9fc;
+    border-radius: 8px;
+    padding: 11px 14px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .step-num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: rgba(37,87,183,0.1);
+    color: #2557b7;
+    border: 1px solid rgba(37,87,183,0.2);
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step p { font-size: 13px; padding-top: 3px; }
+
+  code.inline-code {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 12px;
+    background: rgba(37,87,183,0.07);
+    border: 1px solid rgba(37,87,183,0.15);
+    padding: 1px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  /* TICK / CROSS LISTS */
+  .fact-list { list-style: none; display: flex; flex-direction: column; gap: 9px; margin-top: 4px; }
+
+  .fact-list li {
+    font-size: 13.5px;
+    line-height: 1.6;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #f7f9fc;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 8px;
+    padding: 10px 14px;
+  }
+
+  .fact-list li::before {
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    width: 16px;
+    text-align: center;
+  }
+
+  .fact-list.can li::before  { content: '\2713'; color: #007a3d; }
+  .fact-list.cant li::before { content: '\2715'; color: #b91c1c; }
+
+  /* AMBER ALERT */
+  .lost-alert {
+    border-radius: 8px;
+    padding: 13px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    margin-bottom: 44px;
+  }
+
+  .lost-alert.in-card { margin-top: 20px; margin-bottom: 0; }
+  .lost-alert-icon { font-size: 15px; flex-shrink: 0; margin-top: 2px; color: #d97706; }
+  .lost-alert strong { display: block; font-size: 13px; font-weight: 600; margin-bottom: 3px; color: #92400e; }
+  .lost-alert p { font-size: 13px; color: #78350f; line-height: 1.6; }
+  .lost-alert p + p { margin-top: 8px; }
+
+  /* CALLOUT */
+  .callout {
+    padding: 13px 16px;
+    margin-top: 14px;
+    border-radius: 8px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .callout-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .callout-title { font-weight: 600; font-size: 13px; margin-bottom: 3px; }
+  .callout-body  { font-size: 13px; line-height: 1.6; }
+  .callout-info  { background: #eff6ff; border: 1px solid #bfdbfe; }
+  .callout-info .callout-icon  { color: #2563eb; }
+  .callout-info .callout-title { color: #1e40af; }
+  .callout-info .callout-body  { color: #1e3a5f; }
+  .callout-good  { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .callout-good .callout-icon  { color: #16a34a; }
+  .callout-good .callout-title { color: #14532d; }
+  .callout-good .callout-body  { color: #14532d; }
+
+  /* TRUST BANNER */
+  .app-trust-banner {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 60%, #1e4aa0 100%);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 48px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(30,74,160,0.25);
+  }
+
+  .app-trust-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(194,224,0,0.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .app-trust-banner h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 21px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .app-trust-banner > p {
+    color: rgba(255,255,255,0.78);
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 22px;
+    position: relative;
+  }
+
+  .trust-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  .trust-card {
+    border-radius: 8px;
+    padding: 16px 18px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+
+  .trust-card-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .trust-card.pro   .trust-card-label { color: #c2e000; }
+  .trust-card.never .trust-card-label { color: rgba(255,160,120,0.9); }
+
+  .trust-card-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 14px;
+    color: white;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+
+  .trust-card ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+  .trust-card ul li {
+    font-size: 13px;
+    color: rgba(255,255,255,0.68);
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    line-height: 1.5;
+  }
+
+  .trust-card ul li::before { font-weight: 700; font-size: 11px; flex-shrink: 0; margin-top: 2px; }
+  .trust-card.pro   ul li::before { content: '\2713'; color: #c2e000; }
+  .trust-card.never ul li::before { content: '\2715'; color: rgba(255,140,100,0.9); }
+
+  .privacy-callout {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 18px 20px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    position: relative;
+  }
+
+  .privacy-callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+
+  .privacy-callout-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 15px;
+    color: white;
+    margin-bottom: 8px;
+  }
+
+  .privacy-callout p { font-size: 13px; color: rgba(255,255,255,0.68); line-height: 1.65; }
+  .privacy-callout p + p { margin-top: 8px; }
+
+  /* DIVIDER */
+  .divider { margin: 34px 0; display: flex; align-items: center; gap: 14px; }
+  .divider-line { flex: 1; height: 1px; background: rgba(0,0,0,0.1); }
+  .divider-arrow { color: #bbb; font-size: 14px; }
+
+  /* TABLES */
+  .id-table-wrap {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+
+  .id-table-intro { padding: 16px 22px 0; }
+  .id-table-intro p { font-size: 14px; line-height: 1.6; padding-bottom: 14px; border-bottom: 1px solid rgba(0,0,0,0.08); }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    background: #f7f9fc;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #888;
+    padding: 10px 22px;
+    text-align: left;
+    border-bottom: 2px solid rgba(0,0,0,0.08);
+  }
+
+  tbody tr { border-bottom: 1px solid rgba(0,0,0,0.07); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 14px 22px; font-size: 14px; vertical-align: top; line-height: 1.5; }
+
+  .req-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+    background: rgba(37,87,183,0.1);
+    color: #2557b7;
+  }
+
+  /* SIDE-BY-SIDE COMPARISON TABLE */
+  .compare-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  .compare-table { min-width: 760px; font-size: 13px; }
+  .compare-table thead th { padding: 11px 16px; white-space: normal; }
+  .compare-table thead th:first-child { width: 190px; }
+  .compare-table tbody td { padding: 11px 16px; font-size: 13px; }
+  .compare-table tbody tr:nth-child(even) td { background: #fbfcfe; }
+
+  .compare-table tbody th {
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 11px 16px;
+    background: #f7f9fc;
+    border-right: 1px solid rgba(0,0,0,0.07);
+    vertical-align: top;
+    line-height: 1.45;
+  }
+
+  .tag {
+    display: inline-block;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 2px 8px;
+    border-radius: 3px;
+    margin-right: 6px;
+    white-space: nowrap;
+  }
+
+  .tag-yes { background: rgba(0,122,61,0.12);  color: #007a3d; border: 1px solid rgba(0,122,61,0.3); }
+  .tag-no  { background: rgba(185,28,28,0.1);  color: #b91c1c; border: 1px solid rgba(185,28,28,0.3); }
+  .tag-na  { background: rgba(128,128,128,0.12); color: #6b7280; border: 1px solid rgba(128,128,128,0.3); }
+
+  /* FAQ */
+  .faq-wrap {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+
+  .faq-header {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
+    padding: 18px 26px;
+  }
+
+  .faq-header h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 2px;
+  }
+
+  .faq-header p {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.42);
+    letter-spacing: 0.06em;
+  }
+
+  details { border-bottom: 1px solid rgba(0,0,0,0.08); }
+  details:last-child { border-bottom: none; }
+
+  summary {
+    padding: 15px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    list-style: none;
+    user-select: none;
+  }
+
+  summary::-webkit-details-marker { display: none; }
+  summary:hover { background: #f7f9fc; }
+  summary::after { content: '+'; font-size: 20px; font-weight: 300; color: #bbb; flex-shrink: 0; }
+  details[open] summary::after { content: '\00d7'; color: #2557b7; }
+  details[open] summary { color: #2557b7; background: #f7f9fc; }
+
+  .faq-answer {
+    padding: 4px 22px 16px;
+    font-size: 14px;
+    line-height: 1.7;
+    background: #f7f9fc;
+    color: #333;
+  }
+
+  /* HELP SECTION */
+  .help-section {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 60%, #1e4aa0 100%);
+    border-radius: 12px;
+    padding: 32px 34px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 44px;
+    color: white;
+    box-shadow: 0 4px 22px rgba(30,74,160,0.3);
+  }
+
+  .help-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 80% 20%, rgba(194,224,0,0.1) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .help-section h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 21px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 5px;
+    position: relative;
+  }
+
+  .help-sub {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 22px;
+    position: relative;
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    position: relative;
+    margin-bottom: 12px;
+  }
+
+  .contact-card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 14px 16px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .contact-card:hover { background: rgba(255,255,255,0.12); border-color: rgba(194,224,0,0.35); }
+
+  .contact-icon-wrap {
+    width: 38px; height: 38px;
+    border-radius: 8px;
+    background: rgba(194,224,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+
+  .contact-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #c2e000;
+    margin-bottom: 3px;
+  }
+
+  .contact-value { font-size: 13px; font-weight: 600; color: white; }
+
+  .rmm-note {
+    background: rgba(194,224,0,0.08);
+    border: 1px solid rgba(194,224,0,0.2);
+    border-radius: 8px;
+    padding: 13px 16px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.72);
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    position: relative;
+  }
+
+  .rmm-note strong { color: #c2e000; }
+
+  /* COMPLETION BANNER */
+  .completion-banner {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
+    border-radius: 12px;
+    padding: 36px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 4px 22px rgba(30,74,160,0.28);
+  }
+
+  .completion-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(194,224,0,0.18) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .completion-inner { position: relative; z-index: 1; }
+
+  .completion-icon {
+    width: 52px; height: 52px;
+    background: rgba(194,224,0,0.2);
+    border: 2px solid rgba(194,224,0,0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    font-size: 22px;
+    color: #c2e000;
+  }
+
+  .completion-eyebrow {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(194,224,0,0.75);
+    margin-bottom: 10px;
+  }
+
+  .completion-banner h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 23px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 12px;
+  }
+
+  .completion-banner p { font-size: 14px; color: rgba(255,255,255,0.6); max-width: 520px; margin: 0 auto 20px; line-height: 1.7; }
+
+  .completion-pills { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+
+  .cpill-lime {
+    background: rgba(194,224,0,0.15);
+    border: 1px solid rgba(194,224,0,0.35);
+    border-radius: 20px;
+    padding: 4px 13px;
+    font-size: 12px;
+    color: #c2e000;
+    font-weight: 500;
+  }
+
+  /* FULL-SCREEN ESCAPE CHIP (shown only when embedded in a squeezed frame) */
+  .fullscreen-chip {
+    display: none;
+    position: fixed;
+    right: 14px;
+    bottom: 14px;
+    z-index: 200;
+    align-items: center;
+    gap: 7px;
+    background: #2557b7;
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 24px;
+    box-shadow: 0 4px 16px rgba(30,74,160,0.4);
+  }
+
+  .fullscreen-chip:hover { background: #1e4aa0; }
+
+  /* RESPONSIVE — squeezed column (e.g. Hudu public share view) */
+  @media (max-width: 980px) {
+    .page-body     { padding: 26px 16px 56px; }
+    .content-card  { padding: 18px 16px 20px; }
+    .overview-card { padding: 22px 18px; }
+    body.embedded .fullscreen-chip { display: inline-flex; }
+  }
+
+  @media (max-width: 640px) {
+    .sticky-nav-inner { padding: 0 14px; }
+    .page-body       { padding: 28px 14px 56px; }
+
+    .overview-card,
+    .app-trust-banner,
+    .help-section,
+    .completion-banner { padding: 20px 16px; }
+
+    .content-card { padding: 16px 16px 20px; }
+
+    .trust-grid,
+    .contact-grid { grid-template-columns: 1fr; }
+
+    .privacy-callout { flex-direction: column; gap: 10px; }
+
+    summary   { padding: 13px 16px; }
+    .faq-answer { padding: 4px 16px 14px; }
+    .faq-header { padding: 14px 18px; }
+
+    .completion-pills { flex-direction: column; align-items: center; }
+
+    thead th,
+    tbody td { padding: 10px 14px; }
+  }
+
+  @media (max-width: 380px) {
+    .step-title { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="sticky-nav">
+  <div class="sticky-nav-inner">
+    <a class="nav-link" href="#why"><span class="nav-num num-lime">?</span> Why This Exists</a>
+    <a class="nav-link" href="#line"><span class="nav-num num-blue">1</span> Where the Line Sits</a>
+    <a class="nav-link" href="#pin"><span class="nav-num num-green">2</span> The Work App PIN</a>
+    <a class="nav-link" href="#contacts"><span class="nav-num num-blue">3</span> About Contacts</a>
+    <a class="nav-link" href="#portal"><span class="nav-num num-green">4</span> Company Portal</a>
+    <a class="nav-link" href="#compare"><span class="nav-num num-lime">&#9707;</span> Side by Side</a>
+    <a class="nav-link" href="#updates"><span class="nav-num num-blue">!</span> Keep It Updated</a>
+    <a class="nav-link" href="#questions"><span class="nav-num num-lime">?</span> Questions</a>
+  </div>
+</nav>
+
+<main class="page-body">
+
+  <!-- OVERVIEW -->
+  <div class="overview-card">
+    <div class="card-label">Your Privacy</div>
+    <p>If you use your <strong>own</strong> phone or tablet for work, you have every right to ask what we can see on it. This article answers that question in full &mdash; not in principle, but item by item.</p>
+    <p>The short version: <strong>nobody is reading your messages, looking at your photos, or checking where you are.</strong> What we are switching on exists to answer two questions and two questions only &mdash; <strong>is the device patched, and is it locked</strong> &mdash; and it has been built deliberately so that we can answer them without being able to see anything else about your phone.</p>
+    <div class="pill-row">
+      <div class="pill"><span class="dot" style="background:#4ade80;"></span> No access to photos, messages or calls</div>
+      <div class="pill"><span class="dot" style="background:#4ade80;"></span> No location tracking &mdash; ever</div>
+      <div class="pill"><span class="dot" style="background:#c2e000;"></span> Work side only on personal devices</div>
+      <div class="pill"><span class="dot" style="background:#4d8cff;"></span> We cannot wipe your phone</div>
+    </div>
+  </div>
+
+  <!-- WHY -->
+  <div id="why">
+    <div class="section-heading">
+      <div class="step-badge badge-lime">?</div>
+      <div>
+        <div class="step-meta">Background</div>
+        <div class="step-title">Why Any of This Exists</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <p><strong>Cyber Essentials</strong> &mdash; the certification the Group is working towards &mdash; sets two requirements for any device that can reach company information.</p>
+
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><p>Security updates must be installed within <strong>14 days</strong> of the manufacturer releasing them.</p></div>
+        <div class="step"><div class="step-num">2</div><p>The device must have a basic set of security settings in place: a <strong>passcode or PIN</strong>, <strong>encryption</strong> switched on, and no tampering with the phone&rsquo;s built-in protections (jailbreaking or rooting).</p></div>
+      </div>
+
+      <p style="margin-top:16px;">We have to be able to demonstrate to an assessor that both of those are true. That is the entire purpose of what we are switching on at <strong>12pm on Monday</strong>.</p>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">&#8505;</div>
+        <div>
+          <div class="callout-title">Two questions, and nothing more</div>
+          <div class="callout-body">Everything described in this article traces back to <strong>&ldquo;is it patched?&rdquo;</strong> and <strong>&ldquo;is it locked?&rdquo;</strong> If a piece of information does not help answer one of those two questions, it is not collected.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- THE LINE -->
+  <div id="line">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">1</div>
+      <div>
+        <div class="step-meta">The Detail</div>
+        <div class="step-title">Where the Line Sits</div>
+      </div>
+    </div>
+
+    <div class="app-trust-banner">
+      <div class="card-label">On Your Own Phone or Tablet</div>
+      <h2>Exactly what is visible to us &mdash; and what never is</h2>
+      <p>On a personal device, enrolment covers the <strong>work side only</strong>. On an iPhone or iPad it creates a separate, sealed space for work data; on Android it creates a separate work profile. In both cases the personal side of the phone is not inventoried, not readable, and not ours to control.</p>
+
+      <div class="trust-grid">
+        <div class="trust-card pro">
+          <div class="trust-card-label">What We Can See</div>
+          <div class="trust-card-title">The evidence an assessor asks for</div>
+          <ul>
+            <li>That you have signed into a work app with your work account, and which work apps the protection has applied to</li>
+            <li>A basic device record: <strong>device name, make, model</strong>, and the version of iOS or Android it is running</li>
+            <li>On Android, the <strong>security patch level</strong>, so we can confirm updates are actually arriving rather than just being pushed</li>
+            <li>Whether the phone has been <strong>jailbroken or rooted</strong></li>
+            <li>Whether the <strong>work app PIN</strong> has been set</li>
+          </ul>
+        </div>
+        <div class="trust-card never">
+          <div class="trust-card-label">What We Cannot See</div>
+          <div class="trust-card-title">Your personal life stays personal</div>
+          <ul>
+            <li>Your photos, messages, WhatsApp or call history</li>
+            <li>Your contacts &mdash; nothing about contacts is configured on a personal device</li>
+            <li>Which personal apps you have installed, or how you use them</li>
+            <li><strong>Your location &mdash; at any time, ever</strong></li>
+            <li>Your browsing history, personal email, or any personal account</li>
+            <li>Anything stored on your phone outside the work apps themselves</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="privacy-callout">
+        <div class="privacy-callout-icon">&#128274;</div>
+        <div>
+          <div class="privacy-callout-title">Why the device record exists at all</div>
+          <p>Every device that signs into a work account creates one of these records &mdash; there is no such thing as an invisible device. That record is what proves to an assessor that a <strong style="color:rgba(255,255,255,0.9);">supported, patched, locked</strong> device is accessing company data. It is the whole reason it exists.</p>
+          <p>On location specifically: it is <strong style="color:rgba(255,255,255,0.9);">not collected and not configured</strong> on any device we manage &mdash; personal or company-issued.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIN -->
+  <div id="pin">
+    <div class="section-heading">
+      <div class="step-badge badge-green">2</div>
+      <div>
+        <div class="step-meta">A Fair Question</div>
+        <div class="step-title">Why the Work Apps Ask for Their Own PIN</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <p>A fair question, since almost every phone already has a passcode or Face ID.</p>
+      <p>The work app PIN is a <strong>second lock on the work apps specifically</strong>, rather than a check on your phone. It exists so we can evidence to an assessor that company data sitting on a personal device is behind a lock, <em>without having to inspect your device to prove it</em>. &ldquo;Almost everyone has a passcode&rdquo; is not something we can put in front of an assessor; &ldquo;the work apps require a 6-digit PIN&rdquo; is.</p>
+      <p><strong>Face ID or Touch ID opens the apps day to day</strong> &mdash; the PIN is the fallback.</p>
+
+      <div class="callout callout-good">
+        <div class="callout-icon">&#10003;</div>
+        <div>
+          <div class="callout-title">The same logic applies to encryption</div>
+          <div class="callout-body">The policy encrypts the work data <em>inside the apps</em> &mdash; so we are protecting our data rather than inspecting your device.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- CONTACTS -->
+  <div id="contacts">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">3</div>
+      <div>
+        <div class="step-meta">The Most Common Question</div>
+        <div class="step-title">About Contacts</div>
+      </div>
+    </div>
+
+    <div class="id-table-wrap">
+      <div class="id-table-intro">
+        <p>Contacts come up more than anything else, so it is worth being exact about what is configured and what is not.</p>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Device</th>
+            <th>What happens with contacts</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="req-pill">&#63743; Your own iPhone or iPad</span></td>
+            <td><strong>Nothing is synced.</strong> We do not push the Group&rsquo;s contact directory to personal devices, and no contact sync is configured for them. Outlook has its own optional setting to save its contacts into your phone&rsquo;s address book &mdash; our policy does not block it, but it is off unless you choose to switch it on. That is your decision, not ours. Your personal contacts are never read, never uploaded, and never visible to us.</td>
+          </tr>
+          <tr>
+            <td><span class="req-pill">&#129302; Your own Android</span></td>
+            <td><strong>Work contacts can show in your dialler.</strong> The work profile is permitted to answer caller-ID lookups, so a work number rings with a name rather than just digits. That is a <em>lookup</em>, not a copy &mdash; the contact stays inside the work profile, and your personal contacts stay on the personal side.</td>
+          </tr>
+          <tr>
+            <td><span class="req-pill">&#128241; Company-issued handset</span></td>
+            <td><strong>Contact sync is configured and runs both ways.</strong> The Group&rsquo;s contact directory syncs into the handset, and contacts saved on the handset sync back up into the work account &mdash; which is what makes them recoverable. So keep personal contacts off a company phone, or expect them to end up in the company directory.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- COMPANY PORTAL -->
+  <div id="portal">
+    <div class="section-heading">
+      <div class="step-badge badge-green">4</div>
+      <div>
+        <div class="step-meta">The App You Will See</div>
+        <div class="step-title">The Company Portal App</div>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <p>Company Portal is Microsoft&rsquo;s app that sets your device up for work. It is used on <strong>every</strong> device with work access &mdash; your own iPhone, iPad or Android, and any company-issued handset. If you removed it while the Apple migration was running, please install it again and sign in.</p>
+
+      <div class="steps" style="margin-top:14px;">
+        <div class="step"><div class="step-num">1</div><p><strong>Sets the device up in the first place.</strong> On a personal device it establishes the work side only &mdash; a sealed work space on iPhone and iPad, a separate work profile on Android. It does not take over your phone.</p></div>
+        <div class="step"><div class="step-num">2</div><p><strong>Puts the Group&rsquo;s approved apps in one place</strong>, so you are not hunting through the App Store or Play Store.</p></div>
+        <div class="step"><div class="step-num">3</div><p><strong>Shows you your device&rsquo;s status</strong> &mdash; which is the part worth understanding.</p></div>
+      </div>
+
+      <div class="card-sub">It tells you what is wrong, and how to fix it</div>
+      <p>If your device stops meeting one of the security requirements, you are not left guessing. You get an email, and Company Portal shows the device as <strong>Not compliant</strong> with the specific item listed and a <strong>&ldquo;How to resolve&rdquo;</strong> link next to it. Tap it and it walks you through the fix.</p>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">&#8505;</div>
+        <div>
+          <div class="callout-title">It is not a monitoring app</div>
+          <div class="callout-body">Company Portal shows <em>you</em> your own device&rsquo;s status. It does not give us anything beyond what is set out in this article. It is a window for you, not a camera for us.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="id-table-wrap">
+      <div class="id-table-intro">
+        <p>These are the checks Company Portal reports against.</p>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Device</th>
+            <th>What is checked</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="req-pill">&#129302; Personal Android<br>with a work profile</span></td>
+            <td>
+              <ul class="fact-list can">
+                <li>Running Android 14 or newer</li>
+                <li>Not rooted, and passing Google Play Protect&rsquo;s integrity check</li>
+                <li>A passcode set, at least 6 digits</li>
+                <li>The phone locks itself after 5 minutes of inactivity</li>
+                <li>Device encryption switched on</li>
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <td><span class="req-pill">&#63743; Company-issued<br>iPhone or iPad</span></td>
+            <td>
+              <ul class="fact-list can">
+                <li>Running iOS or iPadOS 16 or newer</li>
+                <li>Not jailbroken</li>
+                <li>A passcode of at least 6 digits, and not a simple one such as 1234 or repeated digits</li>
+                <li>Locks after 5 minutes of inactivity</li>
+              </ul>
+            </td>
+          </tr>
+          <tr>
+            <td><span class="req-pill">&#128241; Company-issued<br>Android</span></td>
+            <td>
+              <p style="font-size:13.5px;margin-bottom:9px;">Everything in the first list, plus:</p>
+              <ul class="fact-list can">
+                <li>A <strong>security patch level</strong> no older than the required date &mdash; this is the check that proves updates have actually landed, rather than merely been sent</li>
+                <li>Google&rsquo;s certified-device attestation</li>
+              </ul>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="content-card">
+      <div class="card-sub">What happens if something is not met</div>
+      <p>Nothing dramatic, and nothing sudden. The device is flagged, you receive an email listing what needs fixing, and Company Portal shows you how. If it is left unresolved, access to work data on that device is withdrawn until it is sorted out.</p>
+
+      <div class="callout callout-good">
+        <div class="callout-icon">&#10003;</div>
+        <div>
+          <div class="callout-title">No device is wiped, and no personal data is touched</div>
+          <div class="callout-body">At no stage. The only lever we use is <strong>access</strong>.</div>
+        </div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">&#8505;</div>
+        <div>
+          <div class="callout-title">Your password will never be forced to expire</div>
+          <div class="callout-body">On none of these devices is a password ever forced to expire. Following NCSC guidance, forced rotation makes passwords <em>worse</em> rather than better &mdash; so we do not do it.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- SIDE BY SIDE -->
+  <div id="compare">
+    <div class="section-heading">
+      <div class="step-badge badge-lime">&#9707;</div>
+      <div>
+        <div class="step-meta">The Complete Picture</div>
+        <div class="step-title">Side by Side</div>
+      </div>
+    </div>
+
+    <div class="id-table-wrap">
+      <div class="id-table-intro">
+        <p>Every line, for all three kinds of device. If something you care about is not on this list, ask us and we will add it.</p>
+      </div>
+      <div class="compare-scroll">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Your own iPhone or iPad</th>
+            <th>Your own Android phone</th>
+            <th>Company-issued phone or tablet</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>How it is protected</th>
+            <td>A sealed work space for work data, plus app protection on the work apps.</td>
+            <td>A separate, sealed work profile on your phone.</td>
+            <td>The whole device is managed by us.</td>
+          </tr>
+          <tr>
+            <th>Do you need the Company Portal app?</th>
+            <td><span class="tag tag-yes">Yes</span> It is what sets the work side up.</td>
+            <td><span class="tag tag-yes">Yes</span> It is what creates the work profile.</td>
+            <td><span class="tag tag-yes">Yes</span></td>
+          </tr>
+          <tr>
+            <th>Does the device appear in our systems?</th>
+            <td><span class="tag tag-yes">Yes</span> The device and its work side. The personal side is not inventoried.</td>
+            <td><span class="tag tag-yes">Yes</span> The device, but only the work profile side of it.</td>
+            <td><span class="tag tag-yes">Yes</span> Fully.</td>
+          </tr>
+          <tr>
+            <th>Device name, make, model, identifiers</th>
+            <td><span class="tag tag-yes">Yes</span></td>
+            <td><span class="tag tag-yes">Yes</span></td>
+            <td><span class="tag tag-yes">Yes</span> The device is named after its serial number.</td>
+          </tr>
+          <tr>
+            <th>Operating system version</th>
+            <td><span class="tag tag-yes">Yes</span> Used to check it is still supported.</td>
+            <td><span class="tag tag-yes">Yes</span></td>
+            <td><span class="tag tag-yes">Yes</span></td>
+          </tr>
+          <tr>
+            <th>Security update / patch level</th>
+            <td>Checked through the OS version.</td>
+            <td><span class="tag tag-yes">Yes</span></td>
+            <td><span class="tag tag-yes">Yes</span></td>
+          </tr>
+          <tr>
+            <th>Work app PIN / work profile lock</th>
+            <td>Required &mdash; 6 digits, Face ID or Touch ID day to day.</td>
+            <td>Required on the work profile.</td>
+            <td>Device passcode enforced (6 digits, locks after 5 minutes).</td>
+          </tr>
+          <tr>
+            <th>Encryption</th>
+            <td>Work data is encrypted.</td>
+            <td>Verified on the work profile.</td>
+            <td>Verified on the whole device.</td>
+          </tr>
+          <tr>
+            <th>Jailbroken or rooted</th>
+            <td>Detected by the work apps, which then refuse to open.</td>
+            <td><span class="tag tag-yes">Yes</span> Checked.</td>
+            <td><span class="tag tag-yes">Yes</span> Checked.</td>
+          </tr>
+          <tr>
+            <th>Which work apps you use</th>
+            <td><span class="tag tag-yes">Yes</span></td>
+            <td><span class="tag tag-yes">Yes</span> Work profile only.</td>
+            <td><span class="tag tag-yes">Yes</span></td>
+          </tr>
+          <tr>
+            <th>Which personal apps you have installed</th>
+            <td><span class="tag tag-no">No</span> The personal side is invisible to us.</td>
+            <td><span class="tag tag-no">No</span> The personal side is invisible to us.</td>
+            <td><span class="tag tag-na">N/A</span> There is no personal side.</td>
+          </tr>
+          <tr>
+            <th>Photos, messages, WhatsApp, call history</th>
+            <td><span class="tag tag-no">No</span> Never.</td>
+            <td><span class="tag tag-no">No</span> Never.</td>
+            <td><span class="tag tag-no">No</span> Never.</td>
+          </tr>
+          <tr>
+            <th>Contacts</th>
+            <td>Nothing is synced. Outlook&rsquo;s own optional &ldquo;save contacts&rdquo; setting is yours to switch on or leave off.</td>
+            <td>Work contacts can appear in your dialler for caller ID. Personal contacts stay personal.</td>
+            <td><strong>Two-way.</strong> The Group directory syncs down; contacts saved on the handset sync back up &mdash; which is what makes them recoverable.</td>
+          </tr>
+          <tr>
+            <th>Your location</th>
+            <td><span class="tag tag-no">No</span> Never.</td>
+            <td><span class="tag tag-no">No</span> Not configured.</td>
+            <td><span class="tag tag-no">No</span> Not configured.</td>
+          </tr>
+          <tr>
+            <th>Web browsing history</th>
+            <td><span class="tag tag-no">No</span></td>
+            <td><span class="tag tag-no">No</span></td>
+            <td><span class="tag tag-no">No</span></td>
+          </tr>
+          <tr>
+            <th>Personal email and personal accounts</th>
+            <td><span class="tag tag-no">No</span></td>
+            <td><span class="tag tag-no">No</span></td>
+            <td>Blocked &mdash; personal accounts cannot be added.</td>
+          </tr>
+          <tr>
+            <th>Files stored outside the work apps</th>
+            <td><span class="tag tag-no">No</span></td>
+            <td><span class="tag tag-no">No</span></td>
+            <td><span class="tag tag-na">N/A</span></td>
+          </tr>
+          <tr>
+            <th>Can we remove work data?</th>
+            <td><span class="tag tag-yes">Yes</span> The work side only.</td>
+            <td><span class="tag tag-yes">Yes</span> The work profile only.</td>
+            <td><span class="tag tag-yes">Yes</span></td>
+          </tr>
+          <tr>
+            <th>Can we wipe the whole device?</th>
+            <td><span class="tag tag-no">No</span> Only the work data.</td>
+            <td><span class="tag tag-no">No</span> Only the work profile.</td>
+            <td><span class="tag tag-yes">Yes</span></td>
+          </tr>
+          <tr>
+            <th>Can we install or remove apps?</th>
+            <td>Only work apps.</td>
+            <td>Only inside the work profile.</td>
+            <td><span class="tag tag-yes">Yes</span></td>
+          </tr>
+          <tr>
+            <th>Can we restrict what the device does?</th>
+            <td><span class="tag tag-no">No</span></td>
+            <td>Only inside the work profile.</td>
+            <td><span class="tag tag-yes">Yes</span> App Store, settings, and which apps appear.</td>
+          </tr>
+          <tr>
+            <th>Can we reset your PIN if you forget it?</th>
+            <td><span class="tag tag-no">No</span></td>
+            <td><span class="tag tag-no">No</span></td>
+            <td><span class="tag tag-yes">Yes</span></td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- UPDATES -->
+  <div id="updates">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">!</div>
+      <div>
+        <div class="step-meta">One Thing to Do</div>
+        <div class="step-title">If Your Device Is Not Up to Date</div>
+      </div>
+    </div>
+
+    <div class="lost-alert">
+      <div class="lost-alert-icon">&#9888;</div>
+      <div>
+        <strong>An out-of-date phone is the one thing that will actually stop you working</strong>
+        <p>If your device is running an operating system old enough that it no longer receives security updates, the work apps will stop opening until you update it. At that point we can no longer meet the 14-day rule on that device, and the certification does not allow an exception.</p>
+      </div>
+    </div>
+
+    <div class="content-card">
+      <p>Please run a software update <strong>before 12pm on Monday</strong>. It takes a couple of minutes.</p>
+      <div class="steps">
+        <div class="step"><div class="step-num">&#63743;</div><p><strong>iPhone and iPad:</strong> <code class="inline-code">Settings &rsaquo; General &rsaquo; Software Update</code></p></div>
+        <div class="step"><div class="step-num">&#129302;</div><p><strong>Android:</strong> <code class="inline-code">Settings &rsaquo; System &rsaquo; System update</code></p></div>
+      </div>
+
+      <div class="callout callout-info">
+        <div class="callout-icon">&#8505;</div>
+        <div>
+          <div class="callout-title">Phone too old to update?</div>
+          <div class="callout-body">If your phone cannot be updated to a supported version, get in touch and we will look at the options with you.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPLETION BANNER -->
+  <div class="completion-banner">
+    <div class="completion-inner">
+      <div class="completion-icon">&#128274;</div>
+      <div class="completion-eyebrow">The Bottom Line</div>
+      <h2>Is it patched, and is it locked</h2>
+      <p>That is all this is for. It was built deliberately so that we can answer those two questions for an assessor without being able to see anything else about your phone &mdash; and everything in this article is the proof of where that line sits.</p>
+      <div class="completion-pills">
+        <div class="cpill-lime">&#10003; The work side only</div>
+        <div class="cpill-lime">&#10003; No location, ever</div>
+        <div class="cpill-lime">&#10003; Access is the only lever</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUESTIONS -->
+  <div id="questions">
+    <div class="section-heading">
+      <div class="step-badge badge-lime">?</div>
+      <div>
+        <div class="step-meta">Straight Answers</div>
+        <div class="step-title">Common Questions</div>
+      </div>
+    </div>
+
+    <div class="faq-wrap">
+      <div class="faq-header">
+        <h2>Questions &amp; Answers</h2>
+        <p>Click any question to expand the answer</p>
+      </div>
+      <details>
+        <summary>Can you read my messages or see my photos?</summary>
+        <div class="faq-answer">No. Your photos, messages, WhatsApp and call history are not visible to us on any device &mdash; personal or company-issued. There is no setting anywhere that would let us look, and nothing of the sort is configured.</div>
+      </details>
+      <details>
+        <summary>Can you see where I am?</summary>
+        <div class="faq-answer"><strong>No &mdash; at any time, ever.</strong> Location is not collected and is not configured on any device we manage, personal or company-issued. This is worth stating twice because it is the question people most expect a caveat on. There isn&rsquo;t one.</div>
+      </details>
+      <details>
+        <summary>Can you wipe my personal phone?</summary>
+        <div class="faq-answer">No. On a personal device we can only remove the <strong>work side</strong> &mdash; the sealed work space on iPhone and iPad, or the work profile on Android. Your photos, apps, messages and everything else on the personal side are untouched, and there is no mechanism for us to wipe the whole device. On a company-issued handset, which belongs to the Group, a full wipe is possible.</div>
+      </details>
+      <details>
+        <summary>Why do the work apps need their own PIN when my phone already has one?</summary>
+        <div class="faq-answer">Because we have to <em>evidence</em> the lock to an assessor without inspecting your phone. &ldquo;Almost everyone has a passcode&rdquo; is not evidence; &ldquo;the work apps require a 6-digit PIN&rdquo; is. Day to day you will use Face ID or Touch ID &mdash; the PIN is only the fallback.</div>
+      </details>
+      <details>
+        <summary>Will my work contacts flood my personal address book?</summary>
+        <div class="faq-answer">Not on a personal device. On an iPhone or iPad <strong>nothing is synced</strong> &mdash; Outlook has its own optional setting to save its contacts into your address book, and it stays off unless you switch it on. On a personal Android, work contacts can be looked up so a work number rings with a name, but they are not copied to the personal side. On a <em>company-issued</em> handset contact sync does run both ways, so keep personal contacts off a company phone.</div>
+      </details>
+      <details>
+        <summary>Can you see which apps I have installed?</summary>
+        <div class="faq-answer">Only work apps, and only which of them the protection has applied to. Your personal apps &mdash; and how you use them &mdash; are invisible to us. On a personal device the personal side is not inventoried at all.</div>
+      </details>
+      <details>
+        <summary>What happens if my device is flagged as not compliant?</summary>
+        <div class="faq-answer">Nothing dramatic, and nothing sudden. You get an email listing exactly what needs fixing, and Company Portal shows the item with a <strong>&ldquo;How to resolve&rdquo;</strong> link that walks you through it. If it is left unresolved, access to work data on that device is withdrawn until it is sorted &mdash; but no device is wiped and no personal data is touched at any stage.</div>
+      </details>
+      <details>
+        <summary>Will I have to keep changing my password?</summary>
+        <div class="faq-answer">No. Passwords are never forced to expire on any of these devices. Following NCSC guidance, forced rotation makes passwords worse rather than better, so we do not do it.</div>
+      </details>
+      <details>
+        <summary>I deleted Company Portal &mdash; do I need it back?</summary>
+        <div class="faq-answer">Yes, please reinstall it and sign in. Company Portal is used on every device with work access. If you removed it while the Apple migration was running, that is understandable &mdash; but it is the app that sets up the work side and shows you your device&rsquo;s status, so work access depends on it.</div>
+      </details>
+      <details>
+        <summary>My phone is too old to update &mdash; what now?</summary>
+        <div class="faq-answer">Get in touch and we will look at the options with you. If a device no longer receives security updates, the work apps will stop opening on it, because we can no longer meet the 14-day patching rule and the certification allows no exception.</div>
+      </details>
+      <details>
+        <summary>I would like to see these settings for myself</summary>
+        <div class="faq-answer">Ask &mdash; genuinely. We are happy to walk through any of the policies with you and show you what is configured. This only works if people are comfortable with it.</div>
+      </details>
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="help-section">
+    <h2>Anything unclear?</h2>
+    <p class="help-sub">Active8 Managed Technologies &middot; happy to walk through any of it</p>
+    <div class="rmm-note">
+      <div>&#8505;</div>
+      <div>If anything here is unclear, or you would like to see the settings for yourself, <strong>just ask</strong>. We would far rather answer a question than leave someone uneasy about their own phone.</div>
+    </div>
+    <div class="contact-grid" style="margin-top:20px;">
+      <a href="mailto:ITSupport@a8mt.co.uk" class="contact-card">
+        <div class="contact-icon-wrap">&#128231;</div>
+        <div>
+          <div class="contact-label">Email</div>
+          <div class="contact-value">ITSupport@a8mt.co.uk</div>
+        </div>
+      </a>
+      <a href="tel:03339997355" class="contact-card">
+        <div class="contact-icon-wrap">&#128222;</div>
+        <div>
+          <div class="contact-label">Phone</div>
+          <div class="contact-value">0333 999 7355</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+</main>
+
+<a class="fullscreen-chip" href="https://b4ldini.github.io/hudu-widgets/articles/MSP-INT-002-BYOD-Privacy-Assurance.html" target="_blank" rel="noopener">&#x2922; Open full-screen</a>
+
+<footer style="background:linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);border-top:1px solid rgba(194,224,0,0.2);padding:18px 40px;text-align:center;">
+  <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">Prepared by <span style="color:rgba(255,255,255,0.85);">Active8 Managed Technologies Limited</span> &middot; IT Service Management</div>
+  <div style="font-family:'Courier New',Consolas,monospace;font-size:10px;color:rgba(255,255,255,0.32);margin-top:5px;">v1.0 &middot; August 2026 &middot; This article is maintained by the Active 8 IT team.</div>
+</footer>
+
+<script>
+(function(){
+  // Flag when this page is inside another page's iframe (e.g. Hudu) so the
+  // full-screen escape chip only appears where it's useful
+  try { if(window.self !== window.top) document.body.classList.add('embedded'); } catch(e){ document.body.classList.add('embedded'); }
+  function sendHeight(){
+    var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+    window.parent.postMessage({type:'a8-iframe-resize', height:h}, '*');
+    try { if(window.frameElement) window.frameElement.style.height = (h+20)+'px'; } catch(e){}
+  }
+  sendHeight();
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+  if(window.ResizeObserver){ new ResizeObserver(sendHeight).observe(document.body); }
+  var attempts = 0;
+  var timer = setInterval(function(){
+    sendHeight();
+    if(++attempts >= 40) clearInterval(timer);
+  }, 300);
+})();
+</script>
+
+</body>
+</html>
