@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Enrol Your Personal iPhone – Intune Company Portal</title>
+<title>Enrol Your Personal Phone – Intune Company Portal (iPhone &amp; Android)</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -52,6 +52,11 @@
     transition: color 0.15s, background 0.15s, border-color 0.15s;
     border-radius: 0;
     position: relative;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-family: inherit;
   }
 
   .nav-link:hover {
@@ -137,6 +142,230 @@
 
   .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 
+  /* ═══════════ PLATFORM PICKER ═══════════ */
+  .picker-wrap {
+    background: #fff;
+    border: 3px solid #2557b7;
+    border-radius: 16px;
+    padding: 26px 26px 28px;
+    margin-bottom: 12px;
+    box-shadow: 0 6px 28px rgba(30,74,160,0.18);
+    position: relative;
+  }
+
+  .picker-wrap.needs-choice { border-color: #d97706; box-shadow: 0 6px 28px rgba(217,119,6,0.22); }
+
+  .picker-flag {
+    position: absolute;
+    top: -14px;
+    left: 22px;
+    background: #2557b7;
+    color: #fff;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .picker-wrap.needs-choice .picker-flag { background: #d97706; }
+
+  .picker-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: #1a1a1a;
+    margin: 6px 0 8px;
+  }
+
+  .picker-lead { font-size: 14px; color: #555; line-height: 1.65; margin-bottom: 20px; max-width: 640px; }
+
+  .picker-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .pcard {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    cursor: pointer;
+    background: #f7f9fc;
+    border: 3px solid rgba(0,0,0,0.12);
+    border-radius: 14px;
+    padding: 22px 20px 18px;
+    transition: transform 0.12s ease, border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  }
+
+  .pcard:hover { transform: translateY(-3px); box-shadow: 0 8px 22px rgba(0,0,0,0.12); }
+
+  .pcard-top { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+
+  .pcard-icon {
+    width: 64px; height: 64px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .pcard-icon svg { width: 38px; height: 38px; display: block; }
+
+  .pcard-name {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 22px;
+    line-height: 1.15;
+    color: #1a1a1a;
+    margin-bottom: 3px;
+  }
+
+  .pcard-made {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #999;
+  }
+
+  .pcard-brands { font-size: 13px; color: #666; line-height: 1.55; min-height: 42px; }
+
+  .pcard-state {
+    margin-top: 14px;
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: rgba(0,0,0,0.05);
+    color: #777;
+    border: 1px dashed rgba(0,0,0,0.2);
+  }
+
+  /* iOS card colours */
+  .pcard-ios .pcard-icon { background: rgba(37,87,183,0.12); color: #2557b7; }
+  .pcard-ios:hover { border-color: rgba(37,87,183,0.5); }
+  .pcard-ios.selected { border-color: #2557b7; background: rgba(37,87,183,0.07); }
+  .pcard-ios.selected .pcard-icon { background: #2557b7; color: #fff; }
+  .pcard-ios.selected .pcard-state { background: #2557b7; color: #fff; border: 1px solid #2557b7; }
+
+  /* Android card colours */
+  .pcard-and .pcard-icon { background: rgba(0,122,61,0.12); color: #007a3d; }
+  .pcard-and:hover { border-color: rgba(0,122,61,0.5); }
+  .pcard-and.selected { border-color: #007a3d; background: rgba(0,122,61,0.07); }
+  .pcard-and.selected .pcard-icon { background: #007a3d; color: #fff; }
+  .pcard-and.selected .pcard-state { background: #007a3d; color: #fff; border: 1px solid #007a3d; }
+
+  .pick-prompt {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    padding: 16px 18px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+    color: #92400e;
+    margin-bottom: 44px;
+  }
+
+  .pick-prompt span { display: block; font-size: 13px; font-weight: 400; color: #78350f; margin-top: 4px; }
+
+  /* ═══════════ PLATFORM BANNER (inside each panel) ═══════════ */
+  .platform-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin: 20px 0 34px;
+    color: #fff;
+  }
+
+  .pbar-ios { background: linear-gradient(135deg,#1e4aa0 0%,#2557b7 100%); }
+  .pbar-and { background: linear-gradient(135deg,#00602f 0%,#007a3d 100%); }
+
+  .pbar-left { display: flex; align-items: center; gap: 12px; }
+
+  .pbar-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.16);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .pbar-icon svg { width: 22px; height: 22px; color: #fff; display: block; }
+
+  .pbar-eyebrow {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+  }
+
+  .pbar-title { font-size: 16px; font-weight: 700; color: #fff; line-height: 1.25; }
+
+  .switch-btn {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.35);
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px 16px;
+    white-space: nowrap;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .switch-btn:hover { background: rgba(255,255,255,0.26); border-color: #c2e000; }
+
+  .switch-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    background: #fff;
+    border: 2px dashed rgba(0,0,0,0.18);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 44px;
+  }
+
+  .switch-strip-text { font-size: 14px; color: #555; }
+  .switch-strip-text strong { color: #1a1a1a; }
+
+  .switch-btn-alt {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 10px 16px;
+    white-space: nowrap;
+    border: 2px solid;
+    background: #fff;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .to-ios { border-color: #2557b7; color: #2557b7; }
+  .to-ios:hover { background: #2557b7; color: #fff; }
+  .to-and { border-color: #007a3d; color: #007a3d; }
+  .to-and:hover { background: #007a3d; color: #fff; }
+
+  .platform-panel { display: none; }
+  .platform-panel.active { display: block; }
+
   /* SECTION HEADING */
   .section-heading {
     display: flex;
@@ -218,6 +447,12 @@
     margin-top: 1px;
   }
 
+  #panel-android .step-num {
+    background: rgba(0,122,61,0.1);
+    color: #007a3d;
+    border-color: rgba(0,122,61,0.25);
+  }
+
   .step p { font-size: 13px; padding-top: 3px; }
 
   code.inline-code {
@@ -264,6 +499,263 @@
   .callout-info .callout-icon  { color: #2563eb; }
   .callout-info .callout-title { color: #1e40af; }
   .callout-info .callout-body  { color: #1e3a5f; }
+
+  /* ═══════════ WORK BADGE VISUAL (Android) ═══════════ */
+  .badge-demo {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    padding: 22px 26px 26px;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+  }
+
+  .badge-demo-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 18px;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+  }
+
+  .badge-demo-lead { font-size: 13px; color: #555; margin-bottom: 20px; line-height: 1.65; }
+
+  .icon-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .icon-box {
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+    border: 2px solid rgba(0,0,0,0.1);
+    background: #f7f9fc;
+  }
+
+  .icon-box.work { border-color: #007a3d; background: rgba(0,122,61,0.06); }
+
+  .app-icon {
+    width: 62px; height: 62px;
+    border-radius: 14px;
+    margin: 0 auto 10px;
+    position: relative;
+    background: linear-gradient(135deg,#0f6cbd 0%,#1a86e0 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 26px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.18);
+  }
+
+  .app-icon .work-badge {
+    position: absolute;
+    right: -6px;
+    bottom: -6px;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: #007a3d;
+    border: 3px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #fff;
+  }
+
+  .icon-box-name { font-size: 14px; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; }
+  .icon-box-desc { font-size: 12px; color: #666; line-height: 1.5; }
+
+  .icon-box-tag {
+    display: inline-block;
+    margin-top: 10px;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(0,0,0,0.07);
+    color: #777;
+  }
+
+  .icon-box.work .icon-box-tag { background: #007a3d; color: #fff; }
+
+  /* Work / personal drawer tabs mock */
+  .drawer-mock {
+    margin-top: 22px;
+    border: 1px solid rgba(0,0,0,0.12);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f7f9fc;
+  }
+
+  .drawer-tabs { display: flex; background: #fff; border-bottom: 1px solid rgba(0,0,0,0.1); }
+
+  .drawer-tab {
+    flex: 1;
+    text-align: center;
+    padding: 12px 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #999;
+    border-bottom: 3px solid transparent;
+  }
+
+  .drawer-tab.on { color: #007a3d; border-bottom-color: #007a3d; background: rgba(0,122,61,0.05); }
+
+  .drawer-apps { display: flex; gap: 18px; padding: 20px; justify-content: center; flex-wrap: wrap; }
+
+  .mini-app { text-align: center; width: 64px; }
+
+  .mini-icon {
+    width: 44px; height: 44px;
+    border-radius: 11px;
+    margin: 0 auto 6px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 18px;
+    box-shadow: 0 2px 7px rgba(0,0,0,0.16);
+  }
+
+  .mini-icon .work-badge {
+    position: absolute;
+    right: -5px;
+    bottom: -5px;
+    width: 19px; height: 19px;
+    border-radius: 50%;
+    background: #007a3d;
+    border: 2px solid #f7f9fc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: #fff;
+  }
+
+  .mini-label { font-size: 11px; color: #666; line-height: 1.3; }
+
+  /* DIVIDER */
+  .divider { margin: 34px 0; display: flex; align-items: center; gap: 14px; }
+  .divider-line { flex: 1; height: 1px; background: rgba(0,0,0,0.1); }
+  .divider-arrow { color: #bbb; font-size: 14px; }
+
+  /* REQUIREMENTS TABLE */
+  .id-table-wrap {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+
+  .id-table-intro { padding: 16px 22px 0; }
+  .id-table-intro p { font-size: 14px; line-height: 1.6; padding-bottom: 14px; border-bottom: 1px solid rgba(0,0,0,0.08); }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    background: #f7f9fc;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #888;
+    padding: 10px 22px;
+    text-align: left;
+    border-bottom: 2px solid rgba(0,0,0,0.08);
+  }
+
+  tbody tr { border-bottom: 1px solid rgba(0,0,0,0.07); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 14px 22px; font-size: 14px; vertical-align: middle; line-height: 1.5; }
+
+  .req-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+    background: rgba(37,87,183,0.1);
+    color: #2557b7;
+  }
+
+  #panel-android .req-pill { background: rgba(0,122,61,0.1); color: #007a3d; }
+
+  /* FAQ / TROUBLESHOOTING */
+  .faq-wrap {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+
+  .faq-header {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
+    padding: 18px 26px;
+  }
+
+  #panel-android .faq-header { background: linear-gradient(135deg, #00602f 0%, #007a3d 100%); }
+
+  .faq-header h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 2px;
+  }
+
+  .faq-header p {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.42);
+    letter-spacing: 0.06em;
+  }
+
+  details { border-bottom: 1px solid rgba(0,0,0,0.08); }
+  details:last-child { border-bottom: none; }
+
+  summary {
+    padding: 15px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    list-style: none;
+    user-select: none;
+  }
+
+  summary::-webkit-details-marker { display: none; }
+  summary:hover { background: #f7f9fc; }
+  summary::after { content: '+'; font-size: 20px; font-weight: 300; color: #bbb; flex-shrink: 0; }
+  details[open] summary::after { content: '×'; color: #2557b7; }
+  details[open] summary { color: #2557b7; background: #f7f9fc; }
+
+  #panel-android details[open] summary::after { color: #007a3d; }
+  #panel-android details[open] summary { color: #007a3d; }
+
+  .faq-answer {
+    padding: 4px 22px 16px;
+    font-size: 14px;
+    line-height: 1.7;
+    background: #f7f9fc;
+    color: #333;
+  }
 
   /* PRIVACY BANNER */
   .app-trust-banner {
@@ -374,118 +866,6 @@
   .privacy-callout p { font-size: 13px; color: rgba(255,255,255,0.68); line-height: 1.65; }
   .privacy-callout p + p { margin-top: 8px; }
 
-  /* DIVIDER */
-  .divider { margin: 34px 0; display: flex; align-items: center; gap: 14px; }
-  .divider-line { flex: 1; height: 1px; background: rgba(0,0,0,0.1); }
-  .divider-arrow { color: #bbb; font-size: 14px; }
-
-  /* REQUIREMENTS TABLE */
-  .id-table-wrap {
-    background: #fff;
-    border: 1px solid rgba(0,0,0,0.1);
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 44px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  }
-
-  .id-table-intro { padding: 16px 22px 0; }
-  .id-table-intro p { font-size: 14px; line-height: 1.6; padding-bottom: 14px; border-bottom: 1px solid rgba(0,0,0,0.08); }
-
-  table { width: 100%; border-collapse: collapse; }
-
-  thead th {
-    background: #f7f9fc;
-    font-family: 'Courier New', Consolas, monospace;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #888;
-    padding: 10px 22px;
-    text-align: left;
-    border-bottom: 2px solid rgba(0,0,0,0.08);
-  }
-
-  tbody tr { border-bottom: 1px solid rgba(0,0,0,0.07); }
-  tbody tr:last-child { border-bottom: none; }
-  tbody td { padding: 14px 22px; font-size: 14px; vertical-align: middle; line-height: 1.5; }
-
-  .req-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-family: 'Courier New', Consolas, monospace;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 4px 12px;
-    border-radius: 20px;
-    white-space: nowrap;
-    background: rgba(37,87,183,0.1);
-    color: #2557b7;
-  }
-
-  /* FAQ / TROUBLESHOOTING */
-  .faq-wrap {
-    background: #fff;
-    border: 1px solid rgba(0,0,0,0.1);
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 44px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-  }
-
-  .faq-header {
-    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
-    padding: 18px 26px;
-  }
-
-  .faq-header h2 {
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size: 17px;
-    font-weight: 400;
-    color: white;
-    margin-bottom: 2px;
-  }
-
-  .faq-header p {
-    font-family: 'Courier New', Consolas, monospace;
-    font-size: 11px;
-    color: rgba(255,255,255,0.42);
-    letter-spacing: 0.06em;
-  }
-
-  details { border-bottom: 1px solid rgba(0,0,0,0.08); }
-  details:last-child { border-bottom: none; }
-
-  summary {
-    padding: 15px 22px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #1a1a1a;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    list-style: none;
-    user-select: none;
-  }
-
-  summary::-webkit-details-marker { display: none; }
-  summary:hover { background: #f7f9fc; }
-  summary::after { content: '+'; font-size: 20px; font-weight: 300; color: #bbb; flex-shrink: 0; }
-  details[open] summary::after { content: '×'; color: #2557b7; }
-  details[open] summary { color: #2557b7; background: #f7f9fc; }
-
-  .faq-answer {
-    padding: 4px 22px 16px;
-    font-size: 14px;
-    line-height: 1.7;
-    background: #f7f9fc;
-    color: #333;
-  }
-
   /* HELP SECTION */
   .help-section {
     background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 60%, #1e4aa0 100%);
@@ -595,6 +975,8 @@
     box-shadow: 0 4px 22px rgba(30,74,160,0.28);
   }
 
+  .completion-banner.green { background: linear-gradient(135deg, #00602f 0%, #007a3d 100%); box-shadow: 0 4px 22px rgba(0,122,61,0.28); }
+
   .completion-banner::before {
     content: '';
     position: absolute;
@@ -661,6 +1043,17 @@
 
     .content-card { padding: 16px 16px 20px; }
 
+    .picker-wrap { padding: 22px 16px 24px; }
+    .picker-title { font-size: 22px; }
+    .picker-grid { grid-template-columns: 1fr; }
+    .pcard-brands { min-height: 0; }
+
+    .icon-compare { grid-template-columns: 1fr; }
+    .badge-demo { padding: 18px 16px 20px; }
+
+    .platform-bar { padding: 14px; }
+    .switch-btn, .switch-btn-alt { width: 100%; text-align: center; }
+
     .trust-grid,
     .contact-grid { grid-template-columns: 1fr; }
 
@@ -685,15 +1078,16 @@
 
 <nav class="sticky-nav">
   <div class="sticky-nav-inner">
-    <a class="nav-link" href="#need"><span class="nav-num num-lime">?</span> What You'll Need</a>
-    <a class="nav-link" href="#step1"><span class="nav-num num-blue">1</span> Install App</a>
-    <a class="nav-link" href="#step2"><span class="nav-num num-green">2</span> Sign In</a>
-    <a class="nav-link" href="#step3"><span class="nav-num num-blue">3</span> Device Setup</a>
-    <a class="nav-link" href="#step4"><span class="nav-num num-green">4</span> Profile</a>
-    <a class="nav-link" href="#step5"><span class="nav-num num-blue">5</span> Finish Setup</a>
-    <a class="nav-link" href="#step6"><span class="nav-num num-green">6</span> Work Apps</a>
-    <a class="nav-link" href="#privacy"><span class="nav-num num-lime">✓</span> Your Privacy</a>
-    <a class="nav-link" href="#troubleshoot"><span class="nav-num num-blue">!</span> Troubleshooting</a>
+    <button class="nav-link" type="button" data-goto="choose"><span class="nav-num num-lime">&#9679;</span> Pick Your Phone</button>
+    <button class="nav-link" type="button" data-goto="need"><span class="nav-num num-lime">?</span> What You'll Need</button>
+    <button class="nav-link" type="button" data-goto="step1"><span class="nav-num num-blue">1</span> Install App</button>
+    <button class="nav-link" type="button" data-goto="step2"><span class="nav-num num-green">2</span> Sign In</button>
+    <button class="nav-link" type="button" data-goto="step3"><span class="nav-num num-blue">3</span> Device Setup</button>
+    <button class="nav-link" type="button" data-goto="step4"><span class="nav-num num-green">4</span> Profile</button>
+    <button class="nav-link" type="button" data-goto="step5"><span class="nav-num num-blue">5</span> Finish Setup</button>
+    <button class="nav-link" type="button" data-goto="step6"><span class="nav-num num-green">6</span> Work Apps</button>
+    <button class="nav-link" type="button" data-goto="privacy"><span class="nav-num num-lime">✓</span> Your Privacy</button>
+    <button class="nav-link" type="button" data-goto="troubleshoot"><span class="nav-num num-blue">!</span> Troubleshooting</button>
   </div>
 </nav>
 
@@ -702,12 +1096,12 @@
   <!-- OVERVIEW -->
   <div class="overview-card">
     <div class="card-label">Article Overview</div>
-    <p>This guide walks you through setting up your <strong>personal iPhone</strong> so you can securely access your work apps and data &mdash; Outlook, Teams, OneDrive and more &mdash; using the <strong>Intune Company Portal</strong> app.</p>
+    <p>This guide walks you through setting up your <strong>personal phone</strong> &mdash; <strong>iPhone or Android</strong> &mdash; so you can securely access your work apps and data (Outlook, Teams, OneDrive and more) using the <strong>Intune Company Portal</strong> app.</p>
     <p>Enrolment registers your device with your organisation&rsquo;s Microsoft 365 environment and typically takes <strong>10&ndash;15 minutes</strong>. Worried about what work can see on a personal phone? The <a href="#privacy" style="color:#c2e000;text-decoration:none;">Your Privacy</a> section explains exactly what your organisation can and cannot see.</p>
     <div class="pill-row">
       <div class="pill"><span class="dot" style="background:#c2e000;"></span> Takes 10&ndash;15 minutes</div>
-      <div class="pill"><span class="dot" style="background:#4d8cff;"></span> Personal iPhone (BYOD)</div>
-      <div class="pill"><span class="dot" style="background:#4ade80;"></span> iOS 14 or later</div>
+      <div class="pill"><span class="dot" style="background:#4d8cff;"></span> iPhone &amp; iPad &mdash; iOS 14 or later</div>
+      <div class="pill"><span class="dot" style="background:#4ade80;"></span> Android &mdash; Android 10 or later</div>
       <div class="pill"><span class="dot" style="background:rgba(255,255,255,0.4);"></span> Outlook &middot; Teams &middot; OneDrive</div>
     </div>
   </div>
@@ -720,208 +1114,685 @@
     </div>
   </div>
 
-  <!-- WHAT YOU'LL NEED -->
-  <div id="need">
-    <div class="section-heading">
-      <div class="step-badge badge-lime">?</div>
-      <div>
-        <div class="step-meta">Preparation</div>
-        <div class="step-title">What You&rsquo;ll Need</div>
-      </div>
-    </div>
+  <!-- ═══════════════ PLATFORM PICKER ═══════════════ -->
+  <div class="picker-wrap needs-choice" id="choose">
+    <div class="picker-flag" id="picker-flag">&#9755; Start here &middot; Choose your phone</div>
+    <div class="picker-title">Which phone are you setting up?</div>
+    <div class="picker-lead">The steps are different for an iPhone and an Android phone, so <strong>tap the box that matches your phone</strong>. Everything below will change to show only your instructions. Not sure? Look at the brand name on the back of the phone, or in <strong>Settings &rarr; About phone</strong>.</div>
 
-    <div class="id-table-wrap">
-      <div class="id-table-intro">
-        <p>Have these four things ready before you start &mdash; it keeps the whole process smooth and avoids the setup timing out partway through.</p>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Requirement</th>
-            <th>Details</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><span class="req-pill">📱 iPhone</span></td>
-            <td>Running iOS 14 or later, connected to Wi-Fi</td>
-          </tr>
-          <tr>
-            <td><span class="req-pill">💼 Work account</span></td>
-            <td>Your work email address and password (e.g. <code class="inline-code">j.smith@yourcompany.com</code>)</td>
-          </tr>
-          <tr>
-            <td><span class="req-pill">🍎 Apple ID</span></td>
-            <td>Signed in to the App Store so you can download apps</td>
-          </tr>
-          <tr>
-            <td><span class="req-pill">🔐 MFA access</span></td>
-            <td>Access to your usual sign-in approval method (Microsoft Authenticator, text message, or phone call)</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+    <div class="picker-grid">
 
-  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+      <button class="pcard pcard-ios" type="button" data-platform="ios">
+        <div class="pcard-top">
+          <div class="pcard-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M17.05 12.53c-.02-2.05 1.68-3.03 1.75-3.08-.95-1.4-2.44-1.59-2.97-1.61-1.26-.13-2.47.74-3.11.74-.64 0-1.63-.72-2.68-.7-1.38.02-2.65.8-3.36 2.03-1.43 2.49-.37 6.17 1.03 8.19.68.99 1.5 2.1 2.57 2.06 1.03-.04 1.42-.67 2.67-.67s1.6.67 2.69.65c1.11-.02 1.81-1 2.49-2 .78-1.15 1.11-2.26 1.13-2.32-.03-.01-2.17-.83-2.21-3.29z"></path>
+              <path d="M15.16 6.6c.57-.69.95-1.65.85-2.6-.82.03-1.81.54-2.4 1.23-.53.61-.99 1.59-.87 2.53.91.07 1.85-.46 2.42-1.16z"></path>
+            </svg>
+          </div>
+          <div>
+            <div class="pcard-name">iPhone or iPad</div>
+            <div class="pcard-made">Made by Apple</div>
+          </div>
+        </div>
+        <div class="pcard-brands">It says <strong>iPhone</strong> or <strong>iPad</strong> on the device, and your apps come from the <strong>App Store</strong> (blue &ldquo;A&rdquo; icon).</div>
+        <div class="pcard-state" data-state>Tap to show iPhone steps</div>
+      </button>
 
-  <!-- STEP 1 -->
-  <div id="step1">
-    <div class="section-heading">
-      <div class="step-badge badge-blue">1</div>
-      <div>
-        <div class="step-meta">Step 01 of 06</div>
-        <div class="step-title">Install the Company Portal App</div>
-      </div>
-    </div>
+      <button class="pcard pcard-and" type="button" data-platform="android">
+        <div class="pcard-top">
+          <div class="pcard-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M7.4 4.35 6.3 2.5a.42.42 0 0 1 .72-.42l1.12 1.9A7.3 7.3 0 0 1 12 3.2c1.03 0 2 .2 2.86.58l1.12-1.9a.42.42 0 1 1 .72.42l-1.1 1.85A5.9 5.9 0 0 1 18.5 9.2h-13a5.9 5.9 0 0 1 1.9-4.85z"></path>
+              <circle cx="9.2" cy="6.6" r=".8" fill="#fff"></circle>
+              <circle cx="14.8" cy="6.6" r=".8" fill="#fff"></circle>
+              <rect x="5.5" y="10.3" width="13" height="8.4" rx="1.5"></rect>
+              <rect x="1.9" y="10.3" width="2.7" height="6.4" rx="1.35"></rect>
+              <rect x="19.4" y="10.3" width="2.7" height="6.4" rx="1.35"></rect>
+            </svg>
+          </div>
+          <div>
+            <div class="pcard-name">Android phone</div>
+            <div class="pcard-made">Everything that isn&rsquo;t an iPhone</div>
+          </div>
+        </div>
+        <div class="pcard-brands"><strong>Samsung, Google Pixel, Motorola, OnePlus, Xiaomi, Honor, Huawei, Nothing, Sony, Oppo</strong> &mdash; apps come from the <strong>Play Store</strong> (coloured triangle icon).</div>
+        <div class="pcard-state" data-state>Tap to show Android steps</div>
+      </button>
 
-    <div class="content-card">
-      <div class="steps">
-        <div class="step"><div class="step-num">1</div><p>Open the <strong>App Store</strong> on your iPhone.</p></div>
-        <div class="step"><div class="step-num">2</div><p>Search for <strong>Intune Company Portal</strong> (published by Microsoft Corporation).</p></div>
-        <div class="step"><div class="step-num">3</div><p>Tap <strong>Get</strong> to download and install the app.</p></div>
-      </div>
     </div>
   </div>
 
-  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
-
-  <!-- STEP 2 -->
-  <div id="step2">
-    <div class="section-heading">
-      <div class="step-badge badge-green">2</div>
-      <div>
-        <div class="step-meta">Step 02 of 06</div>
-        <div class="step-title">Sign In with Your Work Account</div>
-      </div>
-    </div>
-
-    <div class="content-card">
-      <div class="steps">
-        <div class="step"><div class="step-num">1</div><p>Open the <strong>Company Portal</strong> app.</p></div>
-        <div class="step"><div class="step-num">2</div><p>Sign in with your <strong>work email address and password</strong>.</p></div>
-        <div class="step"><div class="step-num">3</div><p>Approve the multi-factor authentication prompt if you receive one.</p></div>
-        <div class="step"><div class="step-num">4</div><p>If asked to allow notifications, tap <strong>Allow</strong> &mdash; this is how the app tells you about anything that needs your attention later.</p></div>
-      </div>
-    </div>
+  <div class="pick-prompt" id="pick-prompt">
+    &#9757; Tap <strong>iPhone or iPad</strong> or <strong>Android phone</strong> above to see your step-by-step instructions.
+    <span>The rest of this guide stays hidden until you choose &mdash; that way you can&rsquo;t follow the wrong steps by mistake.</span>
   </div>
 
-  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+  <!-- ══════════════════════════════════════════════════════════════
+       iOS PANEL
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="platform-panel" id="panel-ios">
 
-  <!-- STEP 3 -->
-  <div id="step3">
-    <div class="section-heading">
-      <div class="step-badge badge-blue">3</div>
-      <div>
-        <div class="step-meta">Step 03 of 06</div>
-        <div class="step-title">Begin Device Setup</div>
-      </div>
-    </div>
-
-    <div class="content-card">
-      <div class="steps">
-        <div class="step"><div class="step-num">1</div><p>On the <strong>How to set up your device</strong> (or <strong>Set up access</strong>) screen, review the steps shown and tap <strong>Get started</strong> / <strong>Begin</strong>.</p></div>
-        <div class="step"><div class="step-num">2</div><p>If asked who owns the device, tap <strong>I own this device</strong>.</p></div>
-        <div class="step"><div class="step-num">3</div><p>Safari will open and prompt you to download a configuration profile. Tap <strong>Allow</strong>.</p></div>
-        <div class="step"><div class="step-num">4</div><p>When the download completes, tap <strong>Close</strong>.</p></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
-
-  <!-- STEP 4 -->
-  <div id="step4">
-    <div class="section-heading">
-      <div class="step-badge badge-green">4</div>
-      <div>
-        <div class="step-meta">Step 04 of 06</div>
-        <div class="step-title">Install the Management Profile</div>
-      </div>
-    </div>
-
-    <div class="content-card">
-      <div class="steps">
-        <div class="step"><div class="step-num">1</div><p>Open the <strong>Settings</strong> app and tap <strong>Profile Downloaded</strong> near the top. If you don&rsquo;t see it, go to <strong>General</strong> &gt; <strong>VPN &amp; Device Management</strong>.</p></div>
-        <div class="step"><div class="step-num">2</div><p>Tap <strong>Management Profile</strong>, then tap <strong>Install</strong>.</p></div>
-        <div class="step"><div class="step-num">3</div><p>Enter your iPhone passcode if prompted, then tap <strong>Install</strong> again.</p></div>
-        <div class="step"><div class="step-num">4</div><p>Read the remote management notice, tap <strong>Install</strong> once more, then tap <strong>Trust</strong>.</p></div>
-        <div class="step"><div class="step-num">5</div><p>Wait for the profile to finish installing, then tap <strong>Done</strong>.</p></div>
-      </div>
-
-      <div class="lost-alert in-card">
-        <div class="lost-alert-icon">&#9888;</div>
+    <div class="platform-bar pbar-ios">
+      <div class="pbar-left">
+        <div class="pbar-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M17.05 12.53c-.02-2.05 1.68-3.03 1.75-3.08-.95-1.4-2.44-1.59-2.97-1.61-1.26-.13-2.47.74-3.11.74-.64 0-1.63-.72-2.68-.7-1.38.02-2.65.8-3.36 2.03-1.43 2.49-.37 6.17 1.03 8.19.68.99 1.5 2.1 2.57 2.06 1.03-.04 1.42-.67 2.67-.67s1.6.67 2.69.65c1.11-.02 1.81-1 2.49-2 .78-1.15 1.11-2.26 1.13-2.32-.03-.01-2.17-.83-2.21-3.29z"></path>
+            <path d="M15.16 6.6c.57-.69.95-1.65.85-2.6-.82.03-1.81.54-2.4 1.23-.53.61-.99 1.59-.87 2.53.91.07 1.85-.46 2.42-1.16z"></path>
+          </svg>
+        </div>
         <div>
-          <strong>Passcode required</strong>
-          <p>If your iPhone doesn&rsquo;t currently have a passcode set, you&rsquo;ll be asked to create one as part of enrolment. This is a security requirement for accessing work data.</p>
+          <div class="pbar-eyebrow">You are following</div>
+          <div class="pbar-title">iPhone &amp; iPad instructions</div>
+        </div>
+      </div>
+      <button class="switch-btn" type="button" data-platform="android">Not an iPhone? Switch to Android &rarr;</button>
+    </div>
+
+    <!-- WHAT YOU'LL NEED -->
+    <div id="ios-need">
+      <div class="section-heading">
+        <div class="step-badge badge-lime">?</div>
+        <div>
+          <div class="step-meta">Preparation &middot; iPhone</div>
+          <div class="step-title">What You&rsquo;ll Need</div>
+        </div>
+      </div>
+
+      <div class="id-table-wrap">
+        <div class="id-table-intro">
+          <p>Have these four things ready before you start &mdash; it keeps the whole process smooth and avoids the setup timing out partway through.</p>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Requirement</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="req-pill">📱 iPhone</span></td>
+              <td>Running iOS 14 or later, connected to Wi-Fi</td>
+            </tr>
+            <tr>
+              <td><span class="req-pill">💼 Work account</span></td>
+              <td>Your work email address and password (e.g. <code class="inline-code">j.smith@yourcompany.com</code>)</td>
+            </tr>
+            <tr>
+              <td><span class="req-pill">🍎 Apple ID</span></td>
+              <td>Signed in to the App Store so you can download apps</td>
+            </tr>
+            <tr>
+              <td><span class="req-pill">🔐 MFA access</span></td>
+              <td>Access to your usual sign-in approval method (Microsoft Authenticator, text message, or phone call)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+    <!-- STEP 1 -->
+    <div id="ios-step1">
+      <div class="section-heading">
+        <div class="step-badge badge-blue">1</div>
+        <div>
+          <div class="step-meta">iPhone &middot; Step 01 of 06</div>
+          <div class="step-title">Install the Company Portal App</div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><p>Open the <strong>App Store</strong> on your iPhone.</p></div>
+          <div class="step"><div class="step-num">2</div><p>Search for <strong>Intune Company Portal</strong> (published by Microsoft Corporation).</p></div>
+          <div class="step"><div class="step-num">3</div><p>Tap <strong>Get</strong> to download and install the app.</p></div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
 
-  <!-- STEP 5 -->
-  <div id="step5">
-    <div class="section-heading">
-      <div class="step-badge badge-blue">5</div>
+    <!-- STEP 2 -->
+    <div id="ios-step2">
+      <div class="section-heading">
+        <div class="step-badge badge-blue">2</div>
+        <div>
+          <div class="step-meta">iPhone &middot; Step 02 of 06</div>
+          <div class="step-title">Sign In with Your Work Account</div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><p>Open the <strong>Company Portal</strong> app.</p></div>
+          <div class="step"><div class="step-num">2</div><p>Sign in with your <strong>work email address and password</strong>.</p></div>
+          <div class="step"><div class="step-num">3</div><p>Approve the multi-factor authentication prompt if you receive one.</p></div>
+          <div class="step"><div class="step-num">4</div><p>If asked to allow notifications, tap <strong>Allow</strong> &mdash; this is how the app tells you about anything that needs your attention later.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+    <!-- STEP 3 -->
+    <div id="ios-step3">
+      <div class="section-heading">
+        <div class="step-badge badge-blue">3</div>
+        <div>
+          <div class="step-meta">iPhone &middot; Step 03 of 06</div>
+          <div class="step-title">Begin Device Setup</div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><p>On the <strong>How to set up your device</strong> (or <strong>Set up access</strong>) screen, review the steps shown and tap <strong>Get started</strong> / <strong>Begin</strong>.</p></div>
+          <div class="step"><div class="step-num">2</div><p>If asked who owns the device, tap <strong>I own this device</strong>.</p></div>
+          <div class="step"><div class="step-num">3</div><p>Safari will open and prompt you to download a configuration profile. Tap <strong>Allow</strong>.</p></div>
+          <div class="step"><div class="step-num">4</div><p>When the download completes, tap <strong>Close</strong>.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+    <!-- STEP 4 -->
+    <div id="ios-step4">
+      <div class="section-heading">
+        <div class="step-badge badge-blue">4</div>
+        <div>
+          <div class="step-meta">iPhone &middot; Step 04 of 06</div>
+          <div class="step-title">Install the Management Profile</div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><p>Open the <strong>Settings</strong> app and tap <strong>Profile Downloaded</strong> near the top. If you don&rsquo;t see it, go to <strong>General</strong> &gt; <strong>VPN &amp; Device Management</strong>.</p></div>
+          <div class="step"><div class="step-num">2</div><p>Tap <strong>Management Profile</strong>, then tap <strong>Install</strong>.</p></div>
+          <div class="step"><div class="step-num">3</div><p>Enter your iPhone passcode if prompted, then tap <strong>Install</strong> again.</p></div>
+          <div class="step"><div class="step-num">4</div><p>Read the remote management notice, tap <strong>Install</strong> once more, then tap <strong>Trust</strong>.</p></div>
+          <div class="step"><div class="step-num">5</div><p>Wait for the profile to finish installing, then tap <strong>Done</strong>.</p></div>
+        </div>
+
+        <div class="lost-alert in-card">
+          <div class="lost-alert-icon">&#9888;</div>
+          <div>
+            <strong>Passcode required</strong>
+            <p>If your iPhone doesn&rsquo;t currently have a passcode set, you&rsquo;ll be asked to create one as part of enrolment. This is a security requirement for accessing work data.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+    <!-- STEP 5 -->
+    <div id="ios-step5">
+      <div class="section-heading">
+        <div class="step-badge badge-blue">5</div>
+        <div>
+          <div class="step-meta">iPhone &middot; Step 05 of 06</div>
+          <div class="step-title">Finish in the Company Portal App</div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><p>Return to the <strong>Company Portal</strong> app and open <strong>Notifications</strong>.</p></div>
+          <div class="step"><div class="step-num">2</div><p>Under pending requirements, tap the option to <strong>register your device</strong> if shown.</p></div>
+          <div class="step"><div class="step-num">3</div><p>Wait a few minutes while your device receives its settings. You may be prompted to install required apps such as <strong>Microsoft Authenticator</strong> &mdash; tap <strong>Install</strong> (or <strong>Manage</strong> if it&rsquo;s already installed) on each prompt.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+    <!-- STEP 6 -->
+    <div id="ios-step6">
+      <div class="section-heading">
+        <div class="step-badge badge-blue">6</div>
+        <div>
+          <div class="step-meta">iPhone &middot; Step 06 of 06</div>
+          <div class="step-title">Sign In to Your Work Apps</div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><p>Install any work apps you need &mdash; <strong>Outlook</strong>, <strong>Teams</strong>, <strong>OneDrive</strong> &mdash; from the Company Portal app or the App Store.</p></div>
+          <div class="step"><div class="step-num">2</div><p>Open an app and sign in with your <strong>work account</strong>.</p></div>
+          <div class="step"><div class="step-num">3</div><p>The first sign-in checks that your device meets your organisation&rsquo;s security requirements. If prompted, tap <strong>Check compliance</strong>, follow the instructions shown in Company Portal, then tap <strong>Retry</strong>.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPLETION BANNER -->
+    <div class="completion-banner">
+      <div class="completion-inner">
+        <div class="completion-icon">&#10003;</div>
+        <div class="completion-eyebrow">Enrolment Complete &middot; iPhone</div>
+        <h2>Your iPhone is set up for work</h2>
+        <p>Once you can open Outlook or Teams and see your work email and chats, your iPhone is fully set up. Your device will stay compliant automatically &mdash; just install iOS updates when prompted.</p>
+        <div class="completion-pills">
+          <div class="cpill-lime">&#10003; Outlook &amp; Teams signed in</div>
+          <div class="cpill-lime">&#10003; Device registered &amp; compliant</div>
+          <div class="cpill-lime">&#10003; Stays compliant automatically</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TROUBLESHOOTING (iOS) -->
+    <div id="ios-troubleshoot">
+      <div class="section-heading">
+        <div class="step-badge badge-blue">!</div>
+        <div>
+          <div class="step-meta">If Something Goes Wrong &middot; iPhone</div>
+          <div class="step-title">Troubleshooting</div>
+        </div>
+      </div>
+
+      <div class="faq-wrap">
+        <div class="faq-header">
+          <h2>Common Problems &amp; Fixes &mdash; iPhone</h2>
+          <p>Tap any problem to expand the fix</p>
+        </div>
+        <details>
+          <summary>Sign-in fails in Company Portal</summary>
+          <div class="faq-answer">Double-check you&rsquo;re using your <strong>work</strong> email and password, not a personal Microsoft account. If your password has expired, reset it before enrolling.</div>
+        </details>
+        <details>
+          <summary>&ldquo;Profile Downloaded&rdquo; doesn&rsquo;t appear in Settings</summary>
+          <div class="faq-answer">Go to <strong>Settings</strong> &gt; <strong>General</strong> &gt; <strong>VPN &amp; Device Management</strong>. If nothing is there, repeat Step 3 &mdash; the profile download may not have completed.</div>
+        </details>
+        <details>
+          <summary>Setup closed or timed out partway through</summary>
+          <div class="faq-answer">Reopen the Company Portal app and sign in again &mdash; it resumes from where you left off.</div>
+        </details>
+        <details>
+          <summary>Outlook or Teams says the device isn&rsquo;t compliant</summary>
+          <div class="faq-answer">Open Company Portal &gt; <strong>Notifications</strong> and complete any pending requirements (e.g. set a passcode, update iOS). Then tap <strong>Retry</strong> in the app. Allow a few minutes for the status to refresh.</div>
+        </details>
+        <details>
+          <summary>Error about Microsoft Authenticator when signing in</summary>
+          <div class="faq-answer">Authenticator must finish installing before work apps will sign in. Wait a few minutes after enrolment, then try again.</div>
+        </details>
+      </div>
+    </div>
+
+    <div class="switch-strip">
+      <div class="switch-strip-text">Following this on the wrong device? <strong>These are the iPhone &amp; iPad steps.</strong></div>
+      <button class="switch-btn-alt to-and" type="button" data-platform="android">Show me the Android steps &rarr;</button>
+    </div>
+
+  </div><!-- /panel-ios -->
+
+  <!-- ══════════════════════════════════════════════════════════════
+       ANDROID PANEL
+  ═══════════════════════════════════════════════════════════════ -->
+  <div class="platform-panel" id="panel-android">
+
+    <div class="platform-bar pbar-and">
+      <div class="pbar-left">
+        <div class="pbar-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M7.4 4.35 6.3 2.5a.42.42 0 0 1 .72-.42l1.12 1.9A7.3 7.3 0 0 1 12 3.2c1.03 0 2 .2 2.86.58l1.12-1.9a.42.42 0 1 1 .72.42l-1.1 1.85A5.9 5.9 0 0 1 18.5 9.2h-13a5.9 5.9 0 0 1 1.9-4.85z"></path>
+            <circle cx="9.2" cy="6.6" r=".8" fill="#007a3d"></circle>
+            <circle cx="14.8" cy="6.6" r=".8" fill="#007a3d"></circle>
+            <rect x="5.5" y="10.3" width="13" height="8.4" rx="1.5"></rect>
+            <rect x="1.9" y="10.3" width="2.7" height="6.4" rx="1.35"></rect>
+            <rect x="19.4" y="10.3" width="2.7" height="6.4" rx="1.35"></rect>
+          </svg>
+        </div>
+        <div>
+          <div class="pbar-eyebrow">You are following</div>
+          <div class="pbar-title">Android instructions</div>
+        </div>
+      </div>
+      <button class="switch-btn" type="button" data-platform="ios">Got an iPhone? Switch to iPhone &rarr;</button>
+    </div>
+
+    <!-- WHAT YOU'LL NEED -->
+    <div id="android-need">
+      <div class="section-heading">
+        <div class="step-badge badge-lime">?</div>
+        <div>
+          <div class="step-meta">Preparation &middot; Android</div>
+          <div class="step-title">What You&rsquo;ll Need</div>
+        </div>
+      </div>
+
+      <div class="id-table-wrap">
+        <div class="id-table-intro">
+          <p>Have these four things ready before you start &mdash; it keeps the whole process smooth and avoids the setup timing out partway through.</p>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Requirement</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="req-pill">📱 Android phone</span></td>
+              <td>Running Android 10 or later, connected to Wi-Fi. To check: <strong>Settings</strong> &gt; <strong>About phone</strong> &gt; <strong>Android version</strong></td>
+            </tr>
+            <tr>
+              <td><span class="req-pill">💼 Work account</span></td>
+              <td>Your work email address and password (e.g. <code class="inline-code">j.smith@yourcompany.com</code>)</td>
+            </tr>
+            <tr>
+              <td><span class="req-pill">▶️ Play Store</span></td>
+              <td>Signed in with your own Google account so you can download apps</td>
+            </tr>
+            <tr>
+              <td><span class="req-pill">🔐 MFA access</span></td>
+              <td>Access to your usual sign-in approval method (Microsoft Authenticator, text message, or phone call)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="lost-alert">
+      <div class="lost-alert-icon">&#9432;</div>
       <div>
-        <div class="step-meta">Step 05 of 06</div>
-        <div class="step-title">Finish in the Company Portal App</div>
+        <strong>Android phones word things slightly differently</strong>
+        <p>Samsung, Pixel, Motorola and others each phrase the same buttons a little differently &mdash; you might see <strong>Continue</strong> where this guide says <strong>Next</strong>, or <strong>Agree</strong> where it says <strong>Accept</strong>. If a button means the same thing, tap it and carry on.</p>
       </div>
     </div>
 
-    <div class="content-card">
-      <div class="steps">
-        <div class="step"><div class="step-num">1</div><p>Return to the <strong>Company Portal</strong> app and open <strong>Notifications</strong>.</p></div>
-        <div class="step"><div class="step-num">2</div><p>Under pending requirements, tap the option to <strong>register your device</strong> if shown.</p></div>
-        <div class="step"><div class="step-num">3</div><p>Wait a few minutes while your device receives its settings. You may be prompted to install required apps such as <strong>Microsoft Authenticator</strong> &mdash; tap <strong>Install</strong> (or <strong>Manage</strong> if it&rsquo;s already installed) on each prompt.</p></div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+    <!-- STEP 1 -->
+    <div id="android-step1">
+      <div class="section-heading">
+        <div class="step-badge badge-green">1</div>
+        <div>
+          <div class="step-meta">Android &middot; Step 01 of 06</div>
+          <div class="step-title">Install the Company Portal App</div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><p>Open the <strong>Play Store</strong> on your phone (the coloured triangle icon).</p></div>
+          <div class="step"><div class="step-num">2</div><p>Search for <strong>Intune Company Portal</strong> (published by Microsoft Corporation).</p></div>
+          <div class="step"><div class="step-num">3</div><p>Tap <strong>Install</strong> and wait for it to download.</p></div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#9432;</div>
+          <div>
+            <div class="callout-title">Don&rsquo;t open it from the Play Store just yet</div>
+            <div class="callout-body">Wait until the download finishes completely, then open the app from your home screen or app list. Opening it too early can make the setup stall on the first screen.</div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
 
-  <!-- STEP 6 -->
-  <div id="step6">
-    <div class="section-heading">
-      <div class="step-badge badge-green">6</div>
-      <div>
-        <div class="step-meta">Step 06 of 06</div>
-        <div class="step-title">Sign In to Your Work Apps</div>
+    <!-- STEP 2 -->
+    <div id="android-step2">
+      <div class="section-heading">
+        <div class="step-badge badge-green">2</div>
+        <div>
+          <div class="step-meta">Android &middot; Step 02 of 06</div>
+          <div class="step-title">Sign In with Your Work Account</div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><p>Open the <strong>Company Portal</strong> app and tap <strong>Sign in</strong>.</p></div>
+          <div class="step"><div class="step-num">2</div><p>Enter your <strong>work email address and password</strong>.</p></div>
+          <div class="step"><div class="step-num">3</div><p>Approve the multi-factor authentication prompt if you receive one.</p></div>
+          <div class="step"><div class="step-num">4</div><p>If asked to allow notifications, tap <strong>Allow</strong> &mdash; this is how the app tells you about anything that needs your attention later.</p></div>
+        </div>
       </div>
     </div>
 
-    <div class="content-card">
-      <div class="steps">
-        <div class="step"><div class="step-num">1</div><p>Install any work apps you need &mdash; <strong>Outlook</strong>, <strong>Teams</strong>, <strong>OneDrive</strong> &mdash; from the Company Portal app or the App Store.</p></div>
-        <div class="step"><div class="step-num">2</div><p>Open an app and sign in with your <strong>work account</strong>.</p></div>
-        <div class="step"><div class="step-num">3</div><p>The first sign-in checks that your device meets your organisation&rsquo;s security requirements. If prompted, tap <strong>Check compliance</strong>, follow the instructions shown in Company Portal, then tap <strong>Retry</strong>.</p></div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+    <!-- STEP 3 -->
+    <div id="android-step3">
+      <div class="section-heading">
+        <div class="step-badge badge-green">3</div>
+        <div>
+          <div class="step-meta">Android &middot; Step 03 of 06</div>
+          <div class="step-title">Start the Work Profile Setup</div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><p>On the <strong>Set up access</strong> (or <strong>Company Access Setup</strong>) screen, tap <strong>Begin</strong>.</p></div>
+          <div class="step"><div class="step-num">2</div><p>Read the privacy screen &mdash; it lists what your organisation can and can&rsquo;t see &mdash; then tap <strong>Continue</strong>.</p></div>
+          <div class="step"><div class="step-num">3</div><p>On the <strong>Set up a work profile</strong> screen, tap <strong>Continue</strong>, then <strong>Accept &amp; continue</strong> (some phones say <strong>Agree</strong> or <strong>Next</strong>).</p></div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#128188;</div>
+          <div>
+            <div class="callout-title">What is a &ldquo;work profile&rdquo;?</div>
+            <div class="callout-body">Android creates a completely separate, sealed-off area on your phone just for work apps and work files. Think of it as a locked drawer inside your phone: work things go in the drawer, and everything personal &mdash; your photos, WhatsApp, banking, browsing &mdash; stays outside it and is <strong>never</strong> visible to your organisation.</div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- COMPLETION BANNER -->
-  <div class="completion-banner">
-    <div class="completion-inner">
-      <div class="completion-icon">&#10003;</div>
-      <div class="completion-eyebrow">Enrolment Complete</div>
-      <h2>Your iPhone is set up for work</h2>
-      <p>Once you can open Outlook or Teams and see your work email and chats, your iPhone is fully set up. Your device will stay compliant automatically &mdash; just install iOS updates when prompted.</p>
-      <div class="completion-pills">
-        <div class="cpill-lime">&#10003; Outlook &amp; Teams signed in</div>
-        <div class="cpill-lime">&#10003; Device registered &amp; compliant</div>
-        <div class="cpill-lime">&#10003; Stays compliant automatically</div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+    <!-- STEP 4 -->
+    <div id="android-step4">
+      <div class="section-heading">
+        <div class="step-badge badge-green">4</div>
+        <div>
+          <div class="step-meta">Android &middot; Step 04 of 06</div>
+          <div class="step-title">Let Your Phone Create the Work Profile</div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><p>Your phone will now show <strong>Setting up your work profile</strong>. This usually takes <strong>2&ndash;5 minutes</strong> &mdash; leave the phone alone and keep it on Wi-Fi.</p></div>
+          <div class="step"><div class="step-num">2</div><p>The screen may flash, go blank, or return to your home screen partway through. That is normal &mdash; don&rsquo;t press anything.</p></div>
+          <div class="step"><div class="step-num">3</div><p>When it finishes you&rsquo;ll see <strong>Work profile setup complete</strong> or a notification that your work profile is ready. Tap <strong>Continue</strong> / <strong>Next</strong>.</p></div>
+          <div class="step"><div class="step-num">4</div><p>You&rsquo;ll now have a <strong>second Company Portal icon</strong> with a small briefcase on it. From here on, always use the one <strong>with the briefcase</strong>.</p></div>
+        </div>
+
+        <div class="lost-alert in-card">
+          <div class="lost-alert-icon">&#9888;</div>
+          <div>
+            <strong>Screen lock required</strong>
+            <p>If your phone doesn&rsquo;t have a PIN, pattern, password or fingerprint set, you&rsquo;ll be asked to create one. This is a security requirement for accessing work data &mdash; the setup can&rsquo;t finish without it.</p>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- PRIVACY -->
+    <!-- BADGE VISUAL -->
+    <div class="badge-demo">
+      <div class="badge-demo-title">&#128188; The briefcase badge &mdash; the one thing to remember</div>
+      <div class="badge-demo-lead">After setup you&rsquo;ll see <strong>two copies of some apps</strong>. They look almost identical. The one with the little <strong>briefcase symbol</strong> in the corner is the <strong>work</strong> one &mdash; that&rsquo;s the one connected to your work email and files. The plain one is your own personal app and is untouched.</div>
+
+      <div class="icon-compare">
+        <div class="icon-box">
+          <div class="app-icon">O</div>
+          <div class="icon-box-name">Outlook</div>
+          <div class="icon-box-desc">No badge &mdash; this is <strong>your personal</strong> app. Your own accounts, nothing to do with work.</div>
+          <div class="icon-box-tag">Personal</div>
+        </div>
+        <div class="icon-box work">
+          <div class="app-icon">O<span class="work-badge">&#128188;</span></div>
+          <div class="icon-box-name">Outlook</div>
+          <div class="icon-box-desc">Briefcase badge &mdash; this is the <strong>work</strong> app. Use this one for work email.</div>
+          <div class="icon-box-tag">&#10003; Use this for work</div>
+        </div>
+      </div>
+
+      <div class="drawer-mock">
+        <div class="drawer-tabs">
+          <div class="drawer-tab">Personal</div>
+          <div class="drawer-tab on">Work &#128188;</div>
+        </div>
+        <div class="drawer-apps">
+          <div class="mini-app">
+            <div class="mini-icon" style="background:linear-gradient(135deg,#0f6cbd,#1a86e0)">O<span class="work-badge">&#128188;</span></div>
+            <div class="mini-label">Outlook</div>
+          </div>
+          <div class="mini-app">
+            <div class="mini-icon" style="background:linear-gradient(135deg,#4b53bc,#6b73d6)">T<span class="work-badge">&#128188;</span></div>
+            <div class="mini-label">Teams</div>
+          </div>
+          <div class="mini-app">
+            <div class="mini-icon" style="background:linear-gradient(135deg,#0364b8,#1a86e0)">D<span class="work-badge">&#128188;</span></div>
+            <div class="mini-label">OneDrive</div>
+          </div>
+          <div class="mini-app">
+            <div class="mini-icon" style="background:linear-gradient(135deg,#007a3d,#00a352)">C<span class="work-badge">&#128188;</span></div>
+            <div class="mini-label">Company Portal</div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#777;margin-top:12px;line-height:1.6">Swipe up on your home screen to see all your apps &mdash; most phones show a <strong>Personal</strong> and a <strong>Work</strong> tab along the top. Your work apps live under <strong>Work</strong>.</div>
+    </div>
+
+    <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+    <!-- STEP 5 -->
+    <div id="android-step5">
+      <div class="section-heading">
+        <div class="step-badge badge-green">5</div>
+        <div>
+          <div class="step-meta">Android &middot; Step 05 of 06</div>
+          <div class="step-title">Finish in the Work Company Portal</div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><p>Open the <strong>Company Portal</strong> app <strong>with the briefcase badge</strong>. Sign in again with your work account if it asks.</p></div>
+          <div class="step"><div class="step-num">2</div><p>Work through anything listed under <strong>Update device settings</strong> &mdash; usually setting a screen lock or turning on encryption. Tap <strong>Resolve</strong> next to each item and follow the prompt.</p></div>
+          <div class="step"><div class="step-num">3</div><p>When every item shows a green tick, tap <strong>Continue</strong>, then <strong>Done</strong>.</p></div>
+          <div class="step"><div class="step-num">4</div><p>Wait a few minutes while your phone receives its settings. You may be prompted to install required apps such as <strong>Microsoft Authenticator</strong> &mdash; tap <strong>Install</strong> on each prompt.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+    <!-- STEP 6 -->
+    <div id="android-step6">
+      <div class="section-heading">
+        <div class="step-badge badge-green">6</div>
+        <div>
+          <div class="step-meta">Android &middot; Step 06 of 06</div>
+          <div class="step-title">Install &amp; Sign In to Your Work Apps</div>
+        </div>
+      </div>
+
+      <div class="content-card">
+        <div class="steps">
+          <div class="step"><div class="step-num">1</div><p>Open the <strong>Play Store with the briefcase badge</strong> (the work version). Anything you install from here lands in your work profile.</p></div>
+          <div class="step"><div class="step-num">2</div><p>Install the work apps you need &mdash; <strong>Outlook</strong>, <strong>Teams</strong>, <strong>OneDrive</strong>. Some may already be there, installed for you automatically.</p></div>
+          <div class="step"><div class="step-num">3</div><p>Open a work app (the one <strong>with the briefcase</strong>) and sign in with your <strong>work account</strong>.</p></div>
+          <div class="step"><div class="step-num">4</div><p>The first sign-in checks that your phone meets your organisation&rsquo;s security requirements. If prompted, tap <strong>Check compliance</strong> or open Company Portal, resolve anything listed, then tap <strong>Retry</strong>.</p></div>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">&#128161;</div>
+          <div>
+            <div class="callout-title">Can&rsquo;t find your work apps afterwards?</div>
+            <div class="callout-body">Swipe up on the home screen to open your app list and tap the <strong>Work</strong> tab. You can also drag work apps onto your home screen so they&rsquo;re easier to reach.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPLETION BANNER -->
+    <div class="completion-banner green">
+      <div class="completion-inner">
+        <div class="completion-icon">&#10003;</div>
+        <div class="completion-eyebrow">Enrolment Complete &middot; Android</div>
+        <h2>Your Android phone is set up for work</h2>
+        <p>Once you can open the badged Outlook or Teams and see your work email and chats, your phone is fully set up. Your device will stay compliant automatically &mdash; just install Android updates when prompted.</p>
+        <div class="completion-pills">
+          <div class="cpill-lime">&#10003; Work profile created</div>
+          <div class="cpill-lime">&#10003; Work apps signed in</div>
+          <div class="cpill-lime">&#10003; Personal side untouched</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TROUBLESHOOTING (Android) -->
+    <div id="android-troubleshoot">
+      <div class="section-heading">
+        <div class="step-badge badge-green">!</div>
+        <div>
+          <div class="step-meta">If Something Goes Wrong &middot; Android</div>
+          <div class="step-title">Troubleshooting</div>
+        </div>
+      </div>
+
+      <div class="faq-wrap">
+        <div class="faq-header">
+          <h2>Common Problems &amp; Fixes &mdash; Android</h2>
+          <p>Tap any problem to expand the fix</p>
+        </div>
+        <details>
+          <summary>Sign-in fails in Company Portal</summary>
+          <div class="faq-answer">Double-check you&rsquo;re using your <strong>work</strong> email and password, not a personal Microsoft account. If your password has expired, reset it before enrolling.</div>
+        </details>
+        <details>
+          <summary>I&rsquo;ve got two of the same app &mdash; which one do I use?</summary>
+          <div class="faq-answer">Always the one with the small <strong>briefcase symbol</strong> in the corner of the icon. That&rsquo;s the work copy, connected to your work account. The plain one is your own personal app and stays completely separate.</div>
+        </details>
+        <details>
+          <summary>&ldquo;Can&rsquo;t set up work profile&rdquo; or the setup stops partway</summary>
+          <div class="faq-answer">Check <strong>Settings</strong> &gt; <strong>About phone</strong> &gt; <strong>Android version</strong> is <strong>10 or later</strong>, make sure you&rsquo;re on Wi-Fi with a good signal, then restart the phone and reopen Company Portal &mdash; it picks up where it left off. If it still fails, contact IT Support.</div>
+        </details>
+        <details>
+          <summary>My work apps have gone grey / say &ldquo;Work profile paused&rdquo;</summary>
+          <div class="faq-answer">Android lets you pause work apps so they stop notifying you. Open your app list, go to the <strong>Work</strong> tab, and turn the <strong>Work apps</strong> switch back on (or tap the &ldquo;Work profile paused&rdquo; notification and tap <strong>Unpause</strong>). Nothing is lost while it&rsquo;s paused.</div>
+        </details>
+        <details>
+          <summary>I can&rsquo;t find the work Play Store or my work apps</summary>
+          <div class="faq-answer">Swipe up on the home screen to open your full app list, then tap the <strong>Work</strong> tab at the top. Everything with a briefcase badge lives there, including the work Play Store.</div>
+        </details>
+        <details>
+          <summary>Outlook or Teams says the device isn&rsquo;t compliant</summary>
+          <div class="faq-answer">Open the badged <strong>Company Portal</strong> and complete anything listed under <strong>Update device settings</strong> (e.g. set a screen lock, update Android). Then tap <strong>Retry</strong> in the app and allow a few minutes for the status to refresh.</div>
+        </details>
+        <details>
+          <summary>My phone asks me to set a PIN or fingerprint &mdash; do I have to?</summary>
+          <div class="faq-answer">Yes. A screen lock is a security requirement for holding work data on a phone, and enrolment can&rsquo;t finish without one. Some phones ask for a separate lock just for the work profile &mdash; that&rsquo;s fine and only applies to work apps.</div>
+        </details>
+        <details>
+          <summary>Error about Microsoft Authenticator when signing in</summary>
+          <div class="faq-answer">Authenticator must finish installing before work apps will sign in. Wait a few minutes after enrolment, then try again.</div>
+        </details>
+      </div>
+    </div>
+
+    <div class="switch-strip">
+      <div class="switch-strip-text">Following this on the wrong device? <strong>These are the Android steps.</strong></div>
+      <button class="switch-btn-alt to-ios" type="button" data-platform="ios">Show me the iPhone steps &rarr;</button>
+    </div>
+
+  </div><!-- /panel-android -->
+
+  <!-- ══════════ SHARED: PRIVACY ══════════ -->
   <div id="privacy">
     <div class="section-heading">
       <div class="step-badge badge-lime">✓</div>
       <div>
-        <div class="step-meta">Worth Knowing</div>
+        <div class="step-meta">Worth Knowing &middot; iPhone &amp; Android</div>
         <div class="step-title">Your Privacy &mdash; What Your Organisation Can and Can&rsquo;t See</div>
       </div>
     </div>
@@ -929,7 +1800,7 @@
     <div class="app-trust-banner">
       <div class="card-label">Personal Device, Personal Data</div>
       <h2>Enrolling a personal device is a common concern</h2>
-      <p>Enrolment lets your organisation apply security settings and remove <em>work</em> data if needed &mdash; it does not give access to your personal life.</p>
+      <p>Enrolment lets your organisation apply security settings and remove <em>work</em> data if needed &mdash; it does not give access to your personal life. This is true on both iPhone and Android.</p>
 
       <div class="trust-grid">
         <div class="trust-card pro">
@@ -948,7 +1819,7 @@
           <ul>
             <li>Device model, name and serial number</li>
             <li>Operating system version and compliance status</li>
-            <li>Names of installed apps (not their content)</li>
+            <li>Names of work apps installed (not their content)</li>
             <li>Work email address and work data on the device</li>
           </ul>
         </div>
@@ -959,46 +1830,9 @@
         <div>
           <div class="privacy-callout-title">If your device is lost, or you leave the organisation</div>
           <p>Only the <strong style="color:rgba(255,255,255,0.9);">work profile and work data</strong> are removed &mdash; your personal apps, photos and files are untouched.</p>
+          <p><strong style="color:rgba(255,255,255,0.9);">On Android</strong> this is especially clear-cut: everything work-related lives inside the separate work profile, so removing it deletes the badged work apps and their data and leaves the personal side of your phone exactly as it was.</p>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- TROUBLESHOOTING -->
-  <div id="troubleshoot">
-    <div class="section-heading">
-      <div class="step-badge badge-blue">!</div>
-      <div>
-        <div class="step-meta">If Something Goes Wrong</div>
-        <div class="step-title">Troubleshooting</div>
-      </div>
-    </div>
-
-    <div class="faq-wrap">
-      <div class="faq-header">
-        <h2>Common Problems &amp; Fixes</h2>
-        <p>Click any problem to expand the fix</p>
-      </div>
-      <details>
-        <summary>Sign-in fails in Company Portal</summary>
-        <div class="faq-answer">Double-check you&rsquo;re using your <strong>work</strong> email and password, not a personal Microsoft account. If your password has expired, reset it before enrolling.</div>
-      </details>
-      <details>
-        <summary>&ldquo;Profile Downloaded&rdquo; doesn&rsquo;t appear in Settings</summary>
-        <div class="faq-answer">Go to <strong>Settings</strong> &gt; <strong>General</strong> &gt; <strong>VPN &amp; Device Management</strong>. If nothing is there, repeat Step 3 &mdash; the profile download may not have completed.</div>
-      </details>
-      <details>
-        <summary>Setup closed or timed out partway through</summary>
-        <div class="faq-answer">Reopen the Company Portal app and sign in again &mdash; it resumes from where you left off.</div>
-      </details>
-      <details>
-        <summary>Outlook or Teams says the device isn&rsquo;t compliant</summary>
-        <div class="faq-answer">Open Company Portal &gt; <strong>Notifications</strong> and complete any pending requirements (e.g. set a passcode, update iOS). Then tap <strong>Retry</strong> in the app. Allow a few minutes for the status to refresh.</div>
-      </details>
-      <details>
-        <summary>Error about Microsoft Authenticator when signing in</summary>
-        <div class="faq-answer">Authenticator must finish installing before work apps will sign in. Wait a few minutes after enrolment, then try again.</div>
-      </details>
     </div>
   </div>
 
@@ -1008,7 +1842,7 @@
     <p class="help-sub">IT Service Management &middot; Active8 Managed Technologies</p>
     <div class="rmm-note">
       <div>&#8505;</div>
-      <div>If you get stuck at any point, contact IT Support with your <strong>name</strong>, <strong>work email address</strong> and the <strong>step number</strong> you&rsquo;re stuck on, along with a screenshot of any error message if possible.</div>
+      <div>If you get stuck at any point, contact IT Support with your <strong>name</strong>, <strong>work email address</strong>, whether you have an <strong>iPhone or Android</strong>, and the <strong>step number</strong> you&rsquo;re stuck on, along with a screenshot of any error message if possible.</div>
     </div>
     <div class="contact-grid" style="margin-top:20px;">
       <a href="mailto:ITSupport@a8mt.co.uk" class="contact-card">
@@ -1032,27 +1866,85 @@
 
 <footer style="background:linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);border-top:1px solid rgba(194,224,0,0.2);padding:18px 40px;text-align:center;">
   <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">Prepared by <span style="color:rgba(255,255,255,0.85);">Active8 Managed Technologies Limited</span> &middot; IT Service Management</div>
-  <div style="font-family:'Courier New',Consolas,monospace;font-size:10px;color:rgba(255,255,255,0.32);margin-top:5px;">v1.0 &middot; July 2026 &middot; This article is maintained by the Active 8 IT team.</div>
+  <div style="font-family:'Courier New',Consolas,monospace;font-size:10px;color:rgba(255,255,255,0.32);margin-top:5px;">v2.0 &middot; August 2026 &middot; This article is maintained by the Active 8 IT team.</div>
 </footer>
 
 <script>
 (function(){
+  /* ── iframe auto-resize ─────────────────────────────────────── */
   function sendHeight(){
     var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
     window.parent.postMessage({type:'a8-iframe-resize', height:h}, '*');
     try { if(window.frameElement) window.frameElement.style.height = (h+20)+'px'; } catch(e){}
   }
-  // Fire immediately, on load, on resize, and via ResizeObserver
   sendHeight();
   window.addEventListener('load', sendHeight);
   window.addEventListener('resize', sendHeight);
   if(window.ResizeObserver){ new ResizeObserver(sendHeight).observe(document.body); }
-  // Retry every 300ms for 12 seconds to survive any parent-side load race
   var attempts = 0;
   var timer = setInterval(function(){
     sendHeight();
     if(++attempts >= 40) clearInterval(timer);
   }, 300);
+
+  /* ── platform switching ─────────────────────────────────────── */
+  var picker  = document.getElementById('choose');
+  var flag    = document.getElementById('picker-flag');
+  var prompt  = document.getElementById('pick-prompt');
+  var panels  = { ios: document.getElementById('panel-ios'), android: document.getElementById('panel-android') };
+  var cards   = { ios: document.querySelector('.pcard-ios'), android: document.querySelector('.pcard-and') };
+  var current = null;
+
+  function selectPlatform(p, scroll){
+    if(!panels[p]) return;
+    current = p;
+
+    Object.keys(panels).forEach(function(k){
+      panels[k].classList.toggle('active', k === p);
+      cards[k].classList.toggle('selected', k === p);
+      var state = cards[k].querySelector('[data-state]');
+      if(k === p){
+        state.innerHTML = '&#10003; Showing these steps';
+      } else {
+        state.innerHTML = 'Tap to show ' + (k === 'ios' ? 'iPhone' : 'Android') + ' steps';
+      }
+    });
+
+    picker.classList.remove('needs-choice');
+    flag.innerHTML = '&#10003; Your phone &middot; tap the other box to swap';
+    prompt.style.display = 'none';
+
+    if(scroll){
+      var target = panels[p].querySelector('.platform-bar');
+      if(target && target.scrollIntoView) target.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+    sendHeight();
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-platform]'), function(btn){
+    btn.addEventListener('click', function(){
+      selectPlatform(btn.getAttribute('data-platform'), true);
+    });
+  });
+
+  /* ── nav links resolve to the active platform's section ─────── */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-goto]'), function(link){
+    link.addEventListener('click', function(){
+      var key = link.getAttribute('data-goto');
+      var el;
+      if(key === 'choose' || key === 'privacy'){
+        el = document.getElementById(key);
+      } else if(!current){
+        /* nothing chosen yet — send them to the picker and flash it */
+        el = picker;
+        picker.classList.add('needs-choice');
+        flag.innerHTML = '&#9755; Choose your phone first';
+      } else {
+        el = document.getElementById((current === 'ios' ? 'ios-' : 'android-') + key);
+      }
+      if(el && el.scrollIntoView) el.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
 })();
 </script>
 
