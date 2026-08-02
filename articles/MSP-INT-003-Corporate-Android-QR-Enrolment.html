@@ -172,6 +172,92 @@
   .gone-name { font-size: 13px; font-weight: 700; color: #fff; }
   .gone-note { font-size: 11px; color: rgba(255,255,255,0.62); line-height: 1.4; margin-top: 3px; }
 
+  /* ═══════════ TEMPORARY ACCESS PASS PANEL ═══════════ */
+  .tapass {
+    background: linear-gradient(135deg,#78350f 0%,#b45309 55%,#78350f 100%);
+    border: 3px solid #92400e;
+    border-radius: 14px;
+    padding: 0;
+    margin-bottom: 44px;
+    color: #fff;
+    overflow: hidden;
+    box-shadow: 0 6px 28px rgba(120,53,15,0.34);
+  }
+
+  .tapass-inner { padding: 26px 32px 30px; }
+
+  .tapass-eyebrow {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: #fde68a; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .tapass h2 {
+    font-family: Georgia,'Times New Roman',serif;
+    font-size: 26px; font-weight: 400; line-height: 1.2;
+    color: #fff; margin-bottom: 12px;
+  }
+
+  .tapass > .tapass-inner > p {
+    font-size: 14.5px; line-height: 1.7;
+    color: rgba(255,255,255,0.9);
+    margin-bottom: 20px; max-width: 720px;
+  }
+
+  .branch-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(285px,1fr)); gap: 14px; }
+
+  .branch { border-radius: 12px; padding: 18px 20px 20px; }
+  .branch.yes { background: rgba(0,0,0,0.3); border: 2px solid #fca5a5; }
+  .branch.no  { background: rgba(0,0,0,0.16); border: 2px solid rgba(255,255,255,0.24); }
+
+  .branch-tag {
+    display: inline-block;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 20px; margin-bottom: 10px;
+  }
+
+  .branch.yes .branch-tag { background: #dc2626; color: #fff; }
+  .branch.no  .branch-tag { background: rgba(255,255,255,0.2); color: #fff; }
+
+  .branch-q { font-size: 15px; font-weight: 700; color: #fff; line-height: 1.4; margin-bottom: 9px; }
+  .branch-a { font-size: 13.5px; line-height: 1.65; color: rgba(255,255,255,0.82); }
+  .branch-a + .branch-a { margin-top: 9px; }
+  .branch-a strong { color: #fff; }
+
+  .ask-box {
+    background: rgba(0,0,0,0.42);
+    border-left: 4px solid #c2e000;
+    border-radius: 8px;
+    padding: 14px 17px;
+    margin-top: 20px;
+  }
+
+  .ask-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+    color: #c2e000; margin-bottom: 8px;
+  }
+
+  .ask-quote {
+    font-family: Georgia,'Times New Roman',serif;
+    font-size: 15px; font-style: italic; line-height: 1.6;
+    color: #fff;
+  }
+
+  .whatis-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(215px,1fr)); gap: 12px; margin-top: 20px; }
+
+  .whatis {
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+
+  .whatis-h { font-size: 13.5px; font-weight: 700; color: #fff; margin-bottom: 5px; display: flex; gap: 7px; align-items: baseline; }
+  .whatis-b { font-size: 12.5px; line-height: 1.6; color: rgba(255,255,255,0.78); }
+
   /* ═══════════ ROADMAP ═══════════ */
   .roadmap {
     background: #fff;
@@ -781,6 +867,7 @@
 <div class="sticky-nav">
   <div class="sticky-nav-inner">
     <button class="nav-link danger" data-goto="warning"><span class="nav-num red">!</span>Read first</button>
+    <button class="nav-link danger" data-goto="access-pass"><span class="nav-num red">&#128273;</span>Authenticator? Get a pass</button>
     <button class="nav-link danger" data-goto="backup"><span class="nav-num red">1</span>Save your stuff</button>
     <button class="nav-link" data-goto="need"><span class="nav-num blue">2</span>What you need</button>
     <button class="nav-link" data-goto="wipe"><span class="nav-num red">3</span>Wipe the phone</button>
@@ -831,11 +918,64 @@
     </div>
   </div>
 
+  <!-- ═══════════ TEMPORARY ACCESS PASS ═══════════ -->
+  <div class="tapass" id="access-pass">
+    <div class="danger-strip"></div>
+    <div class="tapass-inner">
+      <div class="tapass-eyebrow"><span>&#128273;</span> Do this before anything else</div>
+      <h2>Is Microsoft Authenticator on the phone you are about to wipe?</h2>
+      <p>If it is, <strong>speak to IT before you reset the phone</strong> and ask them for a <strong>Temporary Access Pass</strong>. Halfway through this setup you have to sign in with your work account and prove it is you &mdash; and the app you would normally use to do that will have been erased minutes earlier. Without something to replace it, the phone is stuck at the sign-in screen and cannot be finished.</p>
+
+      <div class="branch-grid">
+        <div class="branch yes">
+          <span class="branch-tag">&#10003; Yes &mdash; it&rsquo;s on this phone</span>
+          <div class="branch-q">Stop. Contact IT first.</div>
+          <div class="branch-a">Ask for a <strong>Temporary Access Pass (TAP)</strong>. It is a short code IT generates for you that you type in instead of approving a notification &mdash; it gets you through the sign-in on the new setup.</div>
+          <div class="branch-a"><strong>Ask for it when you are ready to use it</strong>, not days in advance. A TAP is deliberately short-lived and will expire.</div>
+          <div class="branch-a">If you would rather, IT can instead help you <strong>move Authenticator to another device</strong> before the wipe. Either answer works &mdash; you just need one of them in place first.</div>
+        </div>
+
+        <div class="branch no">
+          <span class="branch-tag">Not sure / No</span>
+          <div class="branch-q">Check, then carry on.</div>
+          <div class="branch-a">Look through the phone&rsquo;s apps for <strong>Microsoft Authenticator</strong> (a blue padlock icon). Also check for any other code app &mdash; Google Authenticator, Duo, a banking app that generates codes.</div>
+          <div class="branch-a">If there is genuinely nothing, and you approve sign-ins by <strong>text message</strong> or from a <strong>different phone, tablet or laptop</strong>, you are fine &mdash; carry straight on to Step&nbsp;1.</div>
+          <div class="branch-a">If you are unsure, ask IT anyway. A TAP you did not need costs nothing; discovering you needed one after the wipe costs you the afternoon.</div>
+        </div>
+      </div>
+
+      <div class="ask-box">
+        <div class="ask-label">Word for word, this is all you need to say</div>
+        <div class="ask-quote">&ldquo;I&rsquo;m setting up my new company Android phone and my Authenticator is on the phone I have to wipe. Please can I have a Temporary Access Pass?&rdquo;</div>
+      </div>
+
+      <div class="whatis-grid">
+        <div class="whatis">
+          <div class="whatis-h"><span>&#10067;</span> What it actually is</div>
+          <div class="whatis-b">A one-off code, usually a string of digits, that stands in for your usual approval &mdash; nothing to install and nothing to set up.</div>
+        </div>
+        <div class="whatis">
+          <div class="whatis-h"><span>&#9201;</span> How long it lasts</div>
+          <div class="whatis-b">A limited window set by IT, often an hour or so. Request it when you are about to start, not the day before.</div>
+        </div>
+        <div class="whatis">
+          <div class="whatis-h"><span>&#128241;</span> Where you type it</div>
+          <div class="whatis-b">On the new phone, at <strong>Step&nbsp;6</strong>, on the Microsoft sign-in screen where it would normally ask you to approve.</div>
+        </div>
+        <div class="whatis">
+          <div class="whatis-h"><span>&#8635;</span> Afterwards</div>
+          <div class="whatis-b">Install Microsoft Authenticator on the new phone and set it up again. The pass stops working once it expires.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ═══════════ ROADMAP ═══════════ -->
   <div class="roadmap">
     <div class="roadmap-title">The whole thing, on one line</div>
-    <div class="roadmap-lead">Eight steps. The two red ones are the ones that need care.</div>
+    <div class="roadmap-lead">One phone call, then eight steps. The red ones are the ones that need care.</div>
     <div class="rail">
+      <div class="rail-step red"><div class="rail-n">&#128273;</div><div class="rail-t">Ask IT for a pass</div><div class="rail-d">If Authenticator is on this phone</div></div>
       <div class="rail-step red"><div class="rail-n">1</div><div class="rail-t">Save your stuff</div><div class="rail-d">Photos, messages, codes</div></div>
       <div class="rail-step"><div class="rail-n">2</div><div class="rail-t">Get ready</div><div class="rail-d">Wi-Fi, password, QR code</div></div>
       <div class="rail-step red"><div class="rail-n">3</div><div class="rail-t">Wipe the phone</div><div class="rail-d">Factory reset</div></div>
@@ -863,7 +1003,7 @@
       <div class="callout-icon">&#128273;</div>
       <div>
         <div class="callout-title">The one that catches people out: your Authenticator app</div>
-        <div class="callout-body">If <strong>Microsoft Authenticator</strong> (or any other code app) is on this phone, wiping it destroys your ability to sign in &mdash; including the sign-in you need halfway through this very setup. <strong>Tell IT before you wipe.</strong> They will either move your Authenticator to another device or issue you a one-time <strong>Temporary Access Pass</strong> &mdash; a code you type instead of approving a notification. Do not start the wipe until you have that sorted.</div>
+        <div class="callout-body">Worth repeating, because it is the step people skip: if <strong>Microsoft Authenticator</strong> (or any other code app) is on this phone, wiping it destroys your ability to sign in &mdash; including the sign-in you need halfway through this very setup. <strong>Speak to IT and get a Temporary Access Pass before you reset the phone.</strong> Do not start the wipe until that is sorted &mdash; see <button type="button" data-goto="access-pass" style="font:inherit;font-weight:700;color:#991b1b;background:none;border:none;border-bottom:2px solid #dc2626;padding:0;cursor:pointer;">the panel higher up the page</button> for exactly what to ask for.</div>
       </div>
     </div>
 
@@ -927,7 +1067,7 @@
 
     <div style="margin-top:22px;">
       <div style="font-size:14px;font-weight:700;margin-bottom:10px;">Final check &mdash; tick all five before you go any further</div>
-      <div class="tickbox"><div class="tick"></div><span>I have told IT that this phone is being wiped, and my sign-in codes are sorted (Authenticator moved, or a Temporary Access Pass issued).</span></div>
+      <div class="tickbox"><div class="tick"></div><span>I have spoken to IT, and my sign-in is sorted &mdash; <strong>a Temporary Access Pass is issued</strong>, or my Authenticator has been moved to another device.</span></div>
       <div class="tickbox"><div class="tick"></div><span>Photos and videos are copied off the phone, or fully backed up.</span></div>
       <div class="tickbox"><div class="tick"></div><span>WhatsApp backup has completed.</span></div>
       <div class="tickbox"><div class="tick"></div><span>Contacts and any texts I care about are saved somewhere else.</span></div>
@@ -970,7 +1110,7 @@
         </tr>
         <tr>
           <td><strong>A way to approve the sign-in</strong></td>
-          <td>Authenticator on a <em>different</em> device, a code by text, or the Temporary Access Pass from IT. <strong>Not</strong> the Authenticator on the phone you are wiping &mdash; that will be gone.</td>
+          <td>Authenticator on a <em>different</em> device, a code by text, or a <strong>Temporary Access Pass</strong> from IT &mdash; requested <em>before</em> the phone is reset. <strong>Not</strong> the Authenticator on the phone you are wiping; that will be gone.</td>
           <td><span class="req-pill must">ESSENTIAL</span></td>
         </tr>
         <tr>
@@ -1001,7 +1141,7 @@
       <div class="callout-icon">&#128721;</div>
       <div>
         <div class="callout-title">Last chance</div>
-        <div class="callout-body">Once you tap the final button on this screen, everything on the phone is erased and it cannot be stopped. If you have not finished Step&nbsp;1, go back and finish it now. <strong>New phone out of the box? Skip this step</strong> &mdash; go straight to Step&nbsp;4.</div>
+        <div class="callout-body">Once you tap the final button on this screen, everything on the phone is erased and it cannot be stopped. If you have not finished Step&nbsp;1 &mdash; or your Authenticator is on this phone and IT has <strong>not yet given you a Temporary Access Pass</strong> &mdash; go back and sort that first. <strong>New phone out of the box? Skip this step</strong> &mdash; go straight to Step&nbsp;4.</div>
       </div>
     </div>
 
@@ -1555,7 +1695,7 @@
 
 <footer style="background:linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);border-top:1px solid rgba(194,224,0,0.2);padding:18px 40px;text-align:center;">
   <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">Prepared by <span style="color:rgba(255,255,255,0.85);">Active8 Managed Technologies Limited</span> &middot; IT Service Management</div>
-  <div style="font-family:'Courier New',Consolas,monospace;font-size:10px;color:rgba(255,255,255,0.32);margin-top:5px;">v1.0 &middot; August 2026 &middot; This article is maintained by the Active 8 IT team.</div>
+  <div style="font-family:'Courier New',Consolas,monospace;font-size:10px;color:rgba(255,255,255,0.32);margin-top:5px;">v1.1 &middot; August 2026 &middot; This article is maintained by the Active 8 IT team.</div>
 </footer>
 
 <script>
