@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Set Up Your Company Android Phone &ndash; QR Code Enrolment</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background: #f7f9fc;
+  }
+
+  /* ═══════════ NAV ═══════════ */
+  .sticky-nav {
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  }
+
+  .sticky-nav-inner {
+    padding: 0 40px;
+    display: flex;
+    align-items: stretch;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .sticky-nav-inner::-webkit-scrollbar { display: none; }
+
+  .nav-link {
+    padding: 0 14px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #888;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+    background: none;
+    border-top: none; border-left: none; border-right: none;
+    font-family: inherit;
+  }
+
+  .nav-link:hover { color: #00602f; background: rgba(0,122,61,0.07); border-bottom-color: #007a3d; }
+  .nav-link.danger:hover { color: #b91c1c; background: rgba(220,38,38,0.07); border-bottom-color: #dc2626; }
+
+  .nav-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px; font-weight: 600;
+    flex-shrink: 0;
+    background: rgba(0,122,61,0.12); color: #007a3d;
+  }
+
+  .nav-num.red  { background: rgba(220,38,38,0.14); color: #dc2626; }
+  .nav-num.blue { background: rgba(37,87,183,0.12); color: #2557b7; }
+
+  /* ═══════════ PAGE ═══════════ */
+  .page-body { padding: 40px 40px 72px; }
+
+  h2.sec { font-family: Georgia,'Times New Roman',serif; font-weight: 400; }
+
+  /* ═══════════ OVERVIEW ═══════════ */
+  .overview-card {
+    background: linear-gradient(135deg, #00602f 0%, #007a3d 60%, #00602f 100%);
+    border-radius: 12px;
+    padding: 30px 34px;
+    margin-bottom: 22px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 22px rgba(0,96,47,0.28);
+  }
+
+  .overview-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(194,224,0,0.14) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .card-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(255,255,255,0.42);
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .overview-card h1 {
+    font-family: Georgia,'Times New Roman',serif;
+    font-size: 27px; font-weight: 400; line-height: 1.2;
+    color: #fff; margin-bottom: 12px; position: relative;
+  }
+
+  .overview-card p { color: rgba(255,255,255,0.82); font-size: 14px; line-height: 1.7; margin-bottom: 10px; position: relative; }
+
+  .pill-row { display: flex; gap: 8px; flex-wrap: wrap; position: relative; margin-top: 18px; }
+
+  .pill {
+    padding: 4px 12px;
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 20px;
+    font-size: 12px; font-weight: 500;
+    color: rgba(255,255,255,0.78);
+  }
+
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ═══════════ THE BIG RED WARNING ═══════════ */
+  .danger-banner {
+    background: linear-gradient(135deg, #991b1b 0%, #dc2626 55%, #991b1b 100%);
+    border-radius: 14px;
+    padding: 0;
+    margin-bottom: 44px;
+    color: #fff;
+    overflow: hidden;
+    box-shadow: 0 6px 30px rgba(153,27,27,0.35);
+    border: 3px solid #7f1d1d;
+  }
+
+  .danger-strip {
+    background: repeating-linear-gradient(45deg,#fbbf24 0 14px,#1a1a1a 14px 28px);
+    height: 10px;
+  }
+
+  .danger-inner { padding: 26px 32px 30px; position: relative; }
+
+  .danger-eyebrow {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: #fecaca; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .danger-title {
+    font-family: Georgia,'Times New Roman',serif;
+    font-size: 28px; line-height: 1.2; color: #fff; margin-bottom: 12px;
+  }
+
+  .danger-lead { font-size: 15px; line-height: 1.7; color: rgba(255,255,255,0.92); margin-bottom: 20px; max-width: 720px; }
+
+  .gone-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: 10px; }
+
+  .gone-card {
+    background: rgba(0,0,0,0.22);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 10px;
+    padding: 13px 14px;
+    text-align: center;
+  }
+
+  .gone-icon { font-size: 22px; display: block; margin-bottom: 6px; }
+  .gone-name { font-size: 13px; font-weight: 700; color: #fff; }
+  .gone-note { font-size: 11px; color: rgba(255,255,255,0.62); line-height: 1.4; margin-top: 3px; }
+
+  /* ═══════════ ROADMAP ═══════════ */
+  .roadmap {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    padding: 22px 26px 24px;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+  }
+
+  .roadmap-title { font-family: Georgia,'Times New Roman',serif; font-size: 18px; margin-bottom: 4px; }
+  .roadmap-lead { font-size: 13px; color: #666; margin-bottom: 20px; }
+
+  .rail { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .rail-step {
+    flex: 1 1 130px;
+    border: 2px solid rgba(0,0,0,0.09);
+    border-radius: 10px;
+    padding: 12px 12px 14px;
+    background: #f7f9fc;
+    position: relative;
+  }
+
+  .rail-step.red { border-color: rgba(220,38,38,0.35); background: #fef2f2; }
+  .rail-step.hero { border-color: #007a3d; background: rgba(0,122,61,0.07); box-shadow: 0 4px 14px rgba(0,122,61,0.16); }
+
+  .rail-n {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: #007a3d; color: #fff;
+    font-family: 'Courier New', Consolas, monospace; font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  .rail-step.red .rail-n { background: #dc2626; }
+  .rail-t { font-size: 13px; font-weight: 700; line-height: 1.3; margin-bottom: 3px; }
+  .rail-d { font-size: 11px; color: #777; line-height: 1.4; }
+
+  /* ═══════════ SECTION HEADING ═══════════ */
+  .section-heading { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; }
+
+  .step-badge {
+    flex-shrink: 0;
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: Georgia,'Times New Roman',serif;
+    font-size: 20px; color: #fff;
+  }
+
+  .badge-green { background: #007a3d; }
+  .badge-red   { background: #dc2626; }
+  .badge-blue  { background: #2557b7; }
+  .badge-lime  { background: #8aaa00; }
+
+  .step-meta {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: #999; margin-bottom: 4px;
+  }
+
+  .step-title { font-family: Georgia,'Times New Roman',serif; font-size: 21px; font-weight: 400; line-height: 1.2; }
+
+  /* ═══════════ CARDS & STEPS ═══════════ */
+  .content-card {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+    padding: 22px 26px 26px;
+  }
+
+  .content-card > p { font-size: 14px; line-height: 1.7; margin-bottom: 14px; }
+
+  .steps { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+
+  .step {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: #f7f9fc;
+    border-radius: 8px;
+    padding: 11px 14px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .step-num {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: rgba(0,122,61,0.1); color: #007a3d;
+    border: 1px solid rgba(0,122,61,0.25);
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+
+  .step-num.red { background: rgba(220,38,38,0.1); color: #dc2626; border-color: rgba(220,38,38,0.25); }
+  .step p { font-size: 13px; padding-top: 3px; }
+  .step p strong { font-weight: 700; }
+
+  code.inline-code {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 12px;
+    background: rgba(0,122,61,0.08);
+    border: 1px solid rgba(0,122,61,0.2);
+    padding: 1px 6px; border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  .tapme {
+    display: inline-block;
+    font-weight: 700;
+    background: #1a1a1a; color: #fff;
+    border-radius: 6px; padding: 1px 8px;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+
+  /* ═══════════ CALLOUTS ═══════════ */
+  .callout {
+    padding: 14px 16px;
+    margin-top: 16px;
+    border-radius: 8px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+
+  .callout.first { margin-top: 0; }
+  .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .callout-title { font-weight: 700; font-size: 13px; margin-bottom: 3px; }
+  .callout-body { font-size: 13px; line-height: 1.65; }
+
+  .callout-info { background: #eff6ff; border: 1px solid #bfdbfe; }
+  .callout-info .callout-icon { color: #2563eb; }
+  .callout-info .callout-title { color: #1e40af; }
+  .callout-info .callout-body { color: #1e3a5f; }
+
+  .callout-warn { background: #fffbeb; border: 1px solid #fde68a; }
+  .callout-warn .callout-icon { color: #d97706; }
+  .callout-warn .callout-title { color: #92400e; }
+  .callout-warn .callout-body { color: #78350f; }
+
+  .callout-danger { background: #fef2f2; border: 2px solid #fca5a5; }
+  .callout-danger .callout-icon { color: #dc2626; }
+  .callout-danger .callout-title { color: #991b1b; }
+  .callout-danger .callout-body { color: #7f1d1d; }
+
+  .callout-ok { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .callout-ok .callout-icon { color: #16a34a; }
+  .callout-ok .callout-title { color: #14532d; }
+  .callout-ok .callout-body { color: #14532d; }
+
+  /* ═══════════ SAVE-FIRST CHECKLIST ═══════════ */
+  .save-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(255px,1fr)); gap: 12px; margin-top: 4px; }
+
+  .save-card {
+    border: 1px solid rgba(0,0,0,0.1);
+    border-left: 4px solid #dc2626;
+    border-radius: 10px;
+    padding: 15px 16px;
+    background: #f7f9fc;
+  }
+
+  .save-card.amber { border-left-color: #d97706; }
+  .save-card.green { border-left-color: #007a3d; }
+
+  .save-head { display: flex; align-items: center; gap: 9px; margin-bottom: 7px; }
+  .save-emoji { font-size: 20px; flex-shrink: 0; }
+  .save-name { font-size: 14px; font-weight: 700; }
+  .save-what { font-size: 12.5px; color: #555; line-height: 1.55; }
+  .save-how { font-size: 12.5px; color: #333; line-height: 1.55; margin-top: 7px; padding-top: 7px; border-top: 1px dashed rgba(0,0,0,0.14); }
+  .save-how b { color: #00602f; }
+
+  .tickbox {
+    display: flex; align-items: flex-start; gap: 11px;
+    padding: 11px 14px;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 8px;
+    background: #fff;
+    margin-bottom: 7px;
+  }
+
+  .tick {
+    width: 22px; height: 22px; flex-shrink: 0;
+    border: 2px solid #007a3d; border-radius: 5px;
+    background: #fff; margin-top: 1px;
+  }
+
+  .tickbox span { font-size: 13.5px; line-height: 1.55; }
+
+  /* ═══════════ PHONE MOCKS ═══════════ */
+  .mock-row {
+    display: flex; gap: 26px; flex-wrap: wrap; align-items: flex-start;
+    justify-content: center;
+    margin: 4px 0 4px;
+  }
+
+  .mock-col { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 216px; }
+
+  .phone {
+    width: 216px;
+    border: 9px solid #1f2430;
+    border-radius: 32px;
+    background: #1f2430;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.26);
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .phone::after {
+    content: '';
+    position: absolute;
+    top: 5px; left: 50%; transform: translateX(-50%);
+    width: 54px; height: 5px; border-radius: 4px;
+    background: rgba(255,255,255,0.18);
+  }
+
+  .phone-screen {
+    background: #fff;
+    border-radius: 24px;
+    overflow: hidden;
+    min-height: 330px;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+
+  .scr-dark { background: linear-gradient(170deg,#12161f 0%,#1d2433 100%); color: #fff; }
+  .scr-pad  { padding: 26px 18px; flex: 1; display: flex; flex-direction: column; }
+
+  .scr-status {
+    display: flex; justify-content: space-between;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 9px; opacity: 0.5; padding: 7px 12px 0;
+  }
+
+  .scr-hi { font-family: Georgia,'Times New Roman',serif; font-size: 30px; line-height: 1.15; margin-bottom: 8px; }
+  .scr-sub { font-size: 12px; opacity: 0.65; line-height: 1.5; }
+
+  .scr-btn {
+    margin-top: auto;
+    background: #1a73e8; color: #fff;
+    border-radius: 22px;
+    text-align: center;
+    padding: 11px 0;
+    font-size: 13px; font-weight: 600;
+  }
+
+  .scr-btn.ghost { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25); }
+  .scr-btn.grey { background: #e6eaf2; color: #667; }
+
+  .mock-cap {
+    font-size: 12.5px; color: #555; text-align: center; line-height: 1.5;
+    padding: 0 4px;
+  }
+
+  .mock-cap b { color: #1a1a1a; }
+
+  .mock-tag {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 4px 12px; border-radius: 20px;
+    background: rgba(0,122,61,0.12); color: #007a3d;
+    white-space: nowrap;
+  }
+
+  .mock-tag.red { background: rgba(220,38,38,0.12); color: #dc2626; }
+  .mock-tag.blue { background: rgba(37,87,183,0.12); color: #2557b7; }
+  .mock-tag.grey { background: rgba(0,0,0,0.07); color: #777; }
+
+  .mock-arrow { align-self: center; font-size: 26px; color: #c3ccd9; padding-top: 130px; }
+
+  /* ═══════════ THE TAP HERO ═══════════ */
+  .tap-hero {
+    background: linear-gradient(135deg,#0b1220 0%,#16203a 60%,#0b1220 100%);
+    border-radius: 14px;
+    padding: 30px 32px 34px;
+    margin-bottom: 44px;
+    color: #fff;
+    box-shadow: 0 6px 30px rgba(11,18,32,0.35);
+    border: 2px solid rgba(194,224,0,0.25);
+  }
+
+  .tap-hero-eyebrow {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: #c2e000; margin-bottom: 10px;
+  }
+
+  .tap-hero h2 { font-family: Georgia,'Times New Roman',serif; font-size: 26px; font-weight: 400; margin-bottom: 10px; color: #fff; }
+  .tap-hero > p { font-size: 14.5px; line-height: 1.7; color: rgba(255,255,255,0.8); margin-bottom: 22px; max-width: 700px; }
+
+  .tap-layout { display: flex; gap: 30px; flex-wrap: wrap; align-items: center; justify-content: center; }
+
+  .tap-phone-wrap { position: relative; }
+
+  .tap-ripple {
+    position: absolute;
+    left: 50%; top: 44%;
+    width: 74px; height: 74px;
+    margin-left: -37px; margin-top: -37px;
+    border-radius: 50%;
+    border: 3px solid #c2e000;
+    opacity: 0;
+    animation: rip 2s infinite ease-out;
+    pointer-events: none;
+  }
+
+  .tap-ripple.d2 { animation-delay: 0.66s; }
+  .tap-ripple.d3 { animation-delay: 1.32s; }
+
+  @keyframes rip {
+    0%   { transform: scale(0.35); opacity: 0.95; }
+    100% { transform: scale(1.85); opacity: 0; }
+  }
+
+  .tap-finger {
+    position: absolute;
+    left: 50%; top: 44%;
+    margin-left: -20px; margin-top: -14px;
+    font-size: 40px;
+    animation: bump 1.1s infinite ease-in-out;
+    pointer-events: none;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+  }
+
+  @keyframes bump {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50%      { transform: translateY(9px) scale(0.94); }
+  }
+
+  .tap-count { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; justify-content: center; }
+
+  .tap-bead {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: rgba(194,224,0,0.12);
+    border: 2px solid #c2e000;
+    color: #c2e000;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 15px; font-weight: 700;
+  }
+
+  .tap-side { flex: 1 1 300px; min-width: 280px; max-width: 430px; }
+
+  .tap-do, .tap-dont {
+    border-radius: 10px;
+    padding: 15px 17px;
+    margin-bottom: 12px;
+  }
+
+  .tap-do { background: rgba(194,224,0,0.1); border: 1px solid rgba(194,224,0,0.4); }
+  .tap-dont { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.42); }
+
+  .tap-do-h, .tap-dont-h {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    margin-bottom: 9px;
+  }
+
+  .tap-do-h { color: #c2e000; }
+  .tap-dont-h { color: #fca5a5; }
+
+  .tap-side ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+
+  .tap-side li {
+    font-size: 13.5px; line-height: 1.55;
+    color: rgba(255,255,255,0.85);
+    display: flex; gap: 9px; align-items: flex-start;
+  }
+
+  .tap-do li::before { content: '\2713'; color: #c2e000; font-weight: 700; flex-shrink: 0; }
+  .tap-dont li::before { content: '\2715'; color: #fca5a5; font-weight: 700; flex-shrink: 0; }
+
+  /* ═══════════ QR MOCK ═══════════ */
+  .qr-frame {
+    width: 150px; height: 150px;
+    margin: 0 auto;
+    position: relative;
+    background: #fff;
+    padding: 8px;
+    border-radius: 8px;
+  }
+
+  .qr-corner {
+    position: absolute;
+    width: 26px; height: 26px;
+    border: 3px solid #c2e000;
+  }
+
+  .qr-tl { top: -9px; left: -9px; border-right: none; border-bottom: none; border-radius: 6px 0 0 0; }
+  .qr-tr { top: -9px; right: -9px; border-left: none; border-bottom: none; border-radius: 0 6px 0 0; }
+  .qr-bl { bottom: -9px; left: -9px; border-right: none; border-top: none; border-radius: 0 0 0 6px; }
+  .qr-br { bottom: -9px; right: -9px; border-left: none; border-top: none; border-radius: 0 0 6px 0; }
+
+  /* ═══════════ WHAT YOU NEED TABLE ═══════════ */
+  .id-table-wrap {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+
+  .id-table-intro { padding: 16px 22px 0; }
+  .id-table-intro p { font-size: 14px; line-height: 1.6; padding-bottom: 14px; border-bottom: 1px solid rgba(0,0,0,0.08); }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    background: #f7f9fc;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: #888;
+    padding: 10px 22px; text-align: left;
+    border-bottom: 2px solid rgba(0,0,0,0.08);
+  }
+
+  tbody tr { border-bottom: 1px solid rgba(0,0,0,0.07); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 14px 22px; font-size: 14px; vertical-align: middle; line-height: 1.55; }
+
+  .req-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px; font-weight: 700;
+    padding: 4px 12px; border-radius: 20px; white-space: nowrap;
+    background: rgba(0,122,61,0.1); color: #007a3d;
+  }
+
+  .req-pill.must { background: rgba(220,38,38,0.1); color: #dc2626; }
+
+  /* ═══════════ APPS GRID ═══════════ */
+  .apps-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(96px,1fr)); gap: 14px; margin-top: 6px; }
+
+  .app-tile { text-align: center; }
+
+  .app-sq {
+    width: 52px; height: 52px; border-radius: 13px;
+    margin: 0 auto 7px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    font-family: Georgia,'Times New Roman',serif;
+    font-size: 21px;
+    box-shadow: 0 3px 9px rgba(0,0,0,0.18);
+  }
+
+  .app-nm { font-size: 11.5px; color: #555; line-height: 1.3; }
+
+  /* ═══════════ WHAT'S DIFFERENT ═══════════ */
+  .diff-banner {
+    background: linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 44px;
+    color: #fff;
+    position: relative; overflow: hidden;
+    box-shadow: 0 4px 20px rgba(30,74,160,0.25);
+  }
+
+  .diff-banner::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(194,224,0,0.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .diff-banner h2 { font-family: Georgia,'Times New Roman',serif; font-size: 21px; font-weight: 400; margin-bottom: 10px; position: relative; color: #fff; }
+  .diff-banner > p { color: rgba(255,255,255,0.8); font-size: 14px; line-height: 1.7; margin-bottom: 22px; position: relative; }
+
+  .diff-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 12px; position: relative; }
+
+  .diff-card { border-radius: 8px; padding: 16px 18px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.13); }
+
+  .diff-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+    margin-bottom: 9px;
+  }
+
+  .diff-card.yes .diff-label { color: #c2e000; }
+  .diff-card.no  .diff-label { color: rgba(255,170,130,0.95); }
+
+  .diff-card ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  .diff-card li { font-size: 13px; color: rgba(255,255,255,0.72); display: flex; gap: 8px; align-items: flex-start; line-height: 1.5; }
+  .diff-card li::before { font-weight: 700; font-size: 11px; flex-shrink: 0; margin-top: 2px; }
+  .diff-card.yes li::before { content: '\2713'; color: #c2e000; }
+  .diff-card.no  li::before { content: '\2715'; color: rgba(255,150,110,0.95); }
+
+  /* ═══════════ COMPLETION ═══════════ */
+  .completion-banner {
+    background: linear-gradient(135deg,#00602f 0%,#007a3d 100%);
+    border-radius: 12px;
+    padding: 26px 30px;
+    margin-bottom: 44px;
+    color: #fff;
+    display: flex; gap: 18px; align-items: flex-start;
+    box-shadow: 0 4px 20px rgba(0,96,47,0.28);
+  }
+
+  .completion-tick { font-size: 34px; line-height: 1; flex-shrink: 0; }
+  .completion-banner h3 { font-family: Georgia,'Times New Roman',serif; font-size: 21px; font-weight: 400; margin-bottom: 8px; color: #fff; }
+  .completion-banner p { font-size: 14px; line-height: 1.7; color: rgba(255,255,255,0.85); }
+
+  /* ═══════════ FAQ ═══════════ */
+  .faq-wrap {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+
+  .faq-header { background: linear-gradient(135deg,#00602f 0%,#007a3d 100%); padding: 18px 26px; }
+  .faq-header h2 { font-family: Georgia,'Times New Roman',serif; font-size: 17px; font-weight: 400; color: #fff; margin-bottom: 2px; }
+  .faq-header p { font-family: 'Courier New', Consolas, monospace; font-size: 11px; color: rgba(255,255,255,0.45); letter-spacing: 0.06em; }
+
+  details { border-bottom: 1px solid rgba(0,0,0,0.08); }
+  details:last-child { border-bottom: none; }
+
+  summary {
+    padding: 15px 22px;
+    font-size: 14px; font-weight: 600; color: #1a1a1a;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    list-style: none; user-select: none;
+  }
+
+  summary::-webkit-details-marker { display: none; }
+  summary:hover { background: #f7f9fc; }
+  summary::after { content: '+'; font-size: 20px; font-weight: 300; color: #bbb; flex-shrink: 0; }
+  details[open] summary::after { content: '\00d7'; color: #007a3d; }
+  details[open] summary { color: #007a3d; background: #f7f9fc; }
+
+  .faq-answer { padding: 4px 22px 18px; font-size: 14px; line-height: 1.7; background: #f7f9fc; color: #333; }
+  .faq-answer p + p { margin-top: 10px; }
+  .faq-answer ul { margin: 8px 0 0 18px; }
+  .faq-answer li { margin-bottom: 5px; }
+
+  /* ═══════════ HELP ═══════════ */
+  .help-section {
+    background: linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);
+    border-radius: 12px;
+    padding: 32px 34px;
+    position: relative; overflow: hidden;
+    margin-bottom: 12px;
+    color: #fff;
+    box-shadow: 0 4px 22px rgba(30,74,160,0.3);
+  }
+
+  .help-section::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 80% 20%, rgba(194,224,0,0.1) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .help-section h2 { font-family: Georgia,'Times New Roman',serif; font-size: 22px; font-weight: 400; margin-bottom: 4px; position: relative; color: #fff; }
+  .help-sub { font-family: 'Courier New', Consolas, monospace; font-size: 11px; letter-spacing: 0.1em; color: rgba(255,255,255,0.42); margin-bottom: 20px; position: relative; }
+
+  .rmm-note {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 8px;
+    padding: 16px 18px;
+    display: flex; gap: 13px; align-items: flex-start;
+    font-size: 13.5px; line-height: 1.65;
+    color: rgba(255,255,255,0.78);
+    position: relative;
+  }
+
+  .rmm-note strong { color: #fff; }
+
+  .contact-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(230px,1fr)); gap: 12px; position: relative; }
+
+  .contact-card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 8px;
+    padding: 16px 18px;
+    display: flex; gap: 14px; align-items: center;
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .contact-card:hover { background: rgba(255,255,255,0.12); border-color: rgba(194,224,0,0.4); }
+  .contact-icon-wrap { font-size: 20px; flex-shrink: 0; }
+  .contact-label { font-family: 'Courier New', Consolas, monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.42); margin-bottom: 2px; }
+  .contact-value { font-size: 14px; font-weight: 600; color: #fff; }
+
+  /* ═══════════ RESPONSIVE ═══════════ */
+  @media (max-width: 700px) {
+    .page-body { padding: 28px 18px 56px; }
+    .sticky-nav-inner { padding: 0 14px; }
+    .danger-inner { padding: 22px 20px 24px; }
+    .danger-title { font-size: 23px; }
+    .overview-card, .diff-banner, .help-section, .tap-hero { padding: 24px 20px; }
+    .content-card { padding: 18px 18px 22px; }
+    .mock-arrow { display: none; }
+    tbody td, thead th { padding: 11px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ NAV ═══════════ -->
+<div class="sticky-nav">
+  <div class="sticky-nav-inner">
+    <button class="nav-link danger" data-goto="warning"><span class="nav-num red">!</span>Read first</button>
+    <button class="nav-link danger" data-goto="backup"><span class="nav-num red">1</span>Save your stuff</button>
+    <button class="nav-link" data-goto="need"><span class="nav-num blue">2</span>What you need</button>
+    <button class="nav-link" data-goto="wipe"><span class="nav-num red">3</span>Wipe the phone</button>
+    <button class="nav-link" data-goto="tap"><span class="nav-num">4</span>Tap &times;6</button>
+    <button class="nav-link" data-goto="scan"><span class="nav-num">5</span>Scan the QR</button>
+    <button class="nav-link" data-goto="signin"><span class="nav-num">6</span>Sign in</button>
+    <button class="nav-link" data-goto="apps"><span class="nav-num">7</span>Apps &amp; PIN</button>
+    <button class="nav-link" data-goto="finish"><span class="nav-num">8</span>Finish</button>
+    <button class="nav-link" data-goto="faq"><span class="nav-num">?</span>Problems</button>
+  </div>
+</div>
+
+<main class="page-body">
+
+  <!-- ═══════════ OVERVIEW ═══════════ -->
+  <div class="overview-card" id="overview">
+    <div class="card-label">Company-owned Android handset &middot; QR code setup</div>
+    <h1>Setting up your new company Android phone</h1>
+    <p>This guide takes you from a phone in your hand to a fully working company phone with your email, Teams and apps already on it. You do not need to be technical &mdash; every step is a picture and a sentence.</p>
+    <p>There is one thing you must understand before you begin, and it is on the red panel directly below: <strong style="color:#fff;">this process completely erases the phone</strong>.</p>
+    <div class="pill-row">
+      <span class="pill"><span class="dot" style="background:#c2e000;"></span>About 30&ndash;45 minutes</span>
+      <span class="pill"><span class="dot" style="background:#c2e000;"></span>Android 10 or newer</span>
+      <span class="pill"><span class="dot" style="background:#c2e000;"></span>Wi-Fi needed</span>
+      <span class="pill"><span class="dot" style="background:#fbbf24;"></span>Erases the phone</span>
+    </div>
+  </div>
+
+  <!-- ═══════════ THE BIG WARNING ═══════════ -->
+  <div class="danger-banner" id="warning">
+    <div class="danger-strip"></div>
+    <div class="danger-inner">
+      <div class="danger-eyebrow"><span>&#9888;</span> Stop &mdash; read this before you touch anything</div>
+      <div class="danger-title">This wipes the phone completely.<br>Everything on it will be gone.</div>
+      <p class="danger-lead">A company Android phone can only be set up on a phone that has been <strong>factory reset</strong> &mdash; returned to the state it was in when it came out of the box. There is no way to convert a phone that is already in use. Once the wipe starts it <strong>cannot be undone or stopped</strong>, and nothing can be recovered afterwards.</p>
+      <div class="gone-grid">
+        <div class="gone-card"><span class="gone-icon">&#128248;</span><div class="gone-name">Photos &amp; videos</div><div class="gone-note">Everything in your gallery</div></div>
+        <div class="gone-card"><span class="gone-icon">&#128172;</span><div class="gone-name">Texts &amp; WhatsApp</div><div class="gone-note">All message history</div></div>
+        <div class="gone-card"><span class="gone-icon">&#128100;</span><div class="gone-name">Contacts</div><div class="gone-note">If saved to the phone</div></div>
+        <div class="gone-card"><span class="gone-icon">&#128241;</span><div class="gone-name">Apps &amp; logins</div><div class="gone-note">Including banking apps</div></div>
+        <div class="gone-card"><span class="gone-icon">&#128273;</span><div class="gone-name">Authenticator codes</div><div class="gone-note">The riskiest one &mdash; see below</div></div>
+        <div class="gone-card"><span class="gone-icon">&#128193;</span><div class="gone-name">Downloads &amp; files</div><div class="gone-note">Anything saved locally</div></div>
+      </div>
+      <div style="margin-top:20px;background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.2);border-radius:10px;padding:16px 18px;">
+        <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:6px;">&#128161; If this is a brand-new phone straight out of the box</div>
+        <div style="font-size:13.5px;line-height:1.65;color:rgba(255,255,255,0.85);">There is nothing on it to lose, so you can skip <strong style="color:#fff;">Step&nbsp;1</strong> and <strong style="color:#fff;">Step&nbsp;3</strong> entirely and start at <strong style="color:#fff;">Step&nbsp;4 &mdash; the six taps</strong>. A brand-new phone is already in the state we need.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ ROADMAP ═══════════ -->
+  <div class="roadmap">
+    <div class="roadmap-title">The whole thing, on one line</div>
+    <div class="roadmap-lead">Eight steps. The two red ones are the ones that need care.</div>
+    <div class="rail">
+      <div class="rail-step red"><div class="rail-n">1</div><div class="rail-t">Save your stuff</div><div class="rail-d">Photos, messages, codes</div></div>
+      <div class="rail-step"><div class="rail-n">2</div><div class="rail-t">Get ready</div><div class="rail-d">Wi-Fi, password, QR code</div></div>
+      <div class="rail-step red"><div class="rail-n">3</div><div class="rail-t">Wipe the phone</div><div class="rail-d">Factory reset</div></div>
+      <div class="rail-step hero"><div class="rail-n">4</div><div class="rail-t">Tap the screen &times;6</div><div class="rail-d">Opens the QR scanner</div></div>
+      <div class="rail-step"><div class="rail-n">5</div><div class="rail-t">Scan the QR code</div><div class="rail-d">The one IT gave you</div></div>
+      <div class="rail-step"><div class="rail-n">6</div><div class="rail-t">Sign in</div><div class="rail-d">Work email &amp; password</div></div>
+      <div class="rail-step"><div class="rail-n">7</div><div class="rail-t">Apps &amp; PIN</div><div class="rail-d">Installs on their own</div></div>
+      <div class="rail-step"><div class="rail-n">8</div><div class="rail-t">Finish</div><div class="rail-d">Quick checks</div></div>
+    </div>
+  </div>
+
+  <!-- ═══════════ STEP 1: SAVE YOUR STUFF ═══════════ -->
+  <div class="section-heading" id="backup">
+    <div class="step-badge badge-red">1</div>
+    <div>
+      <div class="step-meta">Step One &middot; Do this days before, not minutes before</div>
+      <div class="step-title">Save anything you want to keep</div>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <p>Work through the list below on the phone <strong>before</strong> you wipe it. Anything not on this list, and not copied off the phone, is gone for good.</p>
+
+    <div class="callout callout-danger first">
+      <div class="callout-icon">&#128273;</div>
+      <div>
+        <div class="callout-title">The one that catches people out: your Authenticator app</div>
+        <div class="callout-body">If <strong>Microsoft Authenticator</strong> (or any other code app) is on this phone, wiping it destroys your ability to sign in &mdash; including the sign-in you need halfway through this very setup. <strong>Tell IT before you wipe.</strong> They will either move your Authenticator to another device or issue you a one-time <strong>Temporary Access Pass</strong> &mdash; a code you type instead of approving a notification. Do not start the wipe until you have that sorted.</div>
+      </div>
+    </div>
+
+    <div class="save-grid" style="margin-top:20px;">
+      <div class="save-card">
+        <div class="save-head"><span class="save-emoji">&#128248;</span><span class="save-name">Photos &amp; videos</span></div>
+        <div class="save-what">Nothing in your gallery survives a wipe.</div>
+        <div class="save-how"><b>How:</b> plug the phone into a computer with its USB cable and copy the <span class="tapme">DCIM</span> folder off &mdash; or open Google Photos and let it finish backing up before you start.</div>
+      </div>
+
+      <div class="save-card">
+        <div class="save-head"><span class="save-emoji">&#128172;</span><span class="save-name">WhatsApp</span></div>
+        <div class="save-what">Chats and photos are stored on the phone, not in the cloud, unless you back them up.</div>
+        <div class="save-how"><b>How:</b> WhatsApp &rarr; <span class="tapme">Settings</span> &rarr; <span class="tapme">Chats</span> &rarr; <span class="tapme">Chat backup</span> &rarr; <span class="tapme">Back up</span>. Wait for it to say it has finished.</div>
+      </div>
+
+      <div class="save-card">
+        <div class="save-head"><span class="save-emoji">&#128100;</span><span class="save-name">Contacts</span></div>
+        <div class="save-what">Numbers saved to the phone itself vanish. Numbers already in a Google or work account are safe.</div>
+        <div class="save-how"><b>How:</b> Contacts app &rarr; menu &rarr; <span class="tapme">Manage contacts</span> &rarr; <span class="tapme">Export</span> to a file, then email that file to yourself.</div>
+      </div>
+
+      <div class="save-card">
+        <div class="save-head"><span class="save-emoji">&#9993;</span><span class="save-name">Text messages</span></div>
+        <div class="save-what">SMS history is not backed up by anything as standard.</div>
+        <div class="save-how"><b>How:</b> if you need them, install <b>SMS Backup &amp; Restore</b> from the Play Store and save the backup file to your computer or email.</div>
+      </div>
+
+      <div class="save-card amber">
+        <div class="save-head"><span class="save-emoji">&#127974;</span><span class="save-name">Banking &amp; other apps</span></div>
+        <div class="save-what">Apps that "remember" you will not remember you afterwards.</div>
+        <div class="save-how"><b>How:</b> make sure you know the usernames and passwords, and that any app that texts you a code can still reach you.</div>
+      </div>
+
+      <div class="save-card amber">
+        <div class="save-head"><span class="save-emoji">&#128179;</span><span class="save-name">Google Pay / wallet cards</span></div>
+        <div class="save-what">Cards, tickets and passes are removed with the wipe.</div>
+        <div class="save-how"><b>How:</b> nothing to save &mdash; just be aware you will need to add cards again afterwards, and a company phone may not allow it.</div>
+      </div>
+
+      <div class="save-card green">
+        <div class="save-head"><span class="save-emoji">&#9729;</span><span class="save-name">Work email &amp; files</span></div>
+        <div class="save-what"><b>Already safe.</b> Anything in Outlook, Teams, OneDrive or SharePoint lives on Microsoft's servers, not the phone.</div>
+        <div class="save-how"><b>How:</b> nothing to do. It all comes back on its own once you sign in.</div>
+      </div>
+
+      <div class="save-card green">
+        <div class="save-head"><span class="save-emoji">&#128274;</span><span class="save-name">Passwords in your browser</span></div>
+        <div class="save-what">Safe <b>if</b> they were syncing to a Google or Microsoft account.</div>
+        <div class="save-how"><b>How:</b> open Chrome &rarr; <span class="tapme">Settings</span> and check it shows an account name at the top. If it says "Sign in", they are only on this phone.</div>
+      </div>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">&#9888;</div>
+      <div>
+        <div class="callout-title">Remove your personal Google account before you reset</div>
+        <div class="callout-body">Android has a theft protection feature that can lock a phone after a reset until the <em>previous</em> Google account is entered. Avoid it entirely: go to <span class="tapme">Settings</span> &rarr; <span class="tapme">Accounts</span>, tap your Google account and choose <span class="tapme">Remove account</span> <strong>before</strong> you do the reset in Step&nbsp;3. Do this last, after all your backups have finished.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:22px;">
+      <div style="font-size:14px;font-weight:700;margin-bottom:10px;">Final check &mdash; tick all five before you go any further</div>
+      <div class="tickbox"><div class="tick"></div><span>I have told IT that this phone is being wiped, and my sign-in codes are sorted (Authenticator moved, or a Temporary Access Pass issued).</span></div>
+      <div class="tickbox"><div class="tick"></div><span>Photos and videos are copied off the phone, or fully backed up.</span></div>
+      <div class="tickbox"><div class="tick"></div><span>WhatsApp backup has completed.</span></div>
+      <div class="tickbox"><div class="tick"></div><span>Contacts and any texts I care about are saved somewhere else.</span></div>
+      <div class="tickbox"><div class="tick"></div><span>My personal Google account has been removed from the phone.</span></div>
+    </div>
+  </div>
+
+  <!-- ═══════════ STEP 2: WHAT YOU NEED ═══════════ -->
+  <div class="section-heading" id="need">
+    <div class="step-badge badge-blue">2</div>
+    <div>
+      <div class="step-meta">Step Two &middot; Two minutes</div>
+      <div class="step-title">Have these ready before you start</div>
+    </div>
+  </div>
+
+  <div class="id-table-wrap">
+    <div class="id-table-intro">
+      <p>Getting halfway through and discovering you are missing one of these means starting the whole thing again. Check all six now.</p>
+    </div>
+    <table>
+      <thead>
+        <tr><th style="width:34%;">What</th><th>Why</th><th style="width:16%;">Needed?</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>The QR code from IT</strong></td>
+          <td>This is the code that tells the phone which organisation it belongs to. IT will email it to you or show it on a screen. Do not share it with anyone &mdash; treat it like a password.</td>
+          <td><span class="req-pill must">ESSENTIAL</span></td>
+        </tr>
+        <tr>
+          <td><strong>Wi-Fi you can join</strong></td>
+          <td>Setup downloads a lot. Mobile data alone is not reliable enough, and on a wiped phone the SIM may not connect until later.</td>
+          <td><span class="req-pill must">ESSENTIAL</span></td>
+        </tr>
+        <tr>
+          <td><strong>Your work email &amp; password</strong></td>
+          <td>You sign in partway through so the phone knows it is yours.</td>
+          <td><span class="req-pill must">ESSENTIAL</span></td>
+        </tr>
+        <tr>
+          <td><strong>A way to approve the sign-in</strong></td>
+          <td>Authenticator on a <em>different</em> device, a code by text, or the Temporary Access Pass from IT. <strong>Not</strong> the Authenticator on the phone you are wiping &mdash; that will be gone.</td>
+          <td><span class="req-pill must">ESSENTIAL</span></td>
+        </tr>
+        <tr>
+          <td><strong>Battery above 50%, or a charger</strong></td>
+          <td>The phone must not die partway through. A charger nearby is safest.</td>
+          <td><span class="req-pill">Strongly advised</span></td>
+        </tr>
+        <tr>
+          <td><strong>30&ndash;45 uninterrupted minutes</strong></td>
+          <td>Most of it is waiting, but you cannot pause halfway and come back tomorrow.</td>
+          <td><span class="req-pill">Strongly advised</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══════════ STEP 3: WIPE ═══════════ -->
+  <div class="section-heading" id="wipe">
+    <div class="step-badge badge-red">3</div>
+    <div>
+      <div class="step-meta">Step Three &middot; The point of no return</div>
+      <div class="step-title">Factory reset (wipe) the phone</div>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <div class="callout callout-danger first">
+      <div class="callout-icon">&#128721;</div>
+      <div>
+        <div class="callout-title">Last chance</div>
+        <div class="callout-body">Once you tap the final button on this screen, everything on the phone is erased and it cannot be stopped. If you have not finished Step&nbsp;1, go back and finish it now. <strong>New phone out of the box? Skip this step</strong> &mdash; go straight to Step&nbsp;4.</div>
+      </div>
+    </div>
+
+    <p style="margin-top:18px;">The wording varies slightly between makes of phone. The two most common paths are below &mdash; follow whichever matches yours. If neither matches, open <span class="tapme">Settings</span> and use the search box at the top: type <strong>reset</strong>.</p>
+
+    <div class="mock-row" style="margin-top:8px;">
+      <div class="mock-col">
+        <div class="mock-tag blue">Samsung phones</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="scr-status" style="color:#333;"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+            <div class="scr-pad" style="padding:14px 14px 18px;">
+              <div style="font-family:Georgia,serif;font-size:19px;margin-bottom:14px;">Settings</div>
+              <div style="font-size:12.5px;background:#eef2f8;border-radius:8px;padding:9px 11px;margin-bottom:7px;color:#667;">Connections</div>
+              <div style="font-size:12.5px;background:#eef2f8;border-radius:8px;padding:9px 11px;margin-bottom:7px;color:#667;">Battery &amp; device care</div>
+              <div style="font-size:12.5px;background:#e8f5ee;border:2px solid #007a3d;border-radius:8px;padding:9px 11px;margin-bottom:7px;font-weight:700;color:#00602f;">General management &rsaquo;</div>
+              <div style="font-size:12.5px;background:#e8f5ee;border:2px solid #007a3d;border-radius:8px;padding:9px 11px;margin-bottom:7px;font-weight:700;color:#00602f;margin-left:14px;">Reset &rsaquo;</div>
+              <div style="font-size:12.5px;background:#fef2f2;border:2px solid #dc2626;border-radius:8px;padding:9px 11px;font-weight:700;color:#991b1b;margin-left:28px;">Factory data reset</div>
+            </div>
+          </div>
+        </div>
+        <div class="mock-cap"><b>Settings</b> &rarr; General management &rarr; Reset &rarr; <b>Factory data reset</b></div>
+      </div>
+
+      <div class="mock-arrow">&nbsp;</div>
+
+      <div class="mock-col">
+        <div class="mock-tag blue">Google Pixel &amp; most others</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="scr-status" style="color:#333;"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+            <div class="scr-pad" style="padding:14px 14px 18px;">
+              <div style="font-family:Georgia,serif;font-size:19px;margin-bottom:14px;">Settings</div>
+              <div style="font-size:12.5px;background:#eef2f8;border-radius:8px;padding:9px 11px;margin-bottom:7px;color:#667;">Network &amp; internet</div>
+              <div style="font-size:12.5px;background:#eef2f8;border-radius:8px;padding:9px 11px;margin-bottom:7px;color:#667;">Display</div>
+              <div style="font-size:12.5px;background:#e8f5ee;border:2px solid #007a3d;border-radius:8px;padding:9px 11px;margin-bottom:7px;font-weight:700;color:#00602f;">System &rsaquo;</div>
+              <div style="font-size:12.5px;background:#e8f5ee;border:2px solid #007a3d;border-radius:8px;padding:9px 11px;margin-bottom:7px;font-weight:700;color:#00602f;margin-left:14px;">Reset options &rsaquo;</div>
+              <div style="font-size:12.5px;background:#fef2f2;border:2px solid #dc2626;border-radius:8px;padding:9px 11px;font-weight:700;color:#991b1b;margin-left:28px;">Erase all data</div>
+            </div>
+          </div>
+        </div>
+        <div class="mock-cap"><b>Settings</b> &rarr; System &rarr; Reset options &rarr; <b>Erase all data (factory reset)</b></div>
+      </div>
+    </div>
+
+    <div class="steps" style="margin-top:26px;">
+      <div class="step"><div class="step-num red">1</div><p>Open <span class="tapme">Settings</span> and follow whichever path above matches your phone.</p></div>
+      <div class="step"><div class="step-num red">2</div><p>You will see a list of everything that is about to be deleted. <strong>Read it.</strong> This is your last opportunity to spot something you forgot to save.</p></div>
+      <div class="step"><div class="step-num red">3</div><p>Tap <span class="tapme">Reset</span> or <span class="tapme">Erase all data</span> at the bottom.</p></div>
+      <div class="step"><div class="step-num red">4</div><p>Enter your <strong>screen PIN, pattern or password</strong> if asked, then confirm once more. Some phones also ask for your Google password here &mdash; another reason to have removed that account first.</p></div>
+      <div class="step"><div class="step-num red">5</div><p>The phone restarts and erases itself. This takes <strong>2 to 10 minutes</strong>. <strong>Leave it alone</strong> &mdash; do not press anything, and do not let it run out of battery.</p></div>
+      <div class="step"><div class="step-num red">6</div><p>When it finishes, the phone starts up on a <strong>welcome screen</strong> &mdash; usually the word <strong>&ldquo;Hi there&rdquo;</strong> or <strong>&ldquo;Welcome&rdquo;</strong> with a language picker. Stop here and go to Step&nbsp;4.</p></div>
+    </div>
+  </div>
+
+  <!-- ═══════════ STEP 4: THE TAP — HERO SECTION ═══════════ -->
+  <div class="section-heading" id="tap">
+    <div class="step-badge badge-green">4</div>
+    <div>
+      <div class="step-meta">Step Four &middot; The bit nobody guesses</div>
+      <div class="step-title">Tap the screen six times to open the QR scanner</div>
+    </div>
+  </div>
+
+  <div class="tap-hero">
+    <div class="tap-hero-eyebrow">The hidden step</div>
+    <h2>There is no button for this. You have to tap.</h2>
+    <p>On the very first screen after the wipe, tapping the same blank spot <strong style="color:#c2e000;">six times</strong> opens a hidden QR code scanner. This is how Android is designed to work &mdash; the option is deliberately hidden so that ordinary users do not stumble into it. Nothing on screen tells you it is there.</p>
+
+    <div class="tap-layout">
+      <div class="tap-phone-wrap">
+        <div class="phone">
+          <div class="phone-screen scr-dark">
+            <div class="scr-status"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+            <div class="scr-pad">
+              <div class="scr-hi">Hi there</div>
+              <div class="scr-sub">English (United Kingdom)</div>
+              <div style="flex:1;"></div>
+              <div style="border:2px dashed rgba(194,224,0,0.55);border-radius:12px;padding:26px 10px;text-align:center;font-size:11px;color:rgba(194,224,0,0.85);font-family:'Courier New',monospace;letter-spacing:0.08em;">TAP HERE &times;6<br><span style="opacity:0.6;">(blank area)</span></div>
+              <div style="flex:1;"></div>
+              <div class="scr-btn ghost">Start</div>
+            </div>
+          </div>
+        </div>
+        <div class="tap-ripple"></div>
+        <div class="tap-ripple d2"></div>
+        <div class="tap-ripple d3"></div>
+        <div class="tap-finger">&#128070;</div>
+      </div>
+
+      <div class="tap-side">
+        <div class="tap-do">
+          <div class="tap-do-h">Do this</div>
+          <ul>
+            <li>Tap on a <strong>blank part of the screen</strong> &mdash; the middle is ideal.</li>
+            <li>Tap the <strong>same spot</strong> each time, fairly quickly, like double-tapping three times over.</li>
+            <li>Six taps is the standard. If nothing happens, keep going to <strong>ten</strong> &mdash; some phones need a few more.</li>
+            <li>You are looking for the screen to change to a camera view or a message about a QR reader.</li>
+          </ul>
+        </div>
+        <div class="tap-dont">
+          <div class="tap-dont-h">Don&rsquo;t do this</div>
+          <ul>
+            <li>Don&rsquo;t press <strong>Start</strong>, <strong>Get started</strong> or <strong>Next</strong>. If you have, the trick will not work &mdash; see below.</li>
+            <li>Don&rsquo;t tap on the language name, a link, or any button.</li>
+            <li>Don&rsquo;t give up after two taps. Nothing visible happens until the sixth.</li>
+          </ul>
+        </div>
+        <div class="tap-count">
+          <div class="tap-bead">1</div><div class="tap-bead">2</div><div class="tap-bead">3</div>
+          <div class="tap-bead">4</div><div class="tap-bead">5</div><div class="tap-bead">6</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><p>Make sure you are on the <strong>very first screen</strong> after the wipe &mdash; usually &ldquo;Hi there&rdquo; or &ldquo;Welcome&rdquo;, with a language shown underneath.</p></div>
+      <div class="step"><div class="step-num">2</div><p>If you need to change the language, do that first. Then <strong>come back to this screen</strong>.</p></div>
+      <div class="step"><div class="step-num">3</div><p><strong>Tap the middle of the screen six times.</strong> Not the Start button &mdash; the empty space above it.</p></div>
+      <div class="step"><div class="step-num">4</div><p>The screen changes. Depending on the phone you will see a <strong>camera view</strong>, or a message offering to <strong>set up a QR reader</strong>. If it offers, accept it &mdash; it takes a few seconds.</p></div>
+      <div class="step"><div class="step-num">5</div><p>If it asks you to join <strong>Wi-Fi</strong> at this point, do so. Pick your network and enter the password.</p></div>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">&#8635;</div>
+      <div>
+        <div class="callout-title">Already pressed &ldquo;Start&rdquo; by mistake?</div>
+        <div class="callout-body">No harm done, but the six-tap trick only works on the first screen. Keep pressing <strong>Back</strong> until you return to it. If you cannot get back &mdash; for example you have already gone through several setup screens &mdash; the cleanest fix is to <strong>factory reset the phone again</strong> from Settings (Step&nbsp;3) and start over. It is quicker than it sounds on an otherwise empty phone.</div>
+      </div>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">&#8505;</div>
+      <div>
+        <div class="callout-title">If the taps genuinely will not work</div>
+        <div class="callout-body">There is a second way in that needs no tapping. Go through the setup screens normally until it asks you to <strong>sign in with a Google account</strong>. Where it asks for the email address, type <code class="inline-code">afw#setup</code> instead and tap Next. The phone downloads the same management app and then offers you the QR scanner. Ask IT if you would rather they walked you through it.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ STEP 5: SCAN ═══════════ -->
+  <div class="section-heading" id="scan">
+    <div class="step-badge badge-green">5</div>
+    <div>
+      <div class="step-meta">Step Five &middot; One minute</div>
+      <div class="step-title">Scan the QR code IT gave you</div>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <p>The camera is now looking for a QR code. Point it at the code IT sent you &mdash; on a computer screen, a printout, or another phone. It scans itself; there is no button to press.</p>
+
+    <div class="mock-row" style="margin-top:18px;">
+      <div class="mock-col">
+        <div class="mock-tag">What you should see</div>
+        <div class="phone">
+          <div class="phone-screen scr-dark">
+            <div class="scr-status"><span>9:41</span><span>&#9679;&#9679;&#9679;</span></div>
+            <div class="scr-pad" style="justify-content:center;">
+              <div style="font-size:13px;text-align:center;margin-bottom:20px;opacity:0.75;">Scan the QR code<br>provided by your organisation</div>
+              <div class="qr-frame">
+                <div class="qr-corner qr-tl"></div><div class="qr-corner qr-tr"></div>
+                <div class="qr-corner qr-bl"></div><div class="qr-corner qr-br"></div>
+                <svg viewBox="0 0 100 100" width="134" height="134" aria-hidden="true">
+                  <rect width="100" height="100" fill="#fff"/>
+                  <g fill="#111">
+                    <path d="M4 4h24v24H4zm4 4v16h16V8z"/><rect x="12" y="12" width="8" height="8"/>
+                    <path d="M72 4h24v24H72zm4 4v16h16V8z"/><rect x="80" y="12" width="8" height="8"/>
+                    <path d="M4 72h24v24H4zm4 4v16h16V76z"/><rect x="12" y="80" width="8" height="8"/>
+                    <rect x="34" y="6" width="5" height="5"/><rect x="44" y="6" width="5" height="5"/><rect x="56" y="12" width="5" height="5"/>
+                    <rect x="34" y="16" width="5" height="5"/><rect x="46" y="18" width="5" height="5"/><rect x="60" y="22" width="5" height="5"/>
+                    <rect x="6" y="34" width="5" height="5"/><rect x="16" y="34" width="5" height="5"/><rect x="26" y="40" width="5" height="5"/>
+                    <rect x="36" y="34" width="5" height="5"/><rect x="46" y="36" width="5" height="5"/><rect x="56" y="34" width="5" height="5"/><rect x="66" y="38" width="5" height="5"/><rect x="78" y="34" width="5" height="5"/><rect x="88" y="40" width="5" height="5"/>
+                    <rect x="8" y="46" width="5" height="5"/><rect x="20" y="48" width="5" height="5"/><rect x="34" y="46" width="5" height="5"/><rect x="44" y="50" width="5" height="5"/><rect x="58" y="46" width="5" height="5"/><rect x="70" y="48" width="5" height="5"/><rect x="84" y="46" width="5" height="5"/>
+                    <rect x="6" y="58" width="5" height="5"/><rect x="18" y="60" width="5" height="5"/><rect x="32" y="58" width="5" height="5"/><rect x="48" y="60" width="5" height="5"/><rect x="60" y="58" width="5" height="5"/><rect x="74" y="60" width="5" height="5"/><rect x="88" y="58" width="5" height="5"/>
+                    <rect x="36" y="70" width="5" height="5"/><rect x="50" y="72" width="5" height="5"/><rect x="64" y="70" width="5" height="5"/><rect x="78" y="72" width="5" height="5"/><rect x="90" y="70" width="5" height="5"/>
+                    <rect x="34" y="82" width="5" height="5"/><rect x="46" y="84" width="5" height="5"/><rect x="60" y="82" width="5" height="5"/><rect x="72" y="86" width="5" height="5"/><rect x="86" y="82" width="5" height="5"/>
+                    <rect x="38" y="92" width="5" height="5"/><rect x="52" y="90" width="5" height="5"/><rect x="68" y="92" width="5" height="5"/><rect x="82" y="90" width="5" height="5"/>
+                  </g>
+                </svg>
+              </div>
+              <div style="font-size:10.5px;text-align:center;margin-top:16px;opacity:0.45;font-family:'Courier New',monospace;">EXAMPLE ONLY &mdash; NOT A REAL CODE</div>
+            </div>
+          </div>
+        </div>
+        <div class="mock-cap">Hold the phone about <b>20&ndash;30&nbsp;cm</b> away and keep it still.</div>
+      </div>
+    </div>
+
+    <div class="steps" style="margin-top:24px;">
+      <div class="step"><div class="step-num">1</div><p>Open the QR code IT sent you on a computer screen, or use the printed copy.</p></div>
+      <div class="step"><div class="step-num">2</div><p>Hold the phone <strong>20&ndash;30&nbsp;cm</strong> from it, square on, and hold steady. It usually catches within a couple of seconds.</p></div>
+      <div class="step"><div class="step-num">3</div><p>Nothing happening? Move slightly closer or further away, wipe the camera lens, and make sure the screen you are scanning from is bright and not reflecting a window.</p></div>
+      <div class="step"><div class="step-num">4</div><p>Once it scans, the phone takes over on its own. You may be asked to <strong>join Wi-Fi</strong> and to <strong>accept Google's terms</strong> &mdash; both are normal. Say yes.</p></div>
+    </div>
+
+    <div class="callout callout-warn">
+      <div class="callout-icon">&#128274;</div>
+      <div>
+        <div class="callout-title">Treat the QR code like a password</div>
+        <div class="callout-body">Anyone who scans it onto a wiped phone can join it to the organisation. Don&rsquo;t forward it on, don&rsquo;t post it in a group chat, and delete your copy once you are finished.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ STEP 6: SETUP + SIGN IN ═══════════ -->
+  <div class="section-heading" id="signin">
+    <div class="step-badge badge-green">6</div>
+    <div>
+      <div class="step-meta">Step Six &middot; 10&ndash;20 minutes, mostly waiting</div>
+      <div class="step-title">Let it set itself up, then sign in</div>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <div class="callout callout-danger first">
+      <div class="callout-icon">&#9940;</div>
+      <div>
+        <div class="callout-title">Do not restart the phone from here until it has finished</div>
+        <div class="callout-body">This is the single most common way the process goes wrong. If the phone is restarted partway through, it can end up <strong>looking</strong> set up while actually being broken &mdash; and the only fix is to wipe it and start again. Even if a screen sits still for several minutes, leave it. Keep it plugged in.</div>
+      </div>
+    </div>
+
+    <div class="mock-row" style="margin-top:20px;">
+      <div class="mock-col">
+        <div class="mock-tag grey">A. It downloads</div>
+        <div class="phone">
+          <div class="phone-screen scr-dark">
+            <div class="scr-status"><span>9:44</span><span>&#9679;&#9679;&#9679;</span></div>
+            <div class="scr-pad" style="justify-content:center;align-items:center;text-align:center;">
+              <div style="width:52px;height:52px;border-radius:50%;border:4px solid rgba(255,255,255,0.15);border-top-color:#c2e000;margin-bottom:20px;"></div>
+              <div style="font-size:15px;font-weight:600;margin-bottom:8px;">Setting up your device</div>
+              <div style="font-size:12px;opacity:0.6;line-height:1.5;">Downloading Android Device Policy&hellip;<br>This can take several minutes.</div>
+            </div>
+          </div>
+        </div>
+        <div class="mock-cap">Leave it. No Google account is ever asked for.</div>
+      </div>
+
+      <div class="mock-arrow">&rarr;</div>
+
+      <div class="mock-col">
+        <div class="mock-tag grey">B. You sign in</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="scr-status" style="color:#333;"><span>9:52</span><span>&#9679;&#9679;&#9679;</span></div>
+            <div class="scr-pad" style="padding:20px 16px;">
+              <div style="font-size:11px;color:#888;margin-bottom:16px;">&#9632; Microsoft</div>
+              <div style="font-family:Georgia,serif;font-size:19px;margin-bottom:14px;">Sign in</div>
+              <div style="border:2px solid #007a3d;border-radius:7px;padding:9px 11px;font-size:12px;color:#333;margin-bottom:10px;">you@yourcompany.co.uk</div>
+              <div style="border:1px solid #ccd3de;border-radius:7px;padding:9px 11px;font-size:12px;color:#aab;margin-bottom:16px;">Password</div>
+              <div class="scr-btn" style="margin-top:0;">Next</div>
+              <div style="flex:1;"></div>
+              <div style="font-size:10.5px;color:#999;text-align:center;line-height:1.5;">Use your <b>work</b> email address,<br>not a personal one.</div>
+            </div>
+          </div>
+        </div>
+        <div class="mock-cap">Your normal work email and password.</div>
+      </div>
+
+      <div class="mock-arrow">&rarr;</div>
+
+      <div class="mock-col">
+        <div class="mock-tag grey">C. You approve it</div>
+        <div class="phone">
+          <div class="phone-screen">
+            <div class="scr-status" style="color:#333;"><span>9:53</span><span>&#9679;&#9679;&#9679;</span></div>
+            <div class="scr-pad" style="padding:20px 16px;justify-content:center;align-items:center;text-align:center;">
+              <div style="font-size:34px;margin-bottom:14px;">&#128274;</div>
+              <div style="font-size:15px;font-weight:700;margin-bottom:8px;">Approve sign-in request</div>
+              <div style="font-size:12px;color:#667;line-height:1.55;">Open Authenticator on your <b>other</b> device and enter the number shown.</div>
+              <div style="font-family:'Courier New',monospace;font-size:32px;font-weight:700;color:#2557b7;margin-top:18px;letter-spacing:0.08em;">47</div>
+            </div>
+          </div>
+        </div>
+        <div class="mock-cap">Or type the <b>Temporary Access Pass</b> IT gave you.</div>
+      </div>
+    </div>
+
+    <div class="steps" style="margin-top:26px;">
+      <div class="step"><div class="step-num">1</div><p>The phone downloads its management app on its own. The screen may say <strong>&ldquo;Setting up your device&rdquo;</strong> or <strong>&ldquo;Working on it&rdquo;</strong> for a long time. That is normal.</p></div>
+      <div class="step"><div class="step-num">2</div><p>Accept the Google terms if it asks. You will <strong>never</strong> be asked for a personal Google account &mdash; a work account is created behind the scenes for you.</p></div>
+      <div class="step"><div class="step-num">3</div><p>A Microsoft sign-in screen appears. Enter your <strong>work email address</strong>, then your password.</p></div>
+      <div class="step"><div class="step-num">4</div><p>Approve the sign-in the way you agreed with IT &mdash; a number to type into Authenticator on another device, a code by text, or the <strong>Temporary Access Pass</strong>.</p></div>
+      <div class="step"><div class="step-num">5</div><p>The phone finishes registering. When it drops you onto a home screen, the hard part is over.</p></div>
+    </div>
+
+    <div class="callout callout-info">
+      <div class="callout-icon">&#8505;</div>
+      <div>
+        <div class="callout-title">Why there is no Company Portal app on this phone</div>
+        <div class="callout-body">You may have used <strong>Company Portal</strong> to add a personal phone at work before. Company-owned phones are different: the whole device is managed from the start, so the app you will see is <strong>Microsoft Intune</strong> instead. It installs itself &mdash; you do not need to do anything with it.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ STEP 7: APPS + PIN ═══════════ -->
+  <div class="section-heading" id="apps">
+    <div class="step-badge badge-green">7</div>
+    <div>
+      <div class="step-meta">Step Seven &middot; Mostly automatic</div>
+      <div class="step-title">Your apps arrive, and you set a PIN</div>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <p>You do not install anything. The apps you need appear on their own over the next few minutes &mdash; already set up, with no Play Store sign-in and no passwords to enter for the install itself.</p>
+
+    <div class="apps-grid">
+      <div class="app-tile"><div class="app-sq" style="background:linear-gradient(135deg,#0f6cbd,#1a86e0);">O</div><div class="app-nm">Outlook<br><span style="opacity:0.6;">email &amp; diary</span></div></div>
+      <div class="app-tile"><div class="app-sq" style="background:linear-gradient(135deg,#4b53bc,#6264a7);">T</div><div class="app-nm">Teams<br><span style="opacity:0.6;">chat &amp; calls</span></div></div>
+      <div class="app-tile"><div class="app-sq" style="background:linear-gradient(135deg,#185abd,#2b7cd3);">W</div><div class="app-nm">Word</div></div>
+      <div class="app-tile"><div class="app-sq" style="background:linear-gradient(135deg,#107c41,#16a34a);">X</div><div class="app-nm">Excel</div></div>
+      <div class="app-tile"><div class="app-sq" style="background:linear-gradient(135deg,#4285f4,#34a853);">C</div><div class="app-nm">Chrome</div></div>
+      <div class="app-tile"><div class="app-sq" style="background:linear-gradient(135deg,#1f2430,#3b4256);">P</div><div class="app-nm">Pleo<br><span style="opacity:0.6;">expenses</span></div></div>
+      <div class="app-tile"><div class="app-sq" style="background:linear-gradient(135deg,#0b7dc7,#38b6ff);">I</div><div class="app-nm">Intune<br><span style="opacity:0.6;">company app</span></div></div>
+      <div class="app-tile"><div class="app-sq" style="background:linear-gradient(135deg,#0f6cbd,#5bb5f0);">A</div><div class="app-nm">Authenticator</div></div>
+    </div>
+
+    <div class="callout callout-info" style="margin-top:22px;">
+      <div class="callout-icon">&#128722;</div>
+      <div>
+        <div class="callout-title">The Play Store looks emptier than you are used to</div>
+        <div class="callout-body">On a company phone the Play Store only shows apps the organisation has approved. Anything extra that has been made available to you &mdash; travel, banking, maps and so on &mdash; will be sitting there ready to install. If something you genuinely need for work is missing, ask IT to add it rather than trying to install it another way.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:26px;font-size:15px;font-weight:700;margin-bottom:10px;">Setting your screen lock</div>
+    <p>The phone will ask you to set a screen lock, and it will insist on a proper one. This is a security requirement, not a suggestion &mdash; the phone will keep nagging until it is done.</p>
+
+    <div class="steps" style="margin-top:12px;">
+      <div class="step"><div class="step-num">1</div><p>Choose a <strong>6-digit PIN</strong> when prompted.</p></div>
+      <div class="step"><div class="step-num">2</div><p>Avoid anything obvious &mdash; no <code class="inline-code">123456</code>, no <code class="inline-code">111111</code>, and not your date of birth.</p></div>
+      <div class="step"><div class="step-num">3</div><p>Add your <strong>fingerprint or face</strong> afterwards if the phone offers. You still need the PIN, but you will rarely type it.</p></div>
+      <div class="step"><div class="step-num">4</div><p>The screen locks itself after a few minutes of inactivity. That is deliberate and cannot be turned off.</p></div>
+    </div>
+  </div>
+
+  <!-- ═══════════ STEP 8: FINISH ═══════════ -->
+  <div class="section-heading" id="finish">
+    <div class="step-badge badge-lime">8</div>
+    <div>
+      <div class="step-meta">Step Eight &middot; Five minutes</div>
+      <div class="step-title">Four quick checks, then you&rsquo;re done</div>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <p>These four take a couple of minutes each and save a support call later.</p>
+
+    <div class="tickbox"><div class="tick"></div><span><strong>Open Outlook and check your email arrives.</strong> Sign in with the same work account if it asks. Your calendar and contacts come with it.</span></div>
+    <div class="tickbox"><div class="tick"></div><span><strong>Check your contacts show up when someone rings.</strong> Open the Contacts app &mdash; your work contacts should be listed. If a known number rings and shows no name, tell IT.</span></div>
+    <div class="tickbox"><div class="tick"></div><span><strong>When you save a new contact, save it to your work account &mdash; not to &ldquo;Device&rdquo; or &ldquo;Phone&rdquo;.</strong> Android asks the first time and then remembers. Anything saved to &ldquo;Device&rdquo; is backed up by nothing and is lost if the phone is.</span></div>
+    <div class="tickbox"><div class="tick"></div><span><strong>Take a screenshot and try to open it.</strong> If the phone says it needs an image viewer, the gallery app has not been switched on yet &mdash; tell IT and they will push it to you. It is a two-minute fix at their end.</span></div>
+
+    <div class="callout callout-warn" style="margin-top:18px;">
+      <div class="callout-icon">&#128247;</div>
+      <div>
+        <div class="callout-title">Photos you take on this phone are not backed up automatically</div>
+        <div class="callout-body">A company phone has no Google Photos or Google One backup. If you take pictures for work, put them somewhere safe the same day &mdash; upload them to OneDrive, or turn on camera backup inside the OneDrive app (open OneDrive &rarr; your account picture &rarr; <span class="tapme">Camera backup</span>) and allow it access to your photos. Ask IT if you would like a hand with this at handover.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="completion-banner">
+    <div class="completion-tick">&#10003;</div>
+    <div>
+      <h3>That&rsquo;s it &mdash; the phone is set up</h3>
+      <p>Your email, calendar, Teams and work apps are all in place, the phone is protected, and IT can support it remotely. From here on it behaves like any other phone &mdash; the differences are listed just below so nothing takes you by surprise.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════ WHAT'S DIFFERENT ═══════════ -->
+  <div class="diff-banner" id="different">
+    <h2>What is different about a company phone</h2>
+    <p>None of this is a punishment or a comment on you &mdash; it is what keeps company information safe, and most of it you will simply never notice. Knowing it in advance saves a puzzled phone call in a fortnight.</p>
+    <div class="diff-grid">
+      <div class="diff-card yes">
+        <div class="diff-label">Works as normal</div>
+        <ul>
+          <li>Calls, texts, camera and web browsing</li>
+          <li>All your work email, files and Teams</li>
+          <li>Approved extra apps from the Play Store</li>
+          <li>Fingerprint or face unlock</li>
+          <li>Wi-Fi at home and at any site</li>
+        </ul>
+      </div>
+      <div class="diff-card no">
+        <div class="diff-label">Different from a personal phone</div>
+        <ul>
+          <li>You cannot add a personal Google account</li>
+          <li>The Play Store only shows approved apps</li>
+          <li>You cannot factory reset it yourself</li>
+          <li>Updates install themselves, automatically</li>
+          <li>Connecting it to a computer charges only &mdash; no file transfer</li>
+          <li>IT can wipe it remotely if it is lost or stolen</li>
+        </ul>
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.13);border-radius:8px;padding:18px 20px;margin-top:14px;position:relative;display:flex;gap:14px;align-items:flex-start;">
+      <div style="font-size:20px;flex-shrink:0;">&#128065;</div>
+      <div>
+        <div style="font-family:Georgia,'Times New Roman',serif;font-size:15px;color:#fff;margin-bottom:8px;">What IT can and cannot see</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.72);line-height:1.65;">IT can see which apps are installed, the phone&rsquo;s name and serial number, whether it is up to date, and whether it is locked with a PIN. <strong style="color:rgba(255,255,255,0.92);">IT cannot read your texts, listen to your calls, look through your photos, or see which websites you visit.</strong> This is a work phone, so treat it as one &mdash; but nobody is reading over your shoulder.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ FAQ ═══════════ -->
+  <div class="faq-wrap" id="faq">
+    <div class="faq-header">
+      <h2>When something goes wrong</h2>
+      <p>THE TWELVE THINGS THAT ACTUALLY HAPPEN</p>
+    </div>
+
+    <details>
+      <summary>I tapped the screen loads of times and nothing happened</summary>
+      <div class="faq-answer">
+        <p>Three things to check, in this order:</p>
+        <ul>
+          <li><strong>Are you on the very first screen?</strong> The trick only works on the "Hi there" / "Welcome" screen straight after a wipe. Press Back until you get there.</li>
+          <li><strong>Are you tapping blank space?</strong> Tapping the Start button, the language name or any other control does not count. Aim for the middle of the screen.</li>
+          <li><strong>Keep going.</strong> Six is standard but some handsets want a few more &mdash; tap up to ten times, in the same place, at a steady pace.</li>
+        </ul>
+        <p>Still nothing? Use the alternative route: go through setup normally, and when asked for a Google account type <code class="inline-code">afw#setup</code> as the email address.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>It says &ldquo;Can&rsquo;t set up device&rdquo; after I scanned the code</summary>
+      <div class="faq-answer">
+        <p>This almost never means the QR code is faulty, even though it reads that way. The usual causes are that the code has expired or been replaced, that your account is not yet cleared for a company phone, or that Wi-Fi dropped mid-way.</p>
+        <p>Try once more on a solid Wi-Fi connection. If it fails again, <strong>stop and contact IT</strong> &mdash; ask them to confirm the QR code is current and that your account is set up for a company-owned device. Repeated attempts will not fix it.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>The camera will not read the QR code</summary>
+      <div class="faq-answer">
+        <ul>
+          <li>Hold the phone <strong>20&ndash;30&nbsp;cm</strong> away, square on rather than at an angle.</li>
+          <li>Turn the brightness up on whatever is displaying the code.</li>
+          <li>If it is on a computer screen, zoom in so the code fills more of the screen &mdash; and zoom out again if that makes it worse. Both extremes cause failures.</li>
+          <li>Wipe the camera lens. On a phone fresh out of a box, peel the protective film off first.</li>
+          <li>A printed copy often scans more easily than a screen.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>The phone restarted in the middle of setting up</summary>
+      <div class="faq-answer">
+        <p>This is the one genuinely serious mishap. A phone interrupted partway through can end up half-registered &mdash; it looks finished but is not actually protected or properly connected.</p>
+        <p>Do not try to carry on. <strong>Factory reset the phone and start again from Step&nbsp;3.</strong> The second run takes far less time because there is nothing left to back up. Tell IT so they can clear away the half-finished record at their end.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>I can&rsquo;t approve the sign-in &mdash; my Authenticator was on this phone</summary>
+      <div class="faq-answer">
+        <p>This is the most common way people get stuck, and it is fixable but it needs IT. Contact them and ask for a <strong>Temporary Access Pass</strong> &mdash; a one-time code you type in instead of approving a notification. It is valid for a short period, so ask for it when you are ready to use it.</p>
+        <p>Once you are signed in, reinstall Authenticator and set it up again on this phone. Next time, move it before you wipe.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>It is asking for a Google account and password I don&rsquo;t recognise</summary>
+      <div class="faq-answer">
+        <p>You have hit Android's anti-theft protection. It triggers when a phone is reset while a Google account is still signed into it, and it demands that same account before the phone can be used.</p>
+        <p>Enter the Google account that was on the phone before the wipe, if you know it. If you do not, contact IT &mdash; on a company-supplied handset they may be able to help, but it can require proof of purchase from the supplier. This is exactly what removing the Google account in Step&nbsp;1 avoids.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>It has been sitting on the same screen for ages</summary>
+      <div class="faq-answer">
+        <p>Give it more time than feels reasonable. Downloading and applying the settings genuinely can take <strong>15 minutes or more</strong> on a slow connection, and the progress indicator often does not move.</p>
+        <p>Plug the phone in and leave it. Only if <strong>nothing at all</strong> has changed after 30 minutes should you assume it is stuck &mdash; and then the fix is a factory reset and a fresh start, not a restart.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>I took a screenshot and it says I need an image viewer</summary>
+      <div class="faq-answer">
+        <p>Nothing is broken. A company phone starts with most built-in apps switched off, and the gallery is sometimes one of them. It needs turning on centrally &mdash; you cannot fix it from the phone.</p>
+        <p>Tell IT, mentioning the <strong>make and model</strong> of your phone. They enable the right gallery app for that handset and it appears within a few minutes.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>The Play Store won&rsquo;t let me install an app I want</summary>
+      <div class="faq-answer">
+        <p>Expected. The Play Store on a company phone only offers apps that have been approved, and there is no way around it from the phone &mdash; that is the point of the control, not a fault.</p>
+        <p>If you need something for work, ask IT to add it. Personal apps generally will not be approved for a company handset.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Where is Company Portal? I used it on my personal phone</summary>
+      <div class="faq-answer">
+        <p>It is not used on company-owned phones. Company Portal is for adding a personal phone to work; here the whole phone is company-managed from the moment it is set up, so the equivalent app is <strong>Microsoft Intune</strong>. It installs itself, and in day-to-day use you will not need to open it.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>Can I put my personal Google account on it?</summary>
+      <div class="faq-answer">
+        <p>No &mdash; personal Google accounts are blocked on this phone, so Gmail, personal Google Photos and personal Play Store purchases are not available on it.</p>
+        <p>That is a deliberate decision. It keeps the line between work and personal clean, and it means nothing personal of yours can be caught up if the phone ever has to be wiped.</p>
+      </div>
+    </details>
+
+    <details>
+      <summary>My phone was lost or stolen &mdash; what happens now?</summary>
+      <div class="faq-answer">
+        <p>Tell IT immediately. They will wipe it remotely so nothing on it can be reached, whether or not the thief knows your PIN.</p>
+        <p>Nothing of yours is lost with it: your email, calendar, contacts, Teams messages and files all live on Microsoft's servers. Once you have a replacement, set it up with this same guide, sign in, and everything comes back. Note that you will need a way to approve that sign-in without the missing phone &mdash; ask IT for a Temporary Access Pass at the same time as you report it.</p>
+      </div>
+    </details>
+  </div>
+
+  <!-- ═══════════ HELP ═══════════ -->
+  <div class="help-section" id="help">
+    <h2>Need help?</h2>
+    <p class="help-sub">IT Service Management &middot; Active8 Managed Technologies</p>
+    <div class="rmm-note">
+      <div>&#8505;</div>
+      <div>If you get stuck, contact IT Support with your <strong>name</strong>, your <strong>work email address</strong>, the <strong>make and model</strong> of the phone, the <strong>step number</strong> you are on, and a photo or screenshot of what is on the screen. That is usually enough to answer it first time.</div>
+    </div>
+    <div class="contact-grid" style="margin-top:20px;">
+      <a href="mailto:ITSupport@a8mt.co.uk" class="contact-card">
+        <div class="contact-icon-wrap">&#128231;</div>
+        <div>
+          <div class="contact-label">Email</div>
+          <div class="contact-value">ITSupport@a8mt.co.uk</div>
+        </div>
+      </a>
+      <a href="tel:03339997355" class="contact-card">
+        <div class="contact-icon-wrap">&#128222;</div>
+        <div>
+          <div class="contact-label">Phone</div>
+          <div class="contact-value">0333 999 7355</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+</main>
+
+<footer style="background:linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);border-top:1px solid rgba(194,224,0,0.2);padding:18px 40px;text-align:center;">
+  <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">Prepared by <span style="color:rgba(255,255,255,0.85);">Active8 Managed Technologies Limited</span> &middot; IT Service Management</div>
+  <div style="font-family:'Courier New',Consolas,monospace;font-size:10px;color:rgba(255,255,255,0.32);margin-top:5px;">v1.0 &middot; August 2026 &middot; This article is maintained by the Active 8 IT team.</div>
+</footer>
+
+<script>
+(function(){
+  /* ── iframe auto-resize ─────────────────────────────────────── */
+  function sendHeight(){
+    var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+    window.parent.postMessage({type:'a8-iframe-resize', height:h}, '*');
+    try { if(window.frameElement) window.frameElement.style.height = (h+20)+'px'; } catch(e){}
+  }
+  sendHeight();
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+  if(window.ResizeObserver){ new ResizeObserver(sendHeight).observe(document.body); }
+  var attempts = 0;
+  var timer = setInterval(function(){
+    sendHeight();
+    if(++attempts >= 40) clearInterval(timer);
+  }, 300);
+
+  /* ── nav jump links ─────────────────────────────────────────── */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-goto]'), function(link){
+    link.addEventListener('click', function(){
+      var el = document.getElementById(link.getAttribute('data-goto'));
+      if(el && el.scrollIntoView) el.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
+
+  /* ── FAQ opening changes height ─────────────────────────────── */
+  Array.prototype.forEach.call(document.querySelectorAll('details'), function(d){
+    d.addEventListener('toggle', sendHeight);
+  });
+})();
+</script>
+
+</body>
+</html>
