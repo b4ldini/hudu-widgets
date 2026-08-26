@@ -788,36 +788,6 @@
   .faq-body { padding: 14px 16px 16px; font-size: 13.5px; line-height: 1.7; color: #334155; }
   .faq-body p + p { margin-top: 10px; }
 
-  /* ═══════════ CONTACT ═══════════ */
-  .contact-card-wrap {
-    background: linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);
-    border-radius: 12px;
-    padding: 26px 30px 28px;
-    color: #fff;
-    box-shadow: 0 4px 22px rgba(30,74,160,0.26);
-  }
-
-  .contact-card-wrap h2 { font-family: Georgia,'Times New Roman',serif; font-size: 22px; font-weight: 400; color: #fff; margin-bottom: 8px; }
-  .contact-card-wrap p { font-size: 14px; color: rgba(255,255,255,0.82); line-height: 1.7; }
-
-  .contact-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(230px,1fr)); gap: 12px; }
-
-  .contact-card {
-    display: flex; align-items: center; gap: 13px;
-    background: rgba(255,255,255,0.09);
-    border: 1px solid rgba(255,255,255,0.17);
-    border-radius: 10px;
-    padding: 14px 16px;
-    text-decoration: none;
-    transition: background 0.15s;
-  }
-
-  .contact-card:hover { background: rgba(255,255,255,0.15); }
-
-  .contact-icon-wrap { font-size: 20px; flex-shrink: 0; }
-  .contact-label { font-family: 'Courier New', Consolas, monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.5); }
-  .contact-value { font-size: 14px; font-weight: 600; color: #fff; margin-top: 2px; }
-
   @media (max-width: 620px) {
     .page-body { padding: 26px 18px 56px; }
     .sticky-nav-inner { padding: 0 14px; }
@@ -1828,28 +1798,6 @@ Get-ItemProperty -LiteralPath $Key -Name $Name</pre>
       <summary>The block is deployed, but a machine still shows WorkplaceJoined : YES.</summary>
       <div class="faq-body"><p>Expected. The block only prevents <em>new</em> workplace joins &mdash; it does not remove one that already exists. Work through Part&nbsp;One on that machine.</p></div>
     </details>
-  </div>
-
-  <!-- ═══════════ CONTACT ═══════════ -->
-  <div class="contact-card-wrap">
-    <h2>Not sure? Ask before you click.</h2>
-    <p>Every escalation route in this article is there because guessing costs a rebuild and asking costs thirty seconds.</p>
-    <div class="contact-grid" style="margin-top:20px;">
-      <a href="mailto:ITSupport@a8mt.co.uk" class="contact-card">
-        <div class="contact-icon-wrap">&#128231;</div>
-        <div>
-          <div class="contact-label">Email</div>
-          <div class="contact-value">ITSupport@a8mt.co.uk</div>
-        </div>
-      </a>
-      <a href="tel:03339997355" class="contact-card">
-        <div class="contact-icon-wrap">&#128222;</div>
-        <div>
-          <div class="contact-label">Phone</div>
-          <div class="contact-value">0333 999 7355</div>
-        </div>
-      </a>
-    </div>
   </div>
 
 </main>
