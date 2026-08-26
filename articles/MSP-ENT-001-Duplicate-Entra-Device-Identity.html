@@ -1,0 +1,1924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compliant in Intune but Blocked at Sign-in &ndash; Duplicate Entra Device Identity</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background: #f7f9fc;
+  }
+
+  /* ═══════════ NAV ═══════════ */
+  .sticky-nav {
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  }
+
+  .sticky-nav-inner {
+    padding: 0 40px;
+    display: flex;
+    align-items: stretch;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .sticky-nav-inner::-webkit-scrollbar { display: none; }
+
+  .nav-link {
+    padding: 0 14px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #888;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+    background: none;
+    border-top: none; border-left: none; border-right: none;
+    font-family: inherit;
+  }
+
+  .nav-link:hover { color: #1e4aa0; background: rgba(37,87,183,0.07); border-bottom-color: #2557b7; }
+  .nav-link.danger:hover { color: #b91c1c; background: rgba(220,38,38,0.07); border-bottom-color: #dc2626; }
+
+  .nav-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px; font-weight: 600;
+    flex-shrink: 0;
+    background: rgba(37,87,183,0.12); color: #2557b7;
+  }
+
+  .nav-num.red  { background: rgba(220,38,38,0.14); color: #dc2626; }
+  .nav-num.grey { background: rgba(0,0,0,0.07); color: #777; }
+  .nav-num.lime { background: rgba(138,170,0,0.18); color: #6f8800; }
+
+  /* ═══════════ PAGE ═══════════ */
+  .page-body { padding: 40px 40px 72px; }
+
+  /* ═══════════ OVERVIEW ═══════════ */
+  .overview-card {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 60%, #1e4aa0 100%);
+    border-radius: 12px;
+    padding: 30px 34px;
+    margin-bottom: 22px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 22px rgba(30,74,160,0.28);
+  }
+
+  .overview-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(194,224,0,0.14) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .card-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .overview-card h1 {
+    font-family: Georgia,'Times New Roman',serif;
+    font-size: 27px; font-weight: 400; line-height: 1.2;
+    color: #fff; margin-bottom: 12px; position: relative;
+  }
+
+  .overview-card p { color: rgba(255,255,255,0.84); font-size: 14px; line-height: 1.7; margin-bottom: 10px; position: relative; }
+
+  .pill-row { display: flex; gap: 8px; flex-wrap: wrap; position: relative; margin-top: 18px; }
+
+  .pill {
+    padding: 4px 12px;
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 20px;
+    font-size: 12px; font-weight: 500;
+    color: rgba(255,255,255,0.78);
+  }
+
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ═══════════ THE STOP BOX ═══════════ */
+  .danger-banner {
+    background: linear-gradient(135deg, #991b1b 0%, #dc2626 55%, #991b1b 100%);
+    border-radius: 14px;
+    padding: 0;
+    margin-bottom: 44px;
+    color: #fff;
+    overflow: hidden;
+    box-shadow: 0 6px 30px rgba(153,27,27,0.35);
+    border: 3px solid #7f1d1d;
+  }
+
+  .danger-strip {
+    background: repeating-linear-gradient(45deg,#fbbf24 0 14px,#1a1a1a 14px 28px);
+    height: 10px;
+  }
+
+  .danger-inner { padding: 26px 32px 30px; position: relative; }
+
+  .danger-eyebrow {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: #fecaca; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .danger-title {
+    font-family: Georgia,'Times New Roman',serif;
+    font-size: 28px; line-height: 1.2; color: #fff; margin-bottom: 12px;
+  }
+
+  .danger-lead { font-size: 15px; line-height: 1.7; color: rgba(255,255,255,0.92); margin-bottom: 20px; max-width: 760px; }
+
+  .kill-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(290px,1fr)); gap: 14px; }
+
+  .kill-card {
+    background: rgba(0,0,0,0.28);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 11px;
+    padding: 17px 19px 19px;
+  }
+
+  .kill-tag {
+    display: inline-block;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    padding: 4px 11px; border-radius: 20px; margin-bottom: 10px;
+    background: #dc2626; color: #fff;
+  }
+
+  .kill-what {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 14.5px; font-weight: 700; color: #fff; line-height: 1.4; margin-bottom: 9px;
+    word-break: break-word;
+  }
+
+  .kill-why { font-size: 13.5px; line-height: 1.65; color: rgba(255,255,255,0.84); }
+  .kill-why strong { color: #fff; }
+
+  .ask-box {
+    background: rgba(0,0,0,0.42);
+    border-left: 4px solid #c2e000;
+    border-radius: 8px;
+    padding: 14px 17px;
+    margin-top: 20px;
+  }
+
+  .ask-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+    color: #c2e000; margin-bottom: 8px;
+  }
+
+  .ask-quote {
+    font-family: Georgia,'Times New Roman',serif;
+    font-size: 15px; font-style: italic; line-height: 1.6;
+    color: #fff;
+  }
+
+  /* ═══════════ SECTION HEADING ═══════════ */
+  .section-heading { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; }
+
+  .step-badge {
+    flex-shrink: 0;
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: Georgia,'Times New Roman',serif;
+    font-size: 20px; color: #fff;
+  }
+
+  .badge-blue  { background: #2557b7; }
+  .badge-red   { background: #dc2626; }
+  .badge-lime  { background: #8aaa00; }
+  .badge-grey  { background: #64748b; }
+  .badge-green { background: #007a3d; }
+
+  .step-meta {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: #999; margin-bottom: 4px;
+  }
+
+  .step-title { font-family: Georgia,'Times New Roman',serif; font-size: 21px; font-weight: 400; line-height: 1.2; }
+
+  /* ═══════════ CARDS & STEPS ═══════════ */
+  .content-card {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+    padding: 22px 26px 26px;
+  }
+
+  .content-card > p { font-size: 14px; line-height: 1.7; margin-bottom: 14px; }
+  .content-card > p:last-child { margin-bottom: 0; }
+
+  .sub-h {
+    font-family: Georgia,'Times New Roman',serif;
+    font-size: 17px; font-weight: 400;
+    margin: 26px 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(0,0,0,0.09);
+  }
+
+  .sub-h:first-child { margin-top: 0; }
+
+  .steps { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+
+  .step {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: #f7f9fc;
+    border-radius: 8px;
+    padding: 11px 14px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .step-num {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: rgba(37,87,183,0.1); color: #2557b7;
+    border: 1px solid rgba(37,87,183,0.25);
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+
+  .step-num.red { background: rgba(220,38,38,0.1); color: #dc2626; border-color: rgba(220,38,38,0.25); }
+  .step p { font-size: 13px; padding-top: 3px; }
+  .step p strong { font-weight: 700; }
+
+  code.inline-code {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 12px;
+    background: rgba(37,87,183,0.08);
+    border: 1px solid rgba(37,87,183,0.2);
+    padding: 1px 6px; border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  code.inline-code.red {
+    background: rgba(220,38,38,0.08);
+    border-color: rgba(220,38,38,0.25);
+    color: #b91c1c;
+  }
+
+  .clickpath {
+    display: inline-block;
+    font-weight: 700;
+    background: #1a1a1a; color: #fff;
+    border-radius: 6px; padding: 1px 8px;
+    font-size: 12.5px;
+    white-space: nowrap;
+  }
+
+  /* ═══════════ CALLOUTS ═══════════ */
+  .callout {
+    padding: 14px 16px;
+    margin-top: 16px;
+    border-radius: 8px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+
+  .callout.first { margin-top: 0; }
+  .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+  .callout-title { font-weight: 700; font-size: 13px; margin-bottom: 3px; }
+  .callout-body { font-size: 13px; line-height: 1.65; }
+  .callout-body code.inline-code { background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.14); }
+
+  .callout-info { background: #eff6ff; border: 1px solid #bfdbfe; }
+  .callout-info .callout-icon { color: #2563eb; }
+  .callout-info .callout-title { color: #1e40af; }
+  .callout-info .callout-body { color: #1e3a5f; }
+
+  .callout-warn { background: #fffbeb; border: 1px solid #fde68a; }
+  .callout-warn .callout-icon { color: #d97706; }
+  .callout-warn .callout-title { color: #92400e; }
+  .callout-warn .callout-body { color: #78350f; }
+
+  .callout-danger { background: #fef2f2; border: 2px solid #fca5a5; }
+  .callout-danger .callout-icon { color: #dc2626; }
+  .callout-danger .callout-title { color: #991b1b; }
+  .callout-danger .callout-body { color: #7f1d1d; }
+
+  .callout-ok { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .callout-ok .callout-icon { color: #16a34a; }
+  .callout-ok .callout-title { color: #14532d; }
+  .callout-ok .callout-body { color: #14532d; }
+
+  /* ═══════════ CODE BLOCKS ═══════════ */
+  .code-wrap {
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 14px 0;
+    border: 1px solid #232a36;
+    background: #12161f;
+    box-shadow: 0 3px 16px rgba(0,0,0,0.18);
+  }
+
+  .code-bar {
+    background: #1b212c;
+    border-bottom: 1px solid #262e3c;
+    padding: 8px 12px 8px 14px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+
+  .code-lang {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    color: #8fa3c4;
+  }
+
+  .code-copy {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    color: #c2e000;
+    background: rgba(194,224,0,0.1);
+    border: 1px solid rgba(194,224,0,0.35);
+    border-radius: 5px;
+    padding: 4px 10px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  .code-copy:hover { background: rgba(194,224,0,0.2); }
+  .code-copy.done { color: #86efac; border-color: rgba(134,239,172,0.45); background: rgba(134,239,172,0.12); }
+
+  pre.code {
+    margin: 0;
+    padding: 15px 16px;
+    overflow-x: auto;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: #e2e8f0;
+    white-space: pre;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  pre.code .cm { color: #6b7c99; }
+  pre.code .hl { color: #c2e000; font-weight: 700; }
+  pre.code .dim { color: #7b879b; }
+
+  /* ═══════════ TWO IDENTITIES ═══════════ */
+  .idrow { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 14px; margin-top: 4px; }
+
+  .idcard {
+    border-radius: 12px;
+    padding: 18px 20px 20px;
+    border: 2px solid;
+  }
+
+  .idcard.good { background: #f0fdf4; border-color: #86efac; }
+  .idcard.bad  { background: #fef2f2; border-color: #fca5a5; }
+
+  .id-tag {
+    display: inline-block;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 4px 11px; border-radius: 20px; margin-bottom: 10px; color: #fff;
+  }
+
+  .idcard.good .id-tag { background: #16a34a; }
+  .idcard.bad  .id-tag { background: #dc2626; }
+
+  .id-name { font-family: Georgia,'Times New Roman',serif; font-size: 19px; margin-bottom: 4px; }
+  .idcard.good .id-name { color: #14532d; }
+  .idcard.bad  .id-name { color: #991b1b; }
+
+  .id-line { font-size: 13px; line-height: 1.6; display: flex; gap: 8px; padding: 6px 0; border-top: 1px dashed rgba(0,0,0,0.12); }
+  .id-line:first-of-type { border-top: none; }
+  .id-k { font-family: 'Courier New', Consolas, monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.6; flex: 0 0 118px; padding-top: 2px; }
+  .id-v { flex: 1; font-weight: 600; }
+  .idcard.good .id-v { color: #14532d; }
+  .idcard.bad  .id-v { color: #7f1d1d; }
+
+  .gate {
+    margin-top: 16px;
+    background: #0f172a;
+    border-radius: 11px;
+    padding: 18px 20px;
+    color: #fff;
+  }
+
+  .gate-h {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;
+    color: #94a3b8; margin-bottom: 12px;
+  }
+
+  .gate-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 9px 0; font-size: 13.5px; }
+  .gate-row + .gate-row { border-top: 1px solid rgba(255,255,255,0.09); }
+  .gate-from { flex: 1 1 200px; color: rgba(255,255,255,0.86); }
+  .gate-arrow { color: #64748b; font-size: 16px; }
+
+  .gate-res {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 5px 12px; border-radius: 20px; white-space: nowrap;
+  }
+
+  .gate-res.pass { background: rgba(34,197,94,0.16); color: #4ade80; border: 1px solid rgba(74,222,128,0.5); }
+  .gate-res.fail { background: rgba(239,68,68,0.16); color: #fca5a5; border: 1px solid rgba(252,165,165,0.5); }
+
+  /* ═══════════ DATA TABLE ═══════════ */
+  .tbl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 14px 0; }
+
+  table.dtable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 520px;
+  }
+
+  table.dtable th {
+    background: #eef2f8;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: #5a6b85;
+    padding: 9px 13px;
+    border: 1px solid rgba(0,0,0,0.1);
+    text-align: left;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  table.dtable td {
+    padding: 10px 13px;
+    border: 1px solid rgba(0,0,0,0.1);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+
+  table.dtable tr:nth-child(even) td { background: #f7f9fc; }
+  table.dtable td.good { background: #f0fdf4 !important; }
+  table.dtable td.bad  { background: #fef2f2 !important; }
+  table.dtable td.warn { background: #fffbeb !important; }
+
+  .verdict {
+    display: inline-block;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 4px; white-space: nowrap;
+  }
+
+  .verdict.ok    { background: rgba(22,163,74,0.14); color: #15803d; border: 1px solid rgba(22,163,74,0.4); }
+  .verdict.stop  { background: rgba(220,38,38,0.14); color: #b91c1c; border: 1px solid rgba(220,38,38,0.4); }
+  .verdict.esc   { background: rgba(217,119,6,0.14); color: #b45309; border: 1px solid rgba(217,119,6,0.4); }
+
+  /* ═══════════ CONDITION CHECKLIST ═══════════ */
+  .cond-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .cond {
+    display: flex; align-items: flex-start; gap: 11px;
+    padding: 12px 15px;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-left: 4px solid #2557b7;
+    border-radius: 8px;
+    background: #f7f9fc;
+  }
+
+  .cond-n {
+    width: 22px; height: 22px; flex-shrink: 0;
+    border: 2px solid #2557b7; border-radius: 5px;
+    background: #fff; margin-top: 1px;
+  }
+
+  .cond span { font-size: 13.5px; line-height: 1.55; }
+
+  /* ═══════════ SETTINGS MOCK ═══════════ */
+  .mock-wrap { display: flex; justify-content: center; margin: 6px 0 4px; }
+
+  .win-panel {
+    width: 100%;
+    max-width: 620px;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.13);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.14);
+  }
+
+  .win-bar {
+    background: #f1f4f9;
+    border-bottom: 1px solid rgba(0,0,0,0.09);
+    padding: 10px 16px;
+    display: flex; align-items: center; gap: 9px;
+  }
+
+  .win-dots { display: flex; gap: 5px; }
+  .win-dot { width: 9px; height: 9px; border-radius: 50%; background: #cbd5e1; }
+  .win-title { font-size: 12px; color: #64748b; font-weight: 600; }
+
+  .win-body { padding: 18px 20px 20px; }
+
+  .win-crumb {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px; color: #94a3b8; letter-spacing: 0.05em;
+    margin-bottom: 14px;
+  }
+
+  .acct {
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 9px;
+    padding: 13px 15px;
+    margin-bottom: 11px;
+    background: #fbfcfe;
+    position: relative;
+  }
+
+  .acct.keep   { border: 2px solid #16a34a; background: #f0fdf4; }
+  .acct.remove { border: 2px solid #dc2626; background: #fef2f2; }
+
+  .acct-top { display: flex; align-items: center; gap: 11px; }
+
+  .acct-ic {
+    width: 34px; height: 34px; border-radius: 7px;
+    background: #2557b7; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+
+  .acct.remove .acct-ic { background: #dc2626; }
+
+  .acct-name { font-size: 13.5px; font-weight: 700; }
+  .acct-sub  { font-size: 11.5px; color: #64748b; margin-top: 1px; }
+
+  .acct-btns { margin-left: auto; display: flex; gap: 7px; flex-shrink: 0; }
+
+  .acct-btn {
+    font-size: 11.5px; font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 5px;
+    border: 1px solid rgba(0,0,0,0.18);
+    background: #fff; color: #334155;
+    white-space: nowrap;
+  }
+
+  .acct-btn.danger { background: #dc2626; color: #fff; border-color: #b91c1c; }
+
+  .acct-info {
+    margin-top: 11px; padding-top: 11px;
+    border-top: 1px dashed rgba(0,0,0,0.16);
+    font-size: 12.5px; line-height: 1.6; color: #475569;
+  }
+
+  .acct-info b { color: #1a1a1a; }
+
+  .acct-flag {
+    display: inline-block;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 4px 11px; border-radius: 20px; color: #fff;
+    margin-bottom: 11px;
+  }
+
+  .acct.keep   .acct-flag { background: #16a34a; }
+  .acct.remove .acct-flag { background: #dc2626; }
+
+  .mock-cap { font-size: 12.5px; color: #64748b; text-align: center; line-height: 1.55; margin-top: 12px; }
+  .mock-cap b { color: #1a1a1a; }
+
+  /* ═══════════ NEVER-DO GRID ═══════════ */
+  .never-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(268px,1fr)); gap: 12px; }
+
+  .never-card {
+    border: 1px solid rgba(0,0,0,0.1);
+    border-left: 4px solid #dc2626;
+    border-radius: 10px;
+    padding: 14px 16px;
+    background: #f7f9fc;
+  }
+
+  .never-h {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 13px; font-weight: 700; color: #991b1b;
+    margin-bottom: 6px; line-height: 1.4; word-break: break-word;
+  }
+
+  .never-b { font-size: 12.5px; color: #475569; line-height: 1.6; }
+
+  /* ═══════════ ESCALATE ═══════════ */
+  .esc-card {
+    background: linear-gradient(135deg,#78350f 0%,#b45309 55%,#78350f 100%);
+    border: 3px solid #92400e;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    color: #fff;
+    box-shadow: 0 6px 28px rgba(120,53,15,0.32);
+  }
+
+  .esc-inner { padding: 26px 32px 30px; }
+
+  .esc-eyebrow {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: #fde68a; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .esc-card h2 { font-family: Georgia,'Times New Roman',serif; font-size: 26px; font-weight: 400; color: #fff; margin-bottom: 12px; }
+  .esc-card > .esc-inner > p { font-size: 14.5px; line-height: 1.7; color: rgba(255,255,255,0.9); margin-bottom: 18px; max-width: 760px; }
+
+  .esc-list { display: grid; grid-template-columns: repeat(auto-fit,minmax(290px,1fr)); gap: 10px; }
+
+  .esc-item {
+    background: rgba(0,0,0,0.24);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 9px;
+    padding: 12px 15px;
+    font-size: 13.5px; line-height: 1.6;
+    color: rgba(255,255,255,0.9);
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+
+  .esc-item b { color: #fff; }
+  .esc-bullet { color: #fde68a; flex-shrink: 0; font-weight: 700; }
+
+  /* ═══════════ PART DIVIDER ═══════════ */
+  .part-div {
+    background: linear-gradient(135deg,#0b1220 0%,#16203a 60%,#0b1220 100%);
+    border-radius: 14px;
+    padding: 28px 32px 30px;
+    margin: 8px 0 44px;
+    color: #fff;
+    border: 2px solid rgba(194,224,0,0.25);
+    box-shadow: 0 6px 30px rgba(11,18,32,0.32);
+  }
+
+  .part-eyebrow {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: #c2e000; margin-bottom: 10px;
+  }
+
+  .part-div h2 { font-family: Georgia,'Times New Roman',serif; font-size: 26px; font-weight: 400; color: #fff; margin-bottom: 10px; }
+  .part-div p { font-size: 14.5px; line-height: 1.7; color: rgba(255,255,255,0.8); max-width: 740px; margin-bottom: 10px; }
+  .part-div p:last-child { margin-bottom: 0; }
+  .part-div strong { color: #fff; }
+
+  /* ═══════════ REGISTRY KEY CARD ═══════════ */
+  .reg-card {
+    background: #0f172a;
+    border-radius: 11px;
+    padding: 6px 0;
+    margin: 14px 0;
+    overflow: hidden;
+  }
+
+  .reg-row { display: flex; gap: 14px; padding: 10px 18px; flex-wrap: wrap; }
+  .reg-row + .reg-row { border-top: 1px solid rgba(255,255,255,0.08); }
+
+  .reg-k {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: #7b879b; flex: 0 0 78px; padding-top: 3px;
+  }
+
+  .reg-v {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 13px; color: #c2e000; font-weight: 700;
+    flex: 1; min-width: 0; word-break: break-all; line-height: 1.5;
+  }
+
+  /* ═══════════ OPTION CARDS ═══════════ */
+  .opt-head { display: flex; align-items: center; gap: 13px; margin-bottom: 14px; flex-wrap: wrap; }
+
+  .opt-letter {
+    width: 38px; height: 38px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: Georgia,'Times New Roman',serif; font-size: 19px;
+    color: #fff; flex-shrink: 0;
+  }
+
+  .opt-a .opt-letter { background: #007a3d; }
+  .opt-b .opt-letter { background: #2557b7; }
+  .opt-c .opt-letter { background: #64748b; }
+
+  .opt-name { font-family: Georgia,'Times New Roman',serif; font-size: 19px; line-height: 1.25; }
+
+  .opt-badge {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 20px; white-space: nowrap;
+  }
+
+  .opt-a .opt-badge { background: rgba(0,122,61,0.12); color: #007a3d; border: 1px solid rgba(0,122,61,0.35); }
+  .opt-b .opt-badge { background: rgba(37,87,183,0.12); color: #2557b7; border: 1px solid rgba(37,87,183,0.35); }
+  .opt-c .opt-badge { background: rgba(100,116,139,0.14); color: #475569; border: 1px solid rgba(100,116,139,0.4); }
+
+  .nav-path {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 12px;
+    background: #eef2f8;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-left: 4px solid #2557b7;
+    border-radius: 7px;
+    padding: 11px 14px;
+    margin: 12px 0;
+    line-height: 1.6;
+    color: #334155;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  /* ═══════════ FAQ / DETAILS ═══════════ */
+  details.faq {
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 9px;
+    background: #fbfcfe;
+    margin-bottom: 9px;
+    overflow: hidden;
+  }
+
+  details.faq summary {
+    padding: 13px 16px;
+    cursor: pointer;
+    font-size: 13.5px; font-weight: 600;
+    list-style: none;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  details.faq summary::-webkit-details-marker { display: none; }
+
+  details.faq summary::before {
+    content: '+';
+    font-family: 'Courier New', Consolas, monospace;
+    font-weight: 700; color: #2557b7;
+    width: 20px; height: 20px; flex-shrink: 0;
+    border: 1px solid rgba(37,87,183,0.35);
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(37,87,183,0.08);
+  }
+
+  details.faq[open] summary::before { content: '\2212'; }
+  details.faq[open] summary { border-bottom: 1px solid rgba(0,0,0,0.08); }
+
+  .faq-body { padding: 14px 16px 16px; font-size: 13.5px; line-height: 1.7; color: #334155; }
+  .faq-body p + p { margin-top: 10px; }
+
+  /* ═══════════ CONTACT ═══════════ */
+  .contact-card-wrap {
+    background: linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);
+    border-radius: 12px;
+    padding: 26px 30px 28px;
+    color: #fff;
+    box-shadow: 0 4px 22px rgba(30,74,160,0.26);
+  }
+
+  .contact-card-wrap h2 { font-family: Georgia,'Times New Roman',serif; font-size: 22px; font-weight: 400; color: #fff; margin-bottom: 8px; }
+  .contact-card-wrap p { font-size: 14px; color: rgba(255,255,255,0.82); line-height: 1.7; }
+
+  .contact-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(230px,1fr)); gap: 12px; }
+
+  .contact-card {
+    display: flex; align-items: center; gap: 13px;
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.17);
+    border-radius: 10px;
+    padding: 14px 16px;
+    text-decoration: none;
+    transition: background 0.15s;
+  }
+
+  .contact-card:hover { background: rgba(255,255,255,0.15); }
+
+  .contact-icon-wrap { font-size: 20px; flex-shrink: 0; }
+  .contact-label { font-family: 'Courier New', Consolas, monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.5); }
+  .contact-value { font-size: 14px; font-weight: 600; color: #fff; margin-top: 2px; }
+
+  @media (max-width: 620px) {
+    .page-body { padding: 26px 18px 56px; }
+    .sticky-nav-inner { padding: 0 14px; }
+    .overview-card, .danger-inner, .esc-inner, .part-div { padding-left: 20px; padding-right: 20px; }
+    .content-card { padding: 18px 18px 20px; }
+    .overview-card h1, .danger-title, .esc-card h2, .part-div h2 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ NAV ═══════════ -->
+<div class="sticky-nav">
+  <div class="sticky-nav-inner">
+    <button class="nav-link danger" data-goto="stopbox"><span class="nav-num red">!</span>Read first</button>
+    <button class="nav-link" data-goto="right-article"><span class="nav-num grey">?</span>Right article?</button>
+    <button class="nav-link" data-goto="whats-going-on"><span class="nav-num">i</span>What&rsquo;s going on</button>
+    <button class="nav-link" data-goto="step1"><span class="nav-num">1</span>Confirm</button>
+    <button class="nav-link danger" data-goto="step2"><span class="nav-num red">2</span>Remove</button>
+    <button class="nav-link" data-goto="step3"><span class="nav-num">3</span>Verify</button>
+    <button class="nav-link" data-goto="step4"><span class="nav-num">4</span>Finish</button>
+    <button class="nav-link danger" data-goto="never"><span class="nav-num red">&times;</span>Never do</button>
+    <button class="nav-link" data-goto="escalate"><span class="nav-num grey">&#8593;</span>Escalate</button>
+    <button class="nav-link" data-goto="block"><span class="nav-num lime">&#128737;</span>Stop it recurring</button>
+  </div>
+</div>
+
+<main class="page-body">
+
+  <!-- ═══════════ OVERVIEW ═══════════ -->
+  <div class="overview-card" id="overview">
+    <div class="card-label">Entra device identity &middot; 1st line fix + 2nd line prevention</div>
+    <h1>&ldquo;It says compliant in Intune, but they still can&rsquo;t sign in&rdquo;</h1>
+    <p>A PC shows as <strong>Compliant</strong> in Intune. The user is still blocked from Microsoft&nbsp;365 with &ldquo;your device does not meet your organisation&rsquo;s requirements&rdquo;. In Entra&nbsp;ID, the machine name appears <strong>twice</strong>.</p>
+    <p>Nothing is broken. The PC has accidentally registered itself a second time, and the sign-in check is sometimes being shown the wrong one. The fix takes about five minutes &mdash; but one wrong click in the middle of it costs a rebuild, so read the red panel first.</p>
+    <div class="pill-row">
+      <span class="pill"><span class="dot" style="background:#c2e000;"></span>About 5 minutes on the device</span>
+      <span class="pill"><span class="dot" style="background:#c2e000;"></span>1st line &mdash; Part One</span>
+      <span class="pill"><span class="dot" style="background:#60a5fa;"></span>2nd line &mdash; Part Two</span>
+      <span class="pill"><span class="dot" style="background:#f87171;"></span>Can un-enrol the PC if done wrong</span>
+    </div>
+  </div>
+
+  <!-- ═══════════ STOP BOX ═══════════ -->
+  <div class="danger-banner" id="stopbox">
+    <div class="danger-strip"></div>
+    <div class="danger-inner">
+      <div class="danger-eyebrow"><span>&#9888;</span> Stop &mdash; the two things that break the PC</div>
+      <div class="danger-title">Both of these look like the fix.<br>Neither of them is.</div>
+      <p class="danger-lead">This job is removing <em>one</em> of two nearly identical-looking things from the PC. Remove the other one and you take the Intune enrolment with it. There is <strong>no undo</strong> &mdash; the machine has to be rebuilt or re-enrolled.</p>
+
+      <div class="kill-grid">
+        <div class="kill-card">
+          <span class="kill-tag">&#10060; Never run this</span>
+          <div class="kill-what">dsregcmd /leave</div>
+          <div class="kill-why">It removes the <strong>Entra join</strong> &mdash; the good identity &mdash; and the Intune enrolment goes with it. This is the single fastest way to turn a five-minute job into a rebuild. It is never part of this fix.</div>
+        </div>
+        <div class="kill-card">
+          <span class="kill-tag">&#10060; Never disconnect this</span>
+          <div class="kill-what">&ldquo;Connected to &hellip; Azure AD&rdquo;</div>
+          <div class="kill-why">That entry <strong>is</strong> the join. Under <em>Access work or school</em> you will see two entries that look much the same. <strong>Step&nbsp;2</strong> shows you exactly how to tell them apart before you click anything.</div>
+        </div>
+      </div>
+
+      <div class="ask-box">
+        <div class="ask-label">If you are not certain which entry is which</div>
+        <div class="ask-quote">Stop and ask 2nd line. Thirty seconds of asking beats a rebuild &mdash; nobody has ever been told off for checking.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ IS THIS THE RIGHT ARTICLE ═══════════ -->
+  <div class="section-heading" id="right-article">
+    <div class="step-badge badge-grey">?</div>
+    <div>
+      <div class="step-meta">Before you start &middot; Thirty second check</div>
+      <div class="step-title">Is this the right article?</div>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <p>Use this article when <strong>all three</strong> of the following are true. If any one of them is not, this is not your problem and the fix below will not help.</p>
+
+    <div class="cond-list">
+      <div class="cond"><span class="cond-n"></span><span>The user <strong>cannot sign in to Microsoft&nbsp;365</strong>, or gets &ldquo;your device does not meet your organisation&rsquo;s requirements&rdquo;.</span></div>
+      <div class="cond"><span class="cond-n"></span><span>That same PC shows as <strong>Compliant</strong> in Intune.</span></div>
+      <div class="cond"><span class="cond-n"></span><span>In <strong>Entra&nbsp;ID</strong> the machine name appears <strong>twice</strong>, as two separate devices.</span></div>
+    </div>
+
+    <div class="callout callout-danger">
+      <span class="callout-icon">&#9940;</span>
+      <div>
+        <div class="callout-title">If the PC genuinely shows Not compliant in Intune &mdash; stop here</div>
+        <div class="callout-body">That is a <strong>real compliance failure</strong>, not this problem. Something on the device is actually failing policy. Escalate it to 2nd line rather than working through this article.</div>
+      </div>
+    </div>
+
+    <div class="sub-h">Three things to have ready</div>
+
+    <div class="steps">
+      <div class="step">
+        <span class="step-num red">1</span>
+        <p>You must be working <strong>in the affected user&rsquo;s Windows session</strong>. The workplace join belongs to the <em>user</em>, not the machine &mdash; do this from your own admin login and you will not find it at all.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">2</span>
+        <p>Get the user to <strong>save their work</strong>. They will need to sign out at the end.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">3</span>
+        <p>Have the <strong>machine name</strong> to hand.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ WHAT IS GOING ON ═══════════ -->
+  <div class="section-heading" id="whats-going-on">
+    <div class="step-badge badge-blue">i</div>
+    <div>
+      <div class="step-meta">Background &middot; Worth two minutes before you touch the PC</div>
+      <div class="step-title">What is actually going on</div>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <p>The PC has <strong>two identities</strong> in Entra&nbsp;ID, not one. They were created by completely different things and only one of them is managed.</p>
+
+    <div class="idrow">
+      <div class="idcard good">
+        <span class="id-tag">&#10003; The good one</span>
+        <div class="id-name">Entra joined</div>
+        <div class="id-line"><span class="id-k">Created by</span><span class="id-v">The PC being set up and joined properly</span></div>
+        <div class="id-line"><span class="id-k">In Intune?</span><span class="id-v">Yes &mdash; managed and compliant</span></div>
+        <div class="id-line"><span class="id-k">Sign-in check</span><span class="id-v">Passes</span></div>
+      </div>
+      <div class="idcard bad">
+        <span class="id-tag">&#10007; The problem</span>
+        <div class="id-name">Workplace joined</div>
+        <div class="id-line"><span class="id-k">Created by</span><span class="id-v">A user adding their work account to an <em>app</em></span></div>
+        <div class="id-line"><span class="id-k">In Intune?</span><span class="id-v">No &mdash; and never can be</span></div>
+        <div class="id-line"><span class="id-k">Sign-in check</span><span class="id-v">Fails, always</span></div>
+      </div>
+    </div>
+
+    <div class="callout callout-info">
+      <span class="callout-icon">&#128172;</span>
+      <div>
+        <div class="callout-title">Where the second one comes from</div>
+        <div class="callout-body">Someone signs into Edge or an Office app and accepts <strong>&ldquo;Allow my organization to manage my device&rdquo;</strong>, or <strong>&ldquo;Stay signed in to all your apps&rdquo;</strong>. It looks harmless. It creates a whole second device record that Intune does not manage and that can never be marked compliant.</div>
+      </div>
+    </div>
+
+    <div class="gate">
+      <div class="gate-h">At sign-in, the PC presents one of the two</div>
+      <div class="gate-row">
+        <span class="gate-from">Presents the <strong>Entra joined</strong> identity</span>
+        <span class="gate-arrow">&#8594;</span>
+        <span class="gate-res pass">&#10003; Access allowed</span>
+      </div>
+      <div class="gate-row">
+        <span class="gate-from">Presents the <strong>workplace joined</strong> identity</span>
+        <span class="gate-arrow">&#8594;</span>
+        <span class="gate-res fail">&#10007; Blocked</span>
+      </div>
+    </div>
+
+    <div class="callout callout-ok">
+      <span class="callout-icon">&#128161;</span>
+      <div>
+        <div class="callout-title">So the fix is simply: remove the workplace join from the PC</div>
+        <div class="callout-body">The Intune enrolment is a completely separate thing and is <strong>not affected</strong>. You are not un-enrolling anything, you are not deleting anything from Intune, and the PC stays fully managed throughout.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ STEP 1 ═══════════ -->
+  <div class="section-heading" id="step1">
+    <div class="step-badge badge-blue">1</div>
+    <div>
+      <div class="step-meta">Step One &middot; In the user&rsquo;s session, not yours</div>
+      <div class="step-title">Confirm the problem</div>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <p>Open <strong>PowerShell as the user</strong> &mdash; not as admin, not as yourself &mdash; and run:</p>
+
+    <div class="code-wrap">
+      <div class="code-bar">
+        <span class="code-lang">PowerShell &middot; user session</span>
+        <button class="code-copy" data-copy>Copy</button>
+      </div>
+      <pre class="code">dsregcmd /status</pre>
+    </div>
+
+    <p>Two lines in that output matter. They are in different sections, so read carefully:</p>
+
+    <div class="code-wrap">
+      <div class="code-bar">
+        <span class="code-lang">What you are looking for</span>
+      </div>
+      <pre class="code"><span class="dim">+----------------------------------------------------------------------+
+| Device State                                                         |
++----------------------------------------------------------------------+</span>
+             <span class="hl">AzureAdJoined : YES</span>
+                  DeviceId : 00db3c74-b621-42e0-ab50-198c9586eee1
+<span class="dim">...
++----------------------------------------------------------------------+
+| User State                                                           |
++----------------------------------------------------------------------+</span>
+           <span class="hl">WorkplaceJoined : YES</span></pre>
+    </div>
+
+    <div class="callout callout-warn first" style="margin-top:16px;">
+      <span class="callout-icon">&#9998;</span>
+      <div>
+        <div class="callout-title">Write down the DeviceId from the Device State section</div>
+        <div class="callout-body">That is the <strong>good identity</strong>. You will check at the end that it is still there and unchanged. If there is a <strong>Work Account 1</strong> section further down, note the <code class="inline-code">WorkplaceDeviceId</code> too &mdash; that is the one being removed.</div>
+      </div>
+    </div>
+
+    <div class="sub-h">What the result means</div>
+
+    <div class="tbl-scroll">
+      <table class="dtable">
+        <tr>
+          <th style="width:38%;">What you see</th>
+          <th style="width:32%;">What it means</th>
+          <th>What to do</th>
+        </tr>
+        <tr>
+          <td class="warn"><code class="inline-code">AzureAdJoined YES</code><br><code class="inline-code">WorkplaceJoined YES</code></td>
+          <td class="warn">This is the duplicate. Your problem.</td>
+          <td class="warn"><span class="verdict ok">Carry on to Step 2</span></td>
+        </tr>
+        <tr>
+          <td><code class="inline-code">AzureAdJoined YES</code><br><code class="inline-code">WorkplaceJoined NO</code></td>
+          <td>Not this problem &mdash; there is no duplicate on the device.</td>
+          <td><span class="verdict esc">Escalate to 2nd line</span></td>
+        </tr>
+        <tr>
+          <td class="bad"><code class="inline-code red">AzureAdJoined NO</code></td>
+          <td class="bad">The PC is not joined at all. Something else is wrong.</td>
+          <td class="bad"><span class="verdict esc">Escalate to 2nd line</span></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════ STEP 2 ═══════════ -->
+  <div class="section-heading" id="step2">
+    <div class="step-badge badge-red">2</div>
+    <div>
+      <div class="step-meta">Step Two &middot; The one step that can go wrong</div>
+      <div class="step-title">Remove the workplace join</div>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <p>Still in the user&rsquo;s session, go to:</p>
+
+    <div class="nav-path">Settings &gt; Accounts &gt; Access work or school</div>
+
+    <p>You will see <strong>two entries</strong>. They look similar. Only one of them comes off.</p>
+
+    <div class="sub-h">How to tell them apart</div>
+
+    <div class="steps">
+      <div class="step">
+        <span class="step-num">1</span>
+        <p>Click each entry, then click <span class="clickpath">Info</span>.</p>
+      </div>
+      <div class="step">
+        <span class="step-num red">2</span>
+        <p>If it opens a page showing <strong>sync status, a Sync button, or an advanced diagnostic report</strong> &mdash; that is the <strong>Entra join / Intune enrolment</strong>. Go back. <strong>Do not touch it.</strong></p>
+      </div>
+      <div class="step">
+        <span class="step-num">3</span>
+        <p>The other entry &mdash; usually just the user&rsquo;s email address, a <strong>Disconnect</strong> button, and <strong>no MDM sync information at all</strong> &mdash; is the <strong>workplace join</strong>. That is the one to remove.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">4</span>
+        <p>Click <span class="clickpath">Disconnect</span> on the workplace-join entry, and confirm.</p>
+      </div>
+    </div>
+
+    <div class="mock-wrap" style="margin-top:22px;">
+      <div class="win-panel">
+        <div class="win-bar">
+          <div class="win-dots"><span class="win-dot"></span><span class="win-dot"></span><span class="win-dot"></span></div>
+          <span class="win-title">Settings</span>
+        </div>
+        <div class="win-body">
+          <div class="win-crumb">Accounts &gt; Access work or school</div>
+
+          <div class="acct keep">
+            <span class="acct-flag">&#128274; Leave this one alone</span>
+            <div class="acct-top">
+              <div class="acct-ic">&#127970;</div>
+              <div>
+                <div class="acct-name">Connected to Contoso&rsquo;s Azure AD</div>
+                <div class="acct-sub">Connected by admin@contoso.co.uk</div>
+              </div>
+              <div class="acct-btns">
+                <span class="acct-btn">Info</span>
+              </div>
+            </div>
+            <div class="acct-info">
+              Clicking <b>Info</b> opens a page with <b>sync status</b>, a <b>Sync</b> button and an <b>advanced diagnostic report</b>. That is the Entra join and the Intune enrolment. Go back.
+            </div>
+          </div>
+
+          <div class="acct remove">
+            <span class="acct-flag">&#9989; Remove this one</span>
+            <div class="acct-top">
+              <div class="acct-ic">&#128100;</div>
+              <div>
+                <div class="acct-name">jsmith@contoso.co.uk</div>
+                <div class="acct-sub">Work or school account</div>
+              </div>
+              <div class="acct-btns">
+                <span class="acct-btn">Info</span>
+                <span class="acct-btn danger">Disconnect</span>
+              </div>
+            </div>
+            <div class="acct-info">
+              Just an email address. <b>No sync status, no Sync button, no diagnostic report.</b> This is the workplace join &mdash; click <b>Disconnect</b>.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mock-cap">Illustrative only &mdash; the account names on the PC in front of you will differ. What matters is <b>what appears behind the Info button</b>, not the wording of the entry.</div>
+
+    <div class="callout callout-danger">
+      <span class="callout-icon">&#9940;</span>
+      <div>
+        <div class="callout-title">If both entries look the same to you, or only one entry appears &mdash; stop</div>
+        <div class="callout-body">Do not disconnect either. <strong>Escalate.</strong> Guessing at this step is what causes rebuilds, and it is the only part of this job that cannot be undone.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ STEP 3 ═══════════ -->
+  <div class="section-heading" id="step3">
+    <div class="step-badge badge-blue">3</div>
+    <div>
+      <div class="step-meta">Step Three &middot; Immediately, before anything else</div>
+      <div class="step-title">Verify what you just did</div>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <p>Run this <strong>straight away</strong> &mdash; before restarting, before telling the user, before closing anything:</p>
+
+    <div class="code-wrap">
+      <div class="code-bar">
+        <span class="code-lang">PowerShell &middot; user session</span>
+        <button class="code-copy" data-copy>Copy</button>
+      </div>
+      <pre class="code">dsregcmd /status</pre>
+    </div>
+
+    <div class="tbl-scroll">
+      <table class="dtable">
+        <tr>
+          <th style="width:36%;">Result</th>
+          <th style="width:28%;">Meaning</th>
+          <th>Action</th>
+        </tr>
+        <tr>
+          <td class="good"><code class="inline-code">AzureAdJoined : YES</code><br><code class="inline-code">WorkplaceJoined : NO</code><br>DeviceId <strong>unchanged</strong></td>
+          <td class="good">Correct. Job done.</td>
+          <td class="good"><span class="verdict ok">Go to Step 4</span></td>
+        </tr>
+        <tr>
+          <td class="bad"><code class="inline-code red">AzureAdJoined : NO</code></td>
+          <td class="bad">The wrong entry was removed &mdash; the join is gone.</td>
+          <td class="bad"><span class="verdict stop">Escalate now</span><br><span style="font-size:12.5px;line-height:1.55;display:block;margin-top:6px;"><strong>Do not attempt to rejoin.</strong> Tell 2nd line the PC has been unjoined.</span></td>
+        </tr>
+        <tr>
+          <td class="warn">Both still <code class="inline-code">YES</code></td>
+          <td class="warn">The disconnect did not take effect.</td>
+          <td class="warn">Restart the PC and re-check. Still both? <span class="verdict esc">Escalate</span></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="callout callout-warn">
+      <span class="callout-icon">&#128269;</span>
+      <div>
+        <div class="callout-title">Check the DeviceId, not just the YES/NO</div>
+        <div class="callout-body">The <code class="inline-code">DeviceId</code> under <strong>Device State</strong> must be the same one you wrote down in Step&nbsp;1. A different value means you are not looking at the identity you started with.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ STEP 4 ═══════════ -->
+  <div class="section-heading" id="step4">
+    <div class="step-badge badge-lime">4</div>
+    <div>
+      <div class="step-meta">Step Four &middot; Two minutes with the user</div>
+      <div class="step-title">Finish up</div>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <div class="steps">
+      <div class="step">
+        <span class="step-num">1</span>
+        <p>Have the user <strong>sign out of Windows and back in</strong>. A restart is fine too.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">2</span>
+        <p>Ask them to open a browser and sign in to <code class="inline-code">https://outlook.office.com</code>.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">3</span>
+        <p>It should sign in normally. That is the whole test.</p>
+      </div>
+    </div>
+
+    <div class="ask-box" style="background:#f7f9fc;border-left-color:#8aaa00;margin-top:20px;">
+      <div class="ask-label" style="color:#6f8800;">What to say to the user, in plain terms</div>
+      <div class="ask-quote" style="color:#1a1a1a;">&ldquo;Your PC had accidentally registered itself with us twice, and the sign-in was sometimes using the wrong one. I have removed the duplicate. Your PC is still fully managed and nothing has been removed from it.&rdquo;</div>
+    </div>
+
+    <div class="sub-h">While you are there &mdash; stop it happening again on this PC</div>
+
+    <p>Ten seconds of explaining now saves the same call in three months. Tell the user that when Windows or an Office app asks:</p>
+
+    <div class="tbl-scroll">
+      <table class="dtable">
+        <tr>
+          <th style="width:52%;">When they see this prompt</th>
+          <th>The right answer on a company PC</th>
+        </tr>
+        <tr>
+          <td>&ldquo;<strong>Allow my organization to manage my device</strong>&rdquo;</td>
+          <td class="good">Tick box should be <strong>UNTICKED</strong></td>
+        </tr>
+        <tr>
+          <td>&ldquo;<strong>Stay signed in to all your apps</strong>&rdquo;</td>
+          <td class="good">Choose <strong>&ldquo;No, sign in to this app only&rdquo;</strong></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="callout callout-info">
+      <span class="callout-icon">&#128737;</span>
+      <div>
+        <div class="callout-title">Seeing this repeatedly on the same site?</div>
+        <div class="callout-body">There is a policy that blocks it happening at all &mdash; <code class="inline-code">BlockAADWorkplaceJoin</code>. Raise it with 2nd line rather than fixing machines one at a time. <strong>Part Two</strong> of this article is how they deploy it.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ NEVER DO ═══════════ -->
+  <div class="section-heading" id="never">
+    <div class="step-badge badge-red">&times;</div>
+    <div>
+      <div class="step-meta">Reference &middot; Every one of these makes it worse</div>
+      <div class="step-title">What not to do</div>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <div class="never-grid">
+      <div class="never-card">
+        <div class="never-h">dsregcmd /leave</div>
+        <div class="never-b">Removes the Entra join and the Intune enrolment with it. Rebuild territory. There is no undo.</div>
+      </div>
+      <div class="never-card">
+        <div class="never-h">Delete the device from Entra ID</div>
+        <div class="never-b">Not your call, and it does not fix anything on its own &mdash; the PC re-registers within a day if the workplace join is still on it.</div>
+      </div>
+      <div class="never-card">
+        <div class="never-h">Delete anything from Intune</div>
+        <div class="never-b">The Intune record is the <strong>good</strong> one. Leave it exactly where it is.</div>
+      </div>
+      <div class="never-card">
+        <div class="never-h">Re-enrol the PC &ldquo;to be safe&rdquo;</div>
+        <div class="never-b">It is already enrolled correctly. Re-enrolling creates more mess, not less.</div>
+      </div>
+      <div class="never-card">
+        <div class="never-h">Do this from your own admin session</div>
+        <div class="never-b">Workplace join is per-user. You will not see the user&rsquo;s registration at all, and you may &ldquo;fix&rdquo; the wrong thing.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ ESCALATE ═══════════ -->
+  <div class="esc-card" id="escalate">
+    <div class="danger-strip"></div>
+    <div class="esc-inner">
+      <div class="esc-eyebrow"><span>&#8593;</span> Hand it over &mdash; no penalty for any of these</div>
+      <h2>Escalate to 2nd line if&hellip;</h2>
+      <p>Any single one of these is enough. You are not expected to work round them, and stopping at this point costs the customer nothing.</p>
+      <div class="esc-list">
+        <div class="esc-item"><span class="esc-bullet">&#9679;</span><span>Only <b>one entry</b> appears under Access work or school.</span></div>
+        <div class="esc-item"><span class="esc-bullet">&#9679;</span><span>You <b>cannot tell the two entries apart</b>.</span></div>
+        <div class="esc-item"><span class="esc-bullet">&#9679;</span><span><b>AzureAdJoined</b> shows <b>NO</b> at any point.</span></div>
+        <div class="esc-item"><span class="esc-bullet">&#9679;</span><span><b>WorkplaceJoined</b> is still <b>YES</b> after a restart.</span></div>
+        <div class="esc-item"><span class="esc-bullet">&#9679;</span><span>The PC shows <b>Not compliant</b> in Intune &mdash; a genuine failure, not this.</span></div>
+        <div class="esc-item"><span class="esc-bullet">&#9679;</span><span>The <b>same machine comes back</b> within a month.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ PART TWO DIVIDER ═══════════ -->
+  <div class="part-div" id="block">
+    <div class="part-eyebrow">Part Two &middot; 2nd line / Intune admin</div>
+    <h2>Stopping it happening in the first place</h2>
+    <p>Everything above fixes <strong>one PC that already has the problem</strong>. This part stops new ones appearing, by setting a single policy value that blocks workplace join outright.</p>
+    <p>Deploy this <strong>first</strong> so the problem stops growing, then work back through the machines that already have it. Doing it the other way round means fixing a queue that is still filling up.</p>
+  </div>
+
+  <div class="section-heading">
+    <div class="step-badge badge-green">&#128737;</div>
+    <div>
+      <div class="step-meta">What it does &middot; One registry value, nothing more</div>
+      <div class="step-title">BlockAADWorkplaceJoin</div>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <p>The whole change is one value on Windows devices:</p>
+
+    <div class="reg-card">
+      <div class="reg-row"><span class="reg-k">Key</span><span class="reg-v">HKLM\SOFTWARE\Policies\Microsoft\Windows\WorkplaceJoin</span></div>
+      <div class="reg-row"><span class="reg-k">Value</span><span class="reg-v">BlockAADWorkplaceJoin</span></div>
+      <div class="reg-row"><span class="reg-k">Type</span><span class="reg-v">REG_DWORD</span></div>
+      <div class="reg-row"><span class="reg-k">Data</span><span class="reg-v">1</span></div>
+    </div>
+
+    <div class="tbl-scroll">
+      <table class="dtable">
+        <tr>
+          <th style="width:22%;">&nbsp;</th>
+          <th>What is affected</th>
+        </tr>
+        <tr>
+          <td class="bad"><strong>Blocks</strong></td>
+          <td class="bad">A user adding their work account to an app and creating a <strong>workplace-joined</strong> (Entra registered) device identity &mdash; the &ldquo;Allow my organization to manage my device&rdquo; tick box and &ldquo;Stay signed in to all your apps&rdquo;.</td>
+        </tr>
+        <tr>
+          <td class="good"><strong>Does not touch</strong></td>
+          <td class="good">Entra join, hybrid join, Intune enrolment, Autopilot, or any device that is already properly joined. Machines keep working exactly as they do now.</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="callout callout-warn">
+      <span class="callout-icon">&#9888;</span>
+      <div>
+        <div class="callout-title">It does NOT clean up existing duplicates</div>
+        <div class="callout-body">This only prevents new ones. PCs that already carry a second identity keep it until the workplace join is removed <strong>on the device</strong> &mdash; that is Part One above.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-heading">
+    <div class="step-badge badge-grey">?</div>
+    <div>
+      <div class="step-meta">Decide these three before you deploy anything</div>
+      <div class="step-title">Three questions first</div>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <div class="steps">
+      <div class="step">
+        <span class="step-num">1</span>
+        <p><strong>Does anything here rely on Windows BYOD?</strong> Workplace join is how a <em>personal Windows PC</em> gets a work identity for app protection &mdash; blocking it stops that. iOS and Android app protection do <strong>not</strong> use workplace join and are unaffected. If nobody is doing Windows BYOD, there is nothing to lose.</p>
+      </div>
+      <div class="step">
+        <span class="step-num red">2</span>
+        <p><strong>Is this a shared, multi-brand tenant?</strong> If so, target a <strong>device group</strong>, not All Devices &mdash; <code class="inline-code">Intune-Windows-All</code> is the right scope. Check its membership before you assign; anything tenant-wide hits every brand in the tenant at once.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">3</span>
+        <p><strong>Check the Settings Catalog first.</strong> In Intune, <strong>Devices &gt; Configuration &gt; Create &gt; Settings catalog</strong>, search <code class="inline-code">workplace join</code>. If your tenant surfaces a native setting, use it &mdash; a native setting reports compliance properly and a script does not. If nothing sensible comes back, use the script route below. <strong>Do not spend more than five minutes looking.</strong></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION A -->
+  <div class="content-card opt-a">
+    <div class="opt-head">
+      <div class="opt-letter">A</div>
+      <div>
+        <div class="opt-name">Platform script</div>
+        <div class="step-meta" style="margin-top:3px;">Simplest &mdash; use this if unsure</div>
+      </div>
+      <span class="opt-badge">&#10003; Works on any licence</span>
+    </div>
+
+    <p>Runs once per device in SYSTEM context. Good enough for a value nobody is going to change back.</p>
+
+    <div class="nav-path">Intune &gt; Devices &gt; Scripts and remediations &gt; Platform scripts &gt; Add &gt; Windows 10 and later</div>
+
+    <div class="tbl-scroll">
+      <table class="dtable">
+        <tr><th style="width:62%;">Setting</th><th>Value</th></tr>
+        <tr><td>Name</td><td><code class="inline-code">Block Entra workplace join</code></td></tr>
+        <tr><td>Run this script using the logged on credentials</td><td><strong>No</strong></td></tr>
+        <tr><td>Enforce script signature check</td><td><strong>No</strong></td></tr>
+        <tr><td>Run script in 64 bit PowerShell Host</td><td><strong>Yes</strong></td></tr>
+        <tr><td>Assignment</td><td><code class="inline-code">Intune-Windows-All</code></td></tr>
+      </table>
+    </div>
+
+    <div class="callout callout-warn">
+      <span class="callout-icon">&#9998;</span>
+      <div>
+        <div class="callout-title">Save as Block-WorkplaceJoin.ps1 &mdash; plain ASCII, no smart quotes</div>
+        <div class="callout-body">Curly quotes and em dashes pasted from a document will break the script when PowerShell reads the file. Save it as plain text.</div>
+      </div>
+    </div>
+
+    <div class="code-wrap">
+      <div class="code-bar">
+        <span class="code-lang">Block-WorkplaceJoin.ps1</span>
+        <button class="code-copy" data-copy>Copy</button>
+      </div>
+      <pre class="code"><span class="cm"># Blocks Entra (Azure AD) workplace join. Does NOT affect Entra join or Intune enrolment.</span>
+$Key   = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WorkplaceJoin'
+$Name  = 'BlockAADWorkplaceJoin'
+$Value = 1
+
+try {
+    if (-not (Test-Path -LiteralPath $Key)) {
+        New-Item -Path $Key -Force | Out-Null
+    }
+    New-ItemProperty -LiteralPath $Key -Name $Name -Value $Value -PropertyType DWord -Force | Out-Null
+
+    <span class="cm"># Read it back. A script that sets a value and never checks is a script that
+    # reports success on a machine where nothing changed.</span>
+    $check = (Get-ItemProperty -LiteralPath $Key -Name $Name -ErrorAction Stop).$Name
+    if ($check -eq $Value) {
+        Write-Output "OK: $Name = $check"
+        exit 0
+    }
+    Write-Output "FAILED: $Name = $check (expected $Value)"
+    exit 1
+}
+catch {
+    Write-Output "FAILED: $($_.Exception.Message)"
+    exit 1
+}</pre>
+    </div>
+  </div>
+
+  <!-- OPTION B -->
+  <div class="content-card opt-b">
+    <div class="opt-head">
+      <div class="opt-letter">B</div>
+      <div>
+        <div class="opt-name">Remediation</div>
+        <div class="step-meta" style="margin-top:3px;">Better &mdash; if you are licensed for it</div>
+      </div>
+      <span class="opt-badge">&#9888; Licence dependent</span>
+    </div>
+
+    <p>A remediation re-checks on a schedule and puts the value back if anything removes it. Use this if you want it to <em>stay</em> set rather than be set once.</p>
+
+    <div class="callout callout-danger first" style="margin-top:0;">
+      <span class="callout-icon">&#128179;</span>
+      <div>
+        <div class="callout-title">Confirm licensing before you build it</div>
+        <div class="callout-body">Remediations need <strong>Windows Enterprise E3/E5</strong>, <strong>Education A3/A5</strong>, or <strong>Microsoft&nbsp;365 E3/E5/Business Premium</strong>. In a mixed-licence tenant (A1 alongside A3, for instance) check first &mdash; otherwise the profile sits there doing nothing. <strong>If you are not sure, use Option&nbsp;A</strong>; it works on any licence.</div>
+      </div>
+    </div>
+
+    <div class="nav-path">Intune &gt; Devices &gt; Scripts and remediations &gt; Remediations &gt; Create</div>
+
+    <div class="sub-h">Detection script</div>
+
+    <div class="code-wrap">
+      <div class="code-bar">
+        <span class="code-lang">Detect-WorkplaceJoinBlock.ps1</span>
+        <button class="code-copy" data-copy>Copy</button>
+      </div>
+      <pre class="code">$Key  = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WorkplaceJoin'
+$Name = 'BlockAADWorkplaceJoin'
+
+try {
+    $v = (Get-ItemProperty -LiteralPath $Key -Name $Name -ErrorAction Stop).$Name
+    if ($v -eq 1) {
+        Write-Output "Compliant: $Name = 1"
+        exit 0
+    }
+    Write-Output "Drift: $Name = $v"
+    exit 1
+}
+catch {
+    Write-Output "Missing: $Name is not set"
+    exit 1
+}</pre>
+    </div>
+
+    <div class="callout callout-info">
+      <span class="callout-icon">&#8505;</span>
+      <div>
+        <div class="callout-title">Exit codes</div>
+        <div class="callout-body"><code class="inline-code">exit 0</code> means compliant and nothing runs. <code class="inline-code">exit 1</code> triggers the remediation.</div>
+      </div>
+    </div>
+
+    <div class="sub-h">Remediation script &amp; settings</div>
+
+    <p>Use <strong>the same script as Option&nbsp;A</strong> as the remediation script. Settings: run in <strong>SYSTEM</strong> (not logged-on credentials), <strong>64-bit</strong> host, <strong>daily</strong> schedule.</p>
+  </div>
+
+  <!-- OPTION C -->
+  <div class="content-card opt-c">
+    <div class="opt-head">
+      <div class="opt-letter">C</div>
+      <div>
+        <div class="opt-name">By hand on a single device</div>
+        <div class="step-meta" style="margin-top:3px;">For a machine in front of you, or testing first</div>
+      </div>
+      <span class="opt-badge">Local admin needed</span>
+    </div>
+
+    <p>Same registry value, applied locally. This is a <strong>machine-wide</strong> setting, so it does not matter which user is signed in &mdash; but you do need <strong>local administrator rights</strong>.</p>
+
+    <div class="sub-h">PowerShell &mdash; fastest</div>
+
+    <p>Open PowerShell <strong>as Administrator</strong> and paste:</p>
+
+    <div class="code-wrap">
+      <div class="code-bar">
+        <span class="code-lang">PowerShell &middot; elevated</span>
+        <button class="code-copy" data-copy>Copy</button>
+      </div>
+      <pre class="code">$Key   = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WorkplaceJoin'
+$Name  = 'BlockAADWorkplaceJoin'
+
+if (-not (Test-Path -LiteralPath $Key)) { New-Item -Path $Key -Force | Out-Null }
+New-ItemProperty -LiteralPath $Key -Name $Name -Value 1 -PropertyType DWord -Force | Out-Null
+
+<span class="cm"># Read it back - do not trust a set you have not verified</span>
+Get-ItemProperty -LiteralPath $Key -Name $Name</pre>
+    </div>
+
+    <p>Expect <code class="inline-code">BlockAADWorkplaceJoin : 1</code>.</p>
+
+    <div class="sub-h">Registry Editor &mdash; if you would rather click</div>
+
+    <div class="steps">
+      <div class="step">
+        <span class="step-num">1</span>
+        <p><code class="inline-code">Win + R</code>, type <code class="inline-code">regedit</code>, <strong>Yes</strong> at the prompt.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">2</span>
+        <p>Navigate to <code class="inline-code">HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows</code>.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">3</span>
+        <p>If there is no <strong>WorkplaceJoin</strong> key under <strong>Windows</strong>: right-click <strong>Windows</strong> &gt; <strong>New</strong> &gt; <strong>Key</strong> &gt; name it <code class="inline-code">WorkplaceJoin</code>.</p>
+      </div>
+      <div class="step">
+        <span class="step-num red">4</span>
+        <p>Right-click <strong>WorkplaceJoin</strong> &gt; <strong>New</strong> &gt; <strong>DWORD (32-bit) Value</strong>.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">5</span>
+        <p>Name it exactly <code class="inline-code">BlockAADWorkplaceJoin</code>. Case does not matter; spelling does.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">6</span>
+        <p>Double-click it, set <strong>Value data</strong> to <code class="inline-code">1</code>. Hexadecimal or Decimal &mdash; 1 is 1 either way. <strong>OK</strong>, then close regedit.</p>
+      </div>
+    </div>
+
+    <div class="callout callout-danger">
+      <span class="callout-icon">&#9888;</span>
+      <div>
+        <div class="callout-title">It must be a DWORD (32-bit) Value</div>
+        <div class="callout-body">Not a String, not a QWORD. <strong>The wrong type is ignored silently</strong> &mdash; the value sits there looking perfectly correct and does absolutely nothing.</div>
+      </div>
+    </div>
+
+    <div class="sub-h">Undoing a manual change</div>
+
+    <div class="code-wrap">
+      <div class="code-bar">
+        <span class="code-lang">PowerShell &middot; elevated</span>
+        <button class="code-copy" data-copy>Copy</button>
+      </div>
+      <pre class="code">Remove-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WorkplaceJoin' -Name 'BlockAADWorkplaceJoin' -ErrorAction SilentlyContinue</pre>
+    </div>
+
+    <p>Or in regedit, right-click the value and <strong>Delete</strong>.</p>
+
+    <div class="callout callout-warn">
+      <span class="callout-icon">&#8635;</span>
+      <div>
+        <div class="callout-title">If Intune is also pushing this</div>
+        <div class="callout-body">A device that gets both the Intune script and a manual edit is fine &mdash; they set the same value. But the Intune version wins the next time it runs, so <strong>undoing it by hand on a managed device is temporary</strong>. Remove the assignment as well, or it comes back.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VERIFY / ROLLBACK / ROLLOUT -->
+  <div class="section-heading">
+    <div class="step-badge badge-blue">&#10003;</div>
+    <div>
+      <div class="step-meta">Prove it &middot; The value being present is not the same as the block working</div>
+      <div class="step-title">Verify, roll back, roll out</div>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <div class="sub-h">Verify it worked</div>
+
+    <p>On a target device, after the script has run:</p>
+
+    <div class="code-wrap">
+      <div class="code-bar">
+        <span class="code-lang">PowerShell</span>
+        <button class="code-copy" data-copy>Copy</button>
+      </div>
+      <pre class="code">Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WorkplaceJoin' -Name BlockAADWorkplaceJoin</pre>
+    </div>
+
+    <p>Expect <code class="inline-code">BlockAADWorkplaceJoin : 1</code>. Then prove the <strong>behaviour</strong>, not just the value:</p>
+
+    <div class="steps">
+      <div class="step">
+        <span class="step-num">1</span>
+        <p>Sign in to <strong>Edge</strong> with a work account on that device.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">2</span>
+        <p>When prompted, <strong>deliberately tick</strong> &ldquo;Allow my organization to manage my device&rdquo;.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">3</span>
+        <p>Run <code class="inline-code">dsregcmd /status</code>.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">4</span>
+        <p>Under <strong>User State</strong>, <code class="inline-code">WorkplaceJoined</code> should still be <strong>NO</strong>.</p>
+      </div>
+    </div>
+
+    <div class="callout callout-danger">
+      <span class="callout-icon">&#128721;</span>
+      <div>
+        <div class="callout-title">AzureAdJoined must stay YES throughout</div>
+        <div class="callout-body">If <code class="inline-code">AzureAdJoined</code> under <strong>Device State</strong> ever flips to <strong>NO</strong>, something other than this change has gone wrong. Stop and investigate.</div>
+      </div>
+    </div>
+
+    <div class="callout callout-info">
+      <span class="callout-icon">&#8505;</span>
+      <div>
+        <div class="callout-title">No reboot is needed for the value to be present</div>
+        <div class="callout-body">But test the actual behaviour on a pilot device rather than assuming the block is live.</div>
+      </div>
+    </div>
+
+    <div class="sub-h">Roll it back</div>
+
+    <p>Set the value to <code class="inline-code">0</code>, or delete it:</p>
+
+    <div class="code-wrap">
+      <div class="code-bar">
+        <span class="code-lang">PowerShell &middot; elevated</span>
+        <button class="code-copy" data-copy>Copy</button>
+      </div>
+      <pre class="code">Remove-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WorkplaceJoin' -Name 'BlockAADWorkplaceJoin' -ErrorAction SilentlyContinue</pre>
+    </div>
+
+    <div class="callout callout-warn">
+      <span class="callout-icon">&#9888;</span>
+      <div>
+        <div class="callout-title">Removing a platform script assignment does not undo it</div>
+        <div class="callout-body">If you used <strong>Option&nbsp;A</strong>, a platform script only runs forward &mdash; unassigning it leaves the value in place. You need a second script to reverse it, or do it by hand. <strong>Option&nbsp;B is easier to reverse</strong>: change the remediation and it corrects itself on the next run.</div>
+      </div>
+    </div>
+
+    <div class="sub-h">Rollout order</div>
+
+    <div class="steps">
+      <div class="step">
+        <span class="step-num">1</span>
+        <p>Deploy to a <strong>pilot group of 2 or 3 devices</strong>. Confirm sign-in, Company Portal and Office all still work, and that <code class="inline-code">AzureAdJoined</code> is untouched.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">2</span>
+        <p>Roll out to <code class="inline-code">Intune-Windows-All</code>.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">3</span>
+        <p>Work through the existing duplicates using <strong>Part One</strong> of this article.</p>
+      </div>
+      <div class="step">
+        <span class="step-num red">4</span>
+        <p>Re-run <code class="inline-code">Get-DuplicateDeviceObjects.ps1</code> from the CE toolkit after a couple of weeks. The count of duplicated machine names should be <strong>falling</strong>, and no new names should appear.</p>
+      </div>
+    </div>
+
+    <div class="callout callout-ok">
+      <span class="callout-icon">&#128200;</span>
+      <div>
+        <div class="callout-title">Step 4 is the one that tells you whether any of this worked</div>
+        <div class="callout-body">Without it you are assuming.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ APPENDIX ═══════════ -->
+  <div class="section-heading" id="appendix">
+    <div class="step-badge badge-grey">&#167;</div>
+    <div>
+      <div class="step-meta">Appendix &middot; 2nd line only</div>
+      <div class="step-title">Cleaning up the leftover Entra object</div>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <div class="callout callout-info first">
+      <span class="callout-icon">&#129529;</span>
+      <div>
+        <div class="callout-title">This is tidying, not the fix</div>
+        <div class="callout-body">Once the workplace join is off the PC, the leftover device object presents nothing. It can be removed afterwards, but removing it is housekeeping.</div>
+      </div>
+    </div>
+
+    <div class="callout callout-danger">
+      <span class="callout-icon">&#128273;</span>
+      <div>
+        <div class="callout-title">Check for BitLocker keys before deleting any duplicate device object</div>
+        <div class="callout-body">Deleting an object <strong>destroys the recovery keys escrowed against it, and that is not recoverable</strong>. <code class="inline-code">Get-DuplicateDeviceObjects.ps1</code> in the CE toolkit checks this for you and labels each object.</div>
+      </div>
+    </div>
+
+    <div class="tbl-scroll">
+      <table class="dtable">
+        <tr><th style="width:34%;">Label the script gives you</th><th>What to do</th></tr>
+        <tr>
+          <td class="good"><code class="inline-code">REDUNDANT</code></td>
+          <td class="good">Safe to remove &mdash; its key(s) are also escrowed on the kept object.</td>
+        </tr>
+        <tr>
+          <td class="bad"><code class="inline-code red">DO NOT DELETE</code></td>
+          <td class="bad">Holds N BitLocker key(s) held nowhere else. Leave it.</td>
+        </tr>
+      </table>
+    </div>
+
+    <p>Removal itself is <code class="inline-code">Remove-StaleEntraDevices.ps1</code>, which disables first and deletes later.</p>
+
+    <div class="callout callout-warn">
+      <span class="callout-icon">&#8635;</span>
+      <div>
+        <div class="callout-title">Device first, cloud second</div>
+        <div class="callout-body">Deleting the Entra object <strong>without</strong> removing the workplace join from the PC achieves nothing &mdash; the PC simply registers again.</div>
+      </div>
+    </div>
+
+    <div class="sub-h">Related toolkit scripts</div>
+
+    <div class="tbl-scroll">
+      <table class="dtable">
+        <tr><th style="width:38%;">Script</th><th>What it does</th></tr>
+        <tr><td><code class="inline-code">Get-DuplicateDeviceObjects.ps1</code></td><td>Finds machines holding more than one Entra identity, and checks BitLocker keys before recommending removal.</td></tr>
+        <tr><td><code class="inline-code">Remove-StaleEntraDevices.ps1</code></td><td>Removes leftover device objects &mdash; disables first, deletes later.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ═══════════ FAQ ═══════════ -->
+  <div class="section-heading" id="faq">
+    <div class="step-badge badge-lime">?</div>
+    <div>
+      <div class="step-meta">Quick answers</div>
+      <div class="step-title">Questions that come up</div>
+    </div>
+  </div>
+
+  <div class="content-card">
+    <details class="faq">
+      <summary>Will removing the workplace join sign the user out of everything?</summary>
+      <div class="faq-body"><p>They will need to sign out of Windows and back in at the end of Step&nbsp;4, and they may be asked to sign in to Office apps again afterwards. Nothing is deleted and no data is lost &mdash; the PC stays enrolled in Intune throughout.</p></div>
+    </details>
+
+    <details class="faq">
+      <summary>The user has more than one work account on the PC. Which one do I remove?</summary>
+      <div class="faq-body"><p>The one that has <strong>no MDM sync information behind the Info button</strong>. If more than one entry fits that description, or you are not certain, escalate rather than guessing.</p></div>
+    </details>
+
+    <details class="faq">
+      <summary>Can I just delete the duplicate from Entra ID and be done with it?</summary>
+      <div class="faq-body"><p>No. The PC re-registers within about a day if the workplace join is still on the device, so you get the same call back. Fix the device first; the cloud object is tidying afterwards, and only after the BitLocker check in the Appendix.</p></div>
+    </details>
+
+    <details class="faq">
+      <summary>Does this affect iPhones and Android phones?</summary>
+      <div class="faq-body"><p>No. Workplace join is a Windows concept. iOS and Android app protection policies do not use it and are completely unaffected by the block in Part&nbsp;Two.</p></div>
+    </details>
+
+    <details class="faq">
+      <summary>The block is deployed, but a machine still shows WorkplaceJoined : YES.</summary>
+      <div class="faq-body"><p>Expected. The block only prevents <em>new</em> workplace joins &mdash; it does not remove one that already exists. Work through Part&nbsp;One on that machine.</p></div>
+    </details>
+  </div>
+
+  <!-- ═══════════ CONTACT ═══════════ -->
+  <div class="contact-card-wrap">
+    <h2>Not sure? Ask before you click.</h2>
+    <p>Every escalation route in this article is there because guessing costs a rebuild and asking costs thirty seconds.</p>
+    <div class="contact-grid" style="margin-top:20px;">
+      <a href="mailto:ITSupport@a8mt.co.uk" class="contact-card">
+        <div class="contact-icon-wrap">&#128231;</div>
+        <div>
+          <div class="contact-label">Email</div>
+          <div class="contact-value">ITSupport@a8mt.co.uk</div>
+        </div>
+      </a>
+      <a href="tel:03339997355" class="contact-card">
+        <div class="contact-icon-wrap">&#128222;</div>
+        <div>
+          <div class="contact-label">Phone</div>
+          <div class="contact-value">0333 999 7355</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+</main>
+
+<footer style="background:linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);border-top:1px solid rgba(194,224,0,0.2);padding:18px 40px;text-align:center;">
+  <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">Prepared by <span style="color:rgba(255,255,255,0.85);">Active8 Managed Technologies Limited</span> &middot; IT Service Management</div>
+  <div style="font-family:'Courier New',Consolas,monospace;font-size:10px;color:rgba(255,255,255,0.32);margin-top:5px;">v1.0 &middot; August 2026 &middot; This article is maintained by the Active 8 IT team.</div>
+</footer>
+
+<script>
+(function(){
+  /* -- iframe auto-resize -------------------------------------- */
+  function sendHeight(){
+    var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+    window.parent.postMessage({type:'a8-iframe-resize', height:h}, '*');
+    try { if(window.frameElement) window.frameElement.style.height = (h+20)+'px'; } catch(e){}
+  }
+  sendHeight();
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+  if(window.ResizeObserver){ new ResizeObserver(sendHeight).observe(document.body); }
+  var attempts = 0;
+  var timer = setInterval(function(){
+    sendHeight();
+    if(++attempts >= 40) clearInterval(timer);
+  }, 300);
+
+  /* -- nav jump links ------------------------------------------ */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-goto]'), function(link){
+    link.addEventListener('click', function(){
+      var el = document.getElementById(link.getAttribute('data-goto'));
+      if(el && el.scrollIntoView) el.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
+
+  /* -- FAQ opening changes height ------------------------------ */
+  Array.prototype.forEach.call(document.querySelectorAll('details'), function(d){
+    d.addEventListener('toggle', sendHeight);
+  });
+
+  /* -- copy buttons on code blocks ----------------------------- */
+  Array.prototype.forEach.call(document.querySelectorAll('[data-copy]'), function(btn){
+    btn.addEventListener('click', function(){
+      var wrap = btn.closest ? btn.closest('.code-wrap') : null;
+      var pre  = wrap ? wrap.querySelector('pre.code') : null;
+      if(!pre) return;
+      var text = pre.innerText;
+      var done = false;
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly','');
+        ta.style.position = 'absolute';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        done = document.execCommand('copy');
+        document.body.removeChild(ta);
+      } catch(e){ done = false; }
+      btn.textContent = done ? 'Copied' : 'Select manually';
+      btn.className = 'code-copy' + (done ? ' done' : '');
+      setTimeout(function(){
+        btn.textContent = 'Copy';
+        btn.className = 'code-copy';
+      }, 2200);
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
