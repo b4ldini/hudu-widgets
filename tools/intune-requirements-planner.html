@@ -252,6 +252,48 @@
   .checkgrid label{display:flex;align-items:flex-start;gap:7px;font-size:13px;cursor:pointer;line-height:1.4}
   .checkgrid label input{margin-top:3px;flex:none}
   .checkgrid label .cg-note{display:block;font-size:11.5px;color:var(--muted)}
+  /* ---------- (i) explain buttons ----------
+     Every piece of jargon in the tool carries one of these. Clicking opens a
+     plain-English explanation in place; only one is open at a time. */
+  button.ib{
+    flex:none;width:17px;height:17px;padding:0;border-radius:50%;cursor:pointer;
+    border:1.5px solid var(--muted);background:transparent;color:var(--muted);
+    font-family:Georgia,"Times New Roman",serif;font-style:italic;font-weight:700;
+    font-size:11px;line-height:1;display:inline-grid;place-items:center;
+    vertical-align:middle;margin-left:5px;transition:none;
+  }
+  button.ib:hover{border-color:var(--accent);color:var(--accent);background:var(--panel)}
+  button.ib:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  button.ib.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .ibox{
+    grid-column:1/-1;margin:6px 0 2px;padding:11px 13px;border-radius:8px;
+    background:var(--panel-2);border:1px solid var(--line);
+    border-left:3px solid var(--accent);
+    font-size:13px;line-height:1.55;color:var(--ink);font-weight:400;
+    text-transform:none;letter-spacing:0;max-width:78ch;
+  }
+  .ibox b{font-weight:650}
+  .ibox .ib-t{
+    display:block;font-weight:700;font-size:11px;text-transform:uppercase;
+    letter-spacing:.06em;color:var(--accent);margin-bottom:5px;
+  }
+  .ibox .ib-list{margin:9px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+  .ibox .ib-list li{padding-left:12px;border-left:2px solid var(--line)}
+  .ibox .ib-list li.on{border-left-color:var(--accent)}
+  /* only the option NAME is a block; inline <b> inside a description must stay
+     inline or it breaks the sentence across three lines */
+  .ibox .ib-list > li > b{display:block;margin-bottom:2px}
+  .ibox .ib-list > li > span{display:block}
+  .ibox .ib-list .na{display:block;color:var(--warn);font-size:11.5px;font-weight:600;margin-top:3px}
+  .ibox .ib-close{
+    display:inline-block;margin-top:9px;background:none;border:none;padding:0;
+    color:var(--accent);cursor:pointer;font:inherit;font-size:12.5px;
+    text-decoration:underline;text-underline-offset:2px;
+  }
+  .wiz .wopt .ib{margin-left:6px}
+  .wiz .ibox{margin:2px 0 10px}
+  .sect > .sect-head .ib{margin-left:0}
+
   .warn-note{
     background:var(--warn-bg);border:1px solid var(--warn);color:var(--ink);
     border-radius:6px;padding:8px 11px;font-size:12.5px;line-height:1.45;
@@ -622,7 +664,8 @@
 
 <dialog class="export wiz" id="wizDlg">
   <h3>A few questions to get started</h3>
-  <p style="font-size:13.5px;color:var(--muted);margin:0 0 16px;max-width:66ch">Two minutes. We use these to lay out a sensible starting point &mdash; you can change anything afterwards, and adding or removing device groups later is easy.</p>
+  <p style="font-size:13.5px;color:var(--muted);margin:0 0 6px;max-width:66ch">Two minutes. We use these to lay out a sensible starting point &mdash; you can change anything afterwards, and adding or removing device groups later is easy.</p>
+  <p style="font-size:13px;color:var(--muted);margin:0 0 16px;max-width:66ch;display:flex;align-items:center;gap:2px;flex-wrap:wrap"><span>Hit a word you don&rsquo;t recognise? Press the</span> <span style="display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;border:1.5px solid var(--muted);color:var(--muted);font-family:Georgia,serif;font-style:italic;font-weight:700;font-size:11px;line-height:1">i</span> <span>next to it for a plain-English explanation. They are all over this tool.</span></p>
   <div id="wizBody"></div>
   <div class="dlg-row">
     <button class="btn" id="wizCancel">Cancel</button>
@@ -906,17 +949,42 @@
     charity: "Charity or not-for-profit",
     other:   "Something else"
   };
+  CAT.sectorNote = {
+    school:  "Brings in shared tablet trolleys, pupil accounts and Apple School Manager, which most businesses never need.",
+    college: "Much like a school, usually with more student-owned devices in the mix.",
+    business:"Staff devices, company phones, and people using their own phones for work.",
+    charity: "Often a mix of donated and bought devices, and volunteers as well as paid staff.",
+    other:   "We will keep the starting point general and work it out with you."
+  };
+
+  /* Plain-English text behind every (i) button. If an explanation needs another
+     piece of jargon to make sense, it is not finished. Keyed by "term:<slug>"
+     and surfaced next to the section it belongs to. */
+  CAT.terms = {
+    enrolment:{ t:"Enrolment", p:"Enrolment is the moment a device first joins the management system and starts being looked after - software installed, settings applied, health checked. It normally happens the very first time the device is switched on, and how it happens depends on how the device was bought and who is going to use it." },
+    affinity:{ t:"Who uses each device", p:"This is the single most important answer on this page. A laptop that goes home with the same person every night belongs to that person. A tablet a whole class works through belongs to nobody in particular. A screen in reception that nobody signs in to is different again.<br><br>It matters because sign-in methods, security rules and even app licensing all work differently depending on the answer - so these are set up as separate groups from the start." },
+    ownership:{ t:"Who owns the devices", p:"Devices your organisation bought can be fully managed - we can set them up from scratch and control what happens on them.<br><br>Devices your staff own personally cannot, and should not be. On those we protect the work data inside the work apps and leave the rest of the phone completely alone. We can never see personal photos, messages or apps." },
+    compliance:{ t:"Health rules", p:"A set of checks a device has to pass to count as trustworthy - for example that it is up to date, locked with a PIN, has its disk encrypted, and has antivirus running.<br><br>On their own these rules only <b>flag</b> a device that fails; they do not stop it doing anything. Actually blocking access is a separate decision we will talk through with you." },
+    config:{ t:"Settings we push out", p:"The settings applied to devices automatically, so nobody has to set them up by hand - Wi-Fi, security hardening, browser settings, and what people are allowed to change themselves.<br><br>The ones marked <b>recommended</b> come from a well-established public security baseline rather than being invented by us." },
+    apps:{ t:"Apps", p:"Software we install or offer on the devices. <b>Installed automatically</b> means it simply appears without anyone doing anything. <b>Offered</b> means it shows up in a company app store on the device, and people install it if they want it.<br><br>You do not need to know how any of it is packaged or delivered - just tell us what people need." },
+    esp:{ t:"The set-up progress screen", p:"When a brand new device is setting itself up, this screen holds the person out until the essentials have finished installing, so they do not land on a half-configured desktop.<br><br>Keep the list of things it waits for short. Every item is time somebody spends watching a progress bar, and a long list is the most common cause of set-up timing out and failing." },
+    updates:{ t:"Updates", p:"How quickly security updates reach these devices, and how much say the person using the device gets over when it restarts.<br><br>Letting a small pilot group take updates first means problems are found on a handful of machines instead of all of them. Taking away someone's ability to postpone a restart is the most common reason a new setup gets a bad reputation in its first week." },
+    groups:{ t:"Groups", p:"A group is a named list of people. Everything we set up reaches devices <b>through</b> a group - which makes them matter far more than they sound.<br><br>A policy pointed at a group with nobody in it looks completely correct in the admin console and does absolutely nothing. That is why the checker nags about it." },
+    resources:{ t:"Wi-Fi, VPN and certificates", p:"Things a device needs before anybody can actually use it. If a device must join a particular Wi-Fi network on its own, reach an internal system, or trust an internal certificate, it has to be given those automatically.<br><br>This matters most on shared and single-purpose devices - there is nobody standing there to type in a Wi-Fi password." },
+    licences:{ t:"Microsoft licences", p:"Worth getting right, because some Microsoft licence names are only one word apart and include completely different things.<br><br>Anything beginning <b>Microsoft 365</b> generally includes device management. Anything beginning <b>Office 365</b> generally does not - it is email and the Office apps only. If you are not sure, say so and we will check; it takes us five minutes and it decides what is possible." },
+    ce:{ t:"Cyber Essentials", p:"A UK government-backed certification covering five basic security controls. If you are certifying or recertifying, we check your answers against what the scheme actually requires.<br><br>Just as usefully, we will tell you where it requires <b>less</b> than people assume - it does not, for example, demand disk encryption, and it explicitly says not to force regular password changes." }
+  };
 
   CAT.licences = [
-    { key:"m365bp",   label:"Microsoft 365 Business Premium", intune:true,  entraP1:true },
-    { key:"m365e3",   label:"Microsoft 365 E3 / E5",          intune:true,  entraP1:true },
-    { key:"m365a3",   label:"Microsoft 365 A3 / A5 (education)", intune:true, entraP1:true },
-    { key:"o365a1",   label:"Office 365 A1 (education, free)", intune:false, entraP1:false },
-    { key:"o365a3",   label:"Office 365 A3 / A5 (education)",  intune:false, entraP1:false },
-    { key:"o365e3",   label:"Office 365 E1 / E3 / E5",         intune:false, entraP1:false },
-    { key:"intuneP1", label:"Intune Plan 1 (standalone)",      intune:true,  entraP1:false },
-    { key:"entraP1",  label:"Entra ID P1 / P2 (standalone)",   intune:false, entraP1:true },
-    { key:"unknown",  label:"Not sure",                        intune:null,  entraP1:null }
+    { key:"m365bp",   label:"Microsoft 365 Business Premium", intune:true,  entraP1:true, plain:"Includes device management and the ability to block access. Everything in this tool is possible on it." },
+    { key:"m365e3",   label:"Microsoft 365 E3 / E5",          intune:true,  entraP1:true, plain:"Includes device management and the ability to block access." },
+    { key:"m365a3",   label:"Microsoft 365 A3 / A5 (education)", intune:true, entraP1:true, plain:"The education licence that DOES include device management. Note that it starts with <b>Microsoft</b> 365, not Office 365 - the two are easily confused and only one of them works." },
+    { key:"o365a1",   label:"Office 365 A1 (education, free)", intune:false, entraP1:false, plain:"The free education licence. Email and Office apps only - it does <b>not</b> include device management." },
+    { key:"o365a3",   label:"Office 365 A3 / A5 (education)",  intune:false, entraP1:false, plain:"Email and Office apps only. Despite sounding almost identical to Microsoft 365 A3, this one does <b>not</b> include device management. This catches people out often enough to be worth double-checking on your invoice." },
+    { key:"o365e3",   label:"Office 365 E1 / E3 / E5",         intune:false, entraP1:false, plain:"Email and Office apps only - it does <b>not</b> include device management." },
+    { key:"intuneP1", label:"Intune Plan 1 (standalone)",      intune:true,  entraP1:false, plain:"Device management bought on its own, rather than as part of a bundle." },
+    { key:"entraP1",  label:"Entra ID P1 / P2 (standalone)",   intune:false, entraP1:true, plain:"Lets us block access based on whether a device is healthy. It does not manage the devices by itself." },
+    { key:"unknown",  label:"Not sure",                        intune:null,  entraP1:null, plain:"Perfectly fine, and a common answer. We will check for you - it takes about five minutes at our end." }
   ];
 
 
@@ -1109,10 +1177,14 @@
 
   /* ---------- seeding from the wizard ---------- */
   var SCENARIOS = {
-    staff1to1:{ label:"Devices belonging to one named person", affinity:"user", ownership:"corporate" },
-    shared:   { label:"Devices shared between several people",  affinity:"shared", ownership:"corporate" },
-    kiosk:    { label:"Single-purpose devices nobody signs in to", affinity:"kiosk", ownership:"corporate" },
-    byod:     { label:"People's own phones or laptops",          affinity:"user", ownership:"personal" }
+    staff1to1:{ label:"Devices belonging to one named person", affinity:"user", ownership:"corporate",
+      plain:"The device has an owner. It goes home with the same person, their files are on it, and they sign in to it every day. A staff laptop, or a pupil's own school-issued device." },
+    shared:   { label:"Devices shared between several people",  affinity:"shared", ownership:"corporate",
+      plain:"Nobody in particular owns it. A trolley of tablets a class works through, a laptop kept in a meeting room, a machine on a hot desk. Different people use it on different days, and nobody's files should be left on it." },
+    kiosk:    { label:"Single-purpose devices nobody signs in to", affinity:"kiosk", ownership:"corporate",
+      plain:"The device does one job and there is usually no sign-in at all. A visitor sign-in tablet, an information screen, a stock scanner, a till." },
+    byod:     { label:"People's own phones or laptops",          affinity:"user", ownership:"personal",
+      plain:"Devices your staff or pupils bought themselves and use for work as well. We protect the work data inside the work apps and never touch the rest of the device - we cannot see personal photos, messages or apps." }
   };
 
   var SEED_NAMES = {
@@ -1229,24 +1301,37 @@
 
   /* ---------- wizard ---------- */
   var wizDlg = document.getElementById("wizDlg");
-  function renderWizard(){
+  /* pre (optional) is the answers currently on screen, from readWizard(). It is
+     passed when an (i) button forces a re-render mid-question so nothing the
+     customer has already ticked is lost. */
+  function renderWizard(pre){
     var m = state.meta;
+    var wOrg     = pre ? pre.org      : m.org;
+    var wContact = pre ? pre.contact  : m.contact;
+    var wSector  = pre ? pre.sector   : m.sector;
+    var wLic     = pre ? pre.licences : (m.licences || []);
+    var wCe      = pre ? pre.ce       : m.ce;
     var pfSel = {}, scSel = {};
-    state.fleets.forEach(function(f){
-      pfSel[f.platform] = true;
-      var sc = f.ownership === "personal" ? "byod"
-             : f.affinity === "shared" ? "shared"
-             : f.affinity === "kiosk" ? "kiosk" : "staff1to1";
-      scSel[sc] = true;
-    });
+    if(pre){
+      pre.platforms.forEach(function(k){ pfSel[k] = true; });
+      pre.scenarios.forEach(function(k){ scSel[k] = true; });
+    } else {
+      state.fleets.forEach(function(f){
+        pfSel[f.platform] = true;
+        var sc = f.ownership === "personal" ? "byod"
+               : f.affinity === "shared" ? "shared"
+               : f.affinity === "kiosk" ? "kiosk" : "staff1to1";
+        scSel[sc] = true;
+      });
+    }
     var h = [];
     h.push('<div class="q">' +
       '<label class="top">Who are we doing this for?</label>' +
       '<div class="grid2">' +
         '<div><label class="top" style="font-size:11px">Organisation</label>' +
-          '<input type="text" id="wOrg" value="' + esc(m.org) + '" placeholder="Your organisation name"></div>' +
+          '<input type="text" id="wOrg" value="' + esc(wOrg) + '" placeholder="Your organisation name"></div>' +
         '<div><label class="top" style="font-size:11px">Your name</label>' +
-          '<input type="text" id="wContact" value="' + esc(m.contact) + '" placeholder="Who is filling this in"></div>' +
+          '<input type="text" id="wContact" value="' + esc(wContact) + '" placeholder="Who is filling this in"></div>' +
       '</div></div>');
 
     h.push('<div class="q"><label class="top">What kind of organisation is it?</label>' +
@@ -1254,39 +1339,47 @@
       '<div class="wgrid">');
     Object.keys(CAT.sectors).forEach(function(k){
       h.push('<label class="wopt"><input type="radio" name="wsector" value="' + k + '"' +
-        (m.sector === k ? " checked" : "") + '><b>' + esc(CAT.sectors[k]) + '</b></label>');
+        (wSector === k ? " checked" : "") + '><span><b>' + esc(CAT.sectors[k]) + '</b></span></label>');
     });
-    h.push('</div></div>');
+    h.push('</div>');
+    Object.keys(CAT.sectors).forEach(function(k){ h.push(ibox("sector:" + k)); });
+    h.push('</div>');
 
     h.push('<div class="q"><label class="top">Which kinds of device are in scope?</label>' +
       '<p class="qn">Tick everything you want managed, even if some of it comes later.</p><div class="wgrid">');
     CAT.platformOrder.forEach(function(k){
       h.push('<label class="wopt"><input type="checkbox" class="wpf" value="' + k + '"' +
-        (pfSel[k] ? " checked" : "") + '><span><b>' + esc(CAT.platforms[k].label) + '</b>' +
+        (pfSel[k] ? " checked" : "") + '><span><b>' + esc(CAT.platforms[k].label) + '</b>' + ib("plat:" + k) +
         '<span class="wn">' + esc(CAT.platforms[k].plain) + '</span></span></label>');
     });
-    h.push('</div></div>');
+    h.push('</div>');
+    CAT.platformOrder.forEach(function(k){ h.push(ibox("plat:" + k)); });
+    h.push('</div>');
 
-    h.push('<div class="q"><label class="top">How are the devices used?</label>' +
+    h.push('<div class="q"><label class="top">How are the devices used?' + ib("term:affinity") + '</label>' + ibox("term:affinity") +
       '<p class="qn">This is the most important question here. A device belonging to one person and a device a class shares need different enrolment, different policies and often different licensing &mdash; so we set them up as separate groups from the start.</p><div class="wgrid">');
     Object.keys(SCENARIOS).forEach(function(k){
       h.push('<label class="wopt"><input type="checkbox" class="wsc" value="' + k + '"' +
-        (scSel[k] ? " checked" : "") + '><span><b>' + esc(SCENARIOS[k].label) + '</b></span></label>');
+        (scSel[k] ? " checked" : "") + '><span><b>' + esc(SCENARIOS[k].label) + '</b>' + ib("scen:" + k) + '</span></label>');
     });
-    h.push('</div></div>');
+    h.push('</div>');
+    Object.keys(SCENARIOS).forEach(function(k){ h.push(ibox("scen:" + k)); });
+    h.push('</div>');
 
-    h.push('<div class="q"><label class="top">Which Microsoft licences do you have?</label>' +
+    h.push('<div class="q"><label class="top">Which Microsoft licences do you have?' + ib("term:licences") + '</label>' + ibox("term:licences") +
       '<p class="qn">Worth getting right &mdash; some licences that sound similar do not include device management at all, and it is much cheaper to find that out now.</p><div class="wgrid">');
     CAT.licences.forEach(function(l){
       h.push('<label class="wopt"><input type="checkbox" class="wlic" value="' + l.key + '"' +
-        ((m.licences||[]).indexOf(l.key) !== -1 ? " checked" : "") + '><span><b>' + esc(l.label) + '</b></span></label>');
+        (wLic.indexOf(l.key) !== -1 ? " checked" : "") + '><span><b>' + esc(l.label) + '</b>' + ib("lic:" + l.key) + '</span></label>');
     });
-    h.push('</div></div>');
+    h.push('</div>');
+    CAT.licences.forEach(function(l){ h.push(ibox("lic:" + l.key)); });
+    h.push('</div>');
 
-    h.push('<div class="q"><label class="top">Does this also have to meet Cyber Essentials?</label>' +
+    h.push('<div class="q"><label class="top">Does this also have to meet Cyber Essentials?' + ib("term:ce") + '</label>' + ibox("term:ce") +
       '<p class="qn">If you are certifying (or recertifying) to Cyber Essentials, we will check your answers against what the scheme actually requires &mdash; and tell you where it requires <em>less</em> than people assume.</p><div class="wgrid">' +
-      '<label class="wopt"><input type="radio" name="wce" value="1"' + (m.ce ? " checked" : "") + '><span><b>Yes &mdash; Cyber Essentials is part of this</b><span class="wn">Adds the scheme\'s requirements to the checker.</span></span></label>' +
-      '<label class="wopt"><input type="radio" name="wce" value="0"' + (!m.ce ? " checked" : "") + '><span><b>No, or not yet</b><span class="wn">You can turn it on later.</span></span></label>' +
+      '<label class="wopt"><input type="radio" name="wce" value="1"' + (wCe ? " checked" : "") + '><span><b>Yes &mdash; Cyber Essentials is part of this</b><span class="wn">Adds the scheme\'s requirements to the checker.</span></span></label>' +
+      '<label class="wopt"><input type="radio" name="wce" value="0"' + (!wCe ? " checked" : "") + '><span><b>No, or not yet</b><span class="wn">You can turn it on later.</span></span></label>' +
       '</div></div>');
 
     document.getElementById("wizBody").innerHTML = h.join("");
@@ -1335,11 +1428,92 @@
     h.push("</select>");
     return h.join("");
   }
-  function fld(label, inner, note){
-    return '<div class="fld"><label>' + label + '</label>' + inner +
+  function fld(label, inner, note, infoKey){
+    return '<div class="fld"><label>' + label + (infoKey ? ib(infoKey) : "") + '</label>' +
+      (infoKey ? ibox(infoKey) : "") + inner +
       (note ? '<div class="fieldnote">' + note + '</div>' : "") + "</div>";
   }
   function d(f, extra){ return 'data-fid="' + f.id + '"' + (extra ? " " + extra : ""); }
+
+  /* ---------- (i) explain buttons ----------
+     openInfo is deliberately module-level, not part of state: it is transient UI,
+     it must survive the full re-render on every keystroke, and it must never end
+     up in an exported plan. Keys are "<kind>:<id>" and resolved by infoFor(). */
+  var openInfo = null;
+
+  function ib(key){
+    return '<button type="button" class="ib' + (openInfo === key ? " on" : "") +
+      '" data-act="info" data-ik="' + esc(key) + '" title="What does this mean?" ' +
+      'aria-label="Explain this in plain English" aria-expanded="' + (openInfo === key) + '">i</button>';
+  }
+  function ibox(key){
+    if(openInfo !== key) return "";
+    var info = infoFor(key);
+    if(!info) return "";
+    return '<div class="ibox" role="note"><span class="ib-t">' + esc(info.t) + "</span>" +
+      info.p + '<button type="button" class="ib-close" data-act="info" data-ik="' + esc(key) + '">Close</button></div>';
+  }
+  /* one call site renders both, for the common "button then panel" case */
+  function ibPair(key){ return { b:ib(key), box:ibox(key) }; }
+
+  function infoFor(key){
+    var ix = (key || "").indexOf(":");
+    if(ix === -1) return null;
+    var kind = key.slice(0, ix), id = key.slice(ix + 1), o;
+
+    if(kind === "term")   return CAT.terms[id] || null;
+    if(kind === "plat")   { o = CAT.platforms[id];  return o && { t:o.label, p:o.plain }; }
+    if(kind === "aff")    { o = CAT.affinity[id];   return o && { t:o.label, p:o.plain }; }
+    if(kind === "own")    { o = CAT.ownership[id];  return o && { t:o.label, p:o.plain }; }
+    if(kind === "scen")   { o = SCENARIOS[id];      return o && { t:o.label, p:o.plain }; }
+    if(kind === "sector") return CAT.sectors[id] ? { t:CAT.sectors[id], p:CAT.sectorNote[id] || "" } : null;
+    if(kind === "lic"){
+      for(var i = 0; i < CAT.licences.length; i++){
+        if(CAT.licences[i].key === id) return { t:CAT.licences[i].label, p:CAT.licences[i].plain || "" };
+      }
+      return null;
+    }
+    if(kind === "intent") return CAT.appIntent[id] ? { t:"How this app is delivered", p:CAT.appIntent[id] } : null;
+
+    /* every option in a list, explained together - used where the choice is a
+       dropdown and a per-option button is not possible */
+    if(kind === "enrolopts" || kind === "affopts" || kind === "ownopts" || kind === "platopts" || kind === "ringopts"){
+      var f = fleetById(id);
+      if(!f) return null;
+      if(kind === "affopts")  return { t:CAT.terms.affinity.t,  p:CAT.terms.affinity.p  + optList(CAT.affinity,  f.affinity)  };
+      if(kind === "ownopts")  return { t:CAT.terms.ownership.t, p:CAT.terms.ownership.p + optList(CAT.ownership, f.ownership) };
+      if(kind === "platopts") return { t:"Kind of device", p:"Pick whichever is closest. If a group has a mixture, split it into two groups - they need different setup." + optList(CAT.platforms, f.platform) };
+      if(kind === "ringopts") return { t:CAT.terms.updates.t, p:CAT.terms.updates.p + optList(CAT.updateRing, f.updates.ring) };
+      /* enrolment: only the methods valid for this group's ownership */
+      var ms = enrolMethodsFor(f), h = [CAT.terms.enrolment.p, '<ul class="ib-list">'];
+      ms.forEach(function(m){
+        var fits = m.affinity.indexOf(f.affinity) !== -1;
+        h.push('<li class="' + (m.key === (currentMethod(f) || "") ? "on" : "") + '"><b>' + esc(m.label) + "</b>" +
+          (fits ? "" : '<span class="na">Not for &ldquo;' + esc(CAT.affinity[f.affinity].label.toLowerCase()) + '&rdquo; devices</span>') +
+          "<span>" + m.plain + "</span>" +
+          (m.note ? '<span class="na">Worth knowing: ' + m.note + "</span>" : "") + "</li>");
+      });
+      h.push("</ul>");
+      return { t:CAT.terms.enrolment.t, p:h.join("") };
+    }
+    if(kind === "cfg"){
+      var parts = id.split("|"), dd = configDef(parts[0], parts[1]);
+      return dd && { t:dd.label, p:dd.plain + (dd.note ? "<br><br><b>Worth knowing:</b> " + dd.note : "") };
+    }
+    return null;
+  }
+  function currentMethod(f){
+    return (f.enrolments[0] && f.enrolments[0].method) || "";
+  }
+  function optList(obj, sel){
+    var h = ['<ul class="ib-list">'];
+    Object.keys(obj).forEach(function(k){
+      h.push('<li class="' + (k === sel ? "on" : "") + '"><b>' + esc(obj[k].label) + "</b><span>" +
+        (obj[k].plain || "") + "</span></li>");
+    });
+    h.push("</ul>");
+    return h.join("");
+  }
 
   function renderEnrolSub(f, e){
     var methods = enrolMethodsFor(f);
@@ -1360,7 +1534,8 @@
       h.push(fld("How these devices get enrolled",
         selectHtml("en-" + e.id, [{v:"",l:"- choose -"}].concat(methods.map(function(m){ return {v:m.key,l:m.label}; })),
           e.method, 'data-k="method" data-list="enrolments" ' + d(f) + ' data-sid="' + e.id + '"'),
-        def ? def.plain : "Only the methods that work for " + esc(CAT.ownership[f.ownership].label.toLowerCase()) + " devices are listed."));
+        def ? def.plain : "Only the methods that work for " + esc(CAT.ownership[f.ownership].label.toLowerCase()) + " devices are listed.",
+        "enrolopts:" + f.id));
       if(def && def.note) h.push('<div class="warn-note"><b>Worth knowing:</b> ' + def.note + "</div>");
       if(def && !suits){
         h.push('<div class="warn-note"><b>Mismatch.</b> ' + esc(def.label) + " is for " +
@@ -1449,11 +1624,13 @@
       h.push(fld("What to call this", '<input type="text" id="gn-' + c.id + '" value="' + esc(c.name) + '" data-k="name" ' + A + '>'));
       h.push('<div class="checkgrid">');
       defs.forEach(function(dd){
+        var ik = "cfg:" + f.platform + "|" + dd.key;
         h.push('<label><input type="checkbox" value="' + dd.key + '"' +
           ((c.packs||[]).indexOf(dd.key) !== -1 ? " checked" : "") +
           ' data-act="packtoggle" ' + A + '><span>' + esc(dd.label) +
           (dd.rec ? ' <span class="chip pol" style="font-size:9px;padding:1px 5px">recommended</span>' : "") +
-          '<span class="cg-note">' + dd.plain + "</span></span></label>");
+          ib(ik) + '<span class="cg-note">' + dd.plain + "</span></span></label>");
+        h.push(ibox(ik));
       });
       h.push("</div>");
       (c.packs||[]).forEach(function(k){
@@ -1491,17 +1668,18 @@
       '<span class="sh-note">The two answers that shape everything else are <b>who uses it</b> and <b>who owns it</b>.</span></div>');
     h.push('<div class="grid2">');
     h.push(fld("Kind of device", selectHtml("pf-" + f.id,
-      CAT.platformOrder.map(function(k){ return {v:k,l:CAT.platforms[k].label}; }), pf, 'data-k="platform" ' + d(f))));
+      CAT.platformOrder.map(function(k){ return {v:k,l:CAT.platforms[k].label}; }), pf, 'data-k="platform" ' + d(f)),
+      "", "platopts:" + f.id));
     h.push(fld("Roughly how many", '<input type="text" id="ct-' + f.id + '" value="' + esc(f.count) +
       '" placeholder="e.g. 120, or 30 now and 30 in September" data-k="count" ' + d(f) + ">"));
     h.push("</div>");
     h.push('<div class="grid2">');
     h.push(fld("Who uses each device", selectHtml("af-" + f.id,
       Object.keys(CAT.affinity).map(function(k){ return {v:k,l:CAT.affinity[k].label}; }), f.affinity, 'data-k="affinity" ' + d(f)),
-      CAT.affinity[f.affinity].plain));
+      CAT.affinity[f.affinity].plain, "affopts:" + f.id));
     h.push(fld("Who owns them", selectHtml("ow-" + f.id,
       Object.keys(CAT.ownership).map(function(k){ return {v:k,l:CAT.ownership[k].label}; }), f.ownership, 'data-k="ownership" ' + d(f)),
-      CAT.ownership[f.ownership].plain));
+      CAT.ownership[f.ownership].plain, "ownopts:" + f.id));
     h.push("</div>");
     h.push(fld("Make and model, if you know it", '<input type="text" id="md-' + f.id + '" value="' + esc(f.model) +
       '" placeholder="e.g. Dell Latitude 3450, iPad 10th gen 64GB, Samsung Galaxy Tab A9" data-k="model" ' + d(f) + ">",
@@ -1515,18 +1693,20 @@
           '<span class="cnt">' + plural((g.personIds||[]).length, "person", "people") + "</span></label>";
       }).join("") + "</div>" +
       '<button class="addbtn" style="margin-top:7px" data-act="newgroup" ' + d(f) + ">+ New group for this</button>",
-      "Settings only reach devices through a group. A group with nobody in it applies to nobody, however correct it looks."));
+      "Settings only reach devices through a group. A group with nobody in it applies to nobody, however correct it looks.",
+      "term:groups"));
     h.push("</div>");
 
     /* --- enrolment --- */
-    h.push('<div class="sect"><div class="sect-head"><h4>Getting the devices enrolled</h4>' +
-      '<span class="sh-note">Add more than one if different batches arrive differently.</span></div>');
+    h.push('<div class="sect"><div class="sect-head"><h4>Getting the devices enrolled</h4>' + ib("term:enrolment") +
+      '<span class="sh-note">Add more than one if different batches arrive differently.</span></div>' + ibox("term:enrolment") + '');
     if(!f.enrolments.length) h.push('<div class="info-note">No enrolment method chosen yet &mdash; this is the one thing we really do need. Use <b>+ Add an enrolment method</b> below and pick from the list.</div>');
     f.enrolments.forEach(function(e){ h.push(renderEnrolSub(f, e)); });
     h.push('<button class="addbtn" data-act="addenrol" ' + d(f) + ">+ Add an enrolment method</button>");
     if(pf === "windows" && f.ownership === "corporate"){
       h.push('<div class="check-row" style="margin-top:4px"><label><input type="checkbox" id="esp-' + f.id + '"' +
-        (f.esp.on ? " checked" : "") + ' data-k="esp.on" ' + d(f) + '>Show a progress screen while the device sets itself up, and hold the user out until it is ready</label></div>');
+        (f.esp.on ? " checked" : "") + ' data-k="esp.on" ' + d(f) + '>Show a progress screen while the device sets itself up, and hold the user out until it is ready</label>' +
+        ib("term:esp") + "</div>" + ibox("term:esp"));
       if(f.esp.on){
         h.push(fld("Which apps must be installed before anyone can use it",
           '<input type="text" id="espb-' + f.id + '" value="' + esc(f.esp.blocking) +
@@ -1537,8 +1717,8 @@
     h.push("</div>");
 
     /* --- compliance --- */
-    h.push('<div class="sect"><div class="sect-head"><h4>Health rules</h4>' +
-      '<span class="sh-note">What a device must satisfy to count as trustworthy.</span></div>');
+    h.push('<div class="sect"><div class="sect-head"><h4>Health rules</h4>' + ib("term:compliance") +
+      '<span class="sh-note">What a device must satisfy to count as trustworthy.</span></div>' + ibox("term:compliance") + '');
     if(f.ownership === "personal" && !isUnmanaged(f)){
       h.push('<div class="info-note">These are personally-owned devices. Health rules only work on a device that is actually enrolled &mdash; if you are not enrolling them, protection has to happen inside the apps instead.</div>');
     }
@@ -1547,16 +1727,16 @@
     h.push("</div>");
 
     /* --- config --- */
-    h.push('<div class="sect"><div class="sect-head"><h4>Settings to push out</h4>' +
-      '<span class="sh-note">Tick what you want; the recommended ones are a sensible starting point.</span></div>');
+    h.push('<div class="sect"><div class="sect-head"><h4>Settings to push out</h4>' + ib("term:config") +
+      '<span class="sh-note">Tick what you want; the recommended ones are a sensible starting point.</span></div>' + ibox("term:config") + '');
     if(!f.config.length) h.push('<div class="info-note">No settings chosen for this group yet. Use <b>+ Add a settings policy</b> and tick what you need &mdash; the recommended ones are a sensible starting point.</div>');
     f.config.forEach(function(c){ h.push(renderConfigSub(f, c)); });
     h.push('<button class="addbtn" data-act="addconf" ' + d(f) + ">+ Add a settings policy</button>");
     h.push("</div>");
 
     /* --- apps --- */
-    h.push('<div class="sect"><div class="sect-head"><h4>Apps on these devices</h4>' +
-      '<span class="sh-note">Add apps in the panel below first, then tick them on here.</span></div>');
+    h.push('<div class="sect"><div class="sect-head"><h4>Apps on these devices</h4>' + ib("term:apps") +
+      '<span class="sh-note">Add apps in the panel below first, then tick them on here.</span></div>' + ibox("term:apps") + '');
     if(!state.apps.length){
       h.push('<div class="info-note">No apps listed yet. Add them in the <b>Apps</b> panel below and they will appear here.</div>');
     } else {
@@ -1574,8 +1754,8 @@
 
     /* --- resources --- */
     if(state.resources.length){
-      h.push('<div class="sect"><div class="sect-head"><h4>Wi-Fi, VPN and certificates</h4>' +
-        '<span class="sh-note">Tick what these devices need.</span></div><div class="pick-list">');
+      h.push('<div class="sect"><div class="sect-head"><h4>Wi-Fi, VPN and certificates</h4>' + ib("term:resources") +
+        '<span class="sh-note">Tick what these devices need.</span></div>' + ibox("term:resources") + '<div class="pick-list">');
       state.resources.forEach(function(r){
         h.push('<label><input type="checkbox" data-act="fres" ' + d(f) + ' value="' + r.id + '"' +
           (f.resourceIds.indexOf(r.id) !== -1 ? " checked" : "") + ">" + esc(r.name) +
@@ -1585,12 +1765,12 @@
     }
 
     /* --- updates --- */
-    h.push('<div class="sect"><div class="sect-head"><h4>Updates</h4>' +
-      '<span class="sh-note">How quickly security updates land, and how much say the user gets.</span></div>');
+    h.push('<div class="sect"><div class="sect-head"><h4>Updates</h4>' + ib("term:updates") +
+      '<span class="sh-note">How quickly security updates land, and how much say the user gets.</span></div>' + ibox("term:updates") + '');
     h.push('<div class="grid2">');
     h.push(fld("When this group gets updates", selectHtml("ur-" + f.id,
       Object.keys(CAT.updateRing).map(function(k){ return {v:k,l:CAT.updateRing[k].label}; }), f.updates.ring, 'data-k="updates.ring" ' + d(f)),
-      CAT.updateRing[f.updates.ring] ? CAT.updateRing[f.updates.ring].plain : ""));
+      CAT.updateRing[f.updates.ring] ? CAT.updateRing[f.updates.ring].plain : "", "ringopts:" + f.id));
     h.push(fld("Days before an update is forced",
       '<input type="text" id="ud-' + f.id + '" value="' + esc(f.updates.deadline) + '" placeholder="e.g. 7" data-k="updates.deadline" ' + d(f) + ">",
       state.meta.ce ? "Cyber Essentials requires security updates within <b>14 days</b> of release, so this plus any delay must come in under that." : "Shorter is safer; too short and people lose work to a surprise restart."));
@@ -2993,6 +3173,20 @@
     render();
   });
 
+  /* ---------- (i) explain buttons ----------
+     One handler for the whole page. Clicking the open one closes it, so only
+     one explanation is ever on screen. Re-renders the region it lives in. */
+  document.addEventListener("click", function(ev){
+    var b = ev.target.closest('[data-act="info"]');
+    if(!b) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    var k = b.getAttribute("data-ik");
+    openInfo = (openInfo === k) ? null : k;
+    if(b.closest("#wizBody")) renderWizard(readWizard());
+    else render();
+  }, true);
+
   /* ---------- jump links ---------- */
   document.getElementById("checks").addEventListener("click", function(ev){
     var b = ev.target.closest("button.jump");
@@ -3154,6 +3348,7 @@
 
   /* ---------- wizard wiring ---------- */
   document.getElementById("openWiz").addEventListener("click", function(){
+    openInfo = null;
     renderWizard();
     openDlg(wizDlg);
   });
