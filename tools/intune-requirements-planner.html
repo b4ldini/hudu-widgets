@@ -171,11 +171,25 @@
   .meta-inline .miss{color:var(--bad);font-weight:600}
   .meta-inline .sep{opacity:.5;padding:0 5px}
 
-  .acts{display:flex;gap:2px;margin-left:auto;opacity:.55;transition:opacity .12s;flex:none}
+  .acts{display:flex;gap:4px;margin-left:auto;flex:none;align-items:center}
   .fleet:hover .acts,.fleet:focus-within .acts,.grow:hover .acts,.grow:focus-within .acts{opacity:1}
   .acts button{
     border:none;background:transparent;color:var(--muted);cursor:pointer;
     border-radius:5px;padding:3px 7px;font-size:12.5px;line-height:1.4;font-family:inherit;
+  }
+  /* The way into a device group has to look like a control. It was faint grey
+     text at 55% opacity and customers could not find it - the whole catalogue
+     of enrolment and policy choices sits behind this one button. */
+  .acts button.opener{
+    background:var(--accent);border:1px solid var(--accent);color:var(--accent-ink);
+    font-weight:650;padding:5px 13px;font-size:12.5px;
+  }
+  .acts button.opener:hover{filter:brightness(1.08);background:var(--accent);color:var(--accent-ink);box-shadow:none}
+  .acts button.opener.on{
+    background:var(--panel-2);border-color:var(--line);color:var(--ink);
+  }
+  .sub-row .acts button.subopener{
+    border:1px solid var(--line);background:var(--panel);color:var(--accent);font-weight:600;padding:3px 10px;
   }
   .acts button:hover{background:var(--panel);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
   .acts button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
@@ -447,7 +461,7 @@
       <p style="margin:10px 0 4px"><strong>What to do:</strong></p>
       <ol>
         <li><strong>Answer the short scope questions</strong> (they open automatically the first time). We use them to lay out a realistic starting point rather than a blank page.</li>
-        <li><strong>Work through each device group.</strong> Click <em>details</em> to open one. Correct the numbers, add or remove enrolment methods, compliance rules, configuration and apps. Add more groups if a set of devices needs to behave differently.</li>
+        <li><strong>Work through each device group.</strong> Press <strong>Open &amp; edit</strong> on one to see everything in it. Correct the numbers, add or remove enrolment methods, compliance rules, configuration and apps. Add more groups if a set of devices needs to behave differently.</li>
         <li><strong>List your apps and your Wi-Fi / network needs</strong> in the panels underneath, then tick them onto the device groups that need them.</li>
         <li><strong>Add your people and groups</strong> so we know who each device group is for, and who will administer Intune.</li>
         <li><strong>Watch the checker</strong> on the right. It flags things that genuinely bite later &mdash; a policy that will never apply to anyone, a rule that can't work on a shared device, a licence that doesn't include what you've asked for.</li>
@@ -469,7 +483,7 @@
       <main class="canvas" aria-label="Device groups">
         <div class="canvas-head">
           <h2>Your device groups</h2>
-          <span class="hint">Click a name to rename &middot; <em>details</em> opens everything</span>
+          <span class="hint">Click a name to rename &middot; <b>Open &amp; edit</b> shows every setting for that group</span>
         </div>
         <p class="lead">One group per set of devices that should behave the same way. Split a group whenever the answer to &ldquo;who uses this and how&rdquo; changes &mdash; staff vs students, 1:1 vs shared, owned by you vs owned by them.</p>
         <div id="fleets"></div>
@@ -961,15 +975,15 @@
       notes:"", open:false
     };
   }
-  function newEnrol(method){ return { id:uid(), method:method || "", note:"", open:false }; }
+  function newEnrol(method){ return { id:uid(), method:method || "", note:"", open:true }; }
   function newCompliance(platform, name){
-    return { id:uid(), name:name || "Standard health rules", open:false,
+    return { id:uid(), name:name || "Standard health rules", open:true,
       s:{ minOs:"", pin:true, pinLen:"6", attempts:"10", encrypt:(platform !== "ios"),
           av:(platform === "windows"), fw:(platform === "windows" || platform === "macos"),
           jailbreak:(platform === "ios" || platform === "android"),
           grace:"1", email:true, retire:false } };
   }
-  function newConfig(name){ return { id:uid(), name:name || "Settings", packs:[], note:"", open:false }; }
+  function newConfig(name){ return { id:uid(), name:name || "Settings", packs:[], note:"", open:true }; }
 
   function migrate(st){
     if(!st || typeof st !== "object") return blankState();
@@ -1197,6 +1211,9 @@
       st.groups.push(g);
       f.userGroupIds.push(g.id);
     });
+    // Open the first group so the customer immediately sees what there is to
+    // change, rather than six collapsed rows with no obvious way in.
+    if(st.fleets.length) st.fleets[0].open = true;
     return st;
   }
   function groupNameFor(f){
@@ -1335,7 +1352,7 @@
     if(def && !suits) h.push('<span class="sub-m" style="color:var(--warn)">does not match &ldquo;' + esc(CAT.affinity[f.affinity].label.toLowerCase()) + '&rdquo;</span>');
     else h.push('<span class="sub-m">' + esc(e.note || "") + "</span>");
     h.push('<span class="acts">' +
-      '<button data-act="subtoggle" data-list="enrolments" ' + d(f) + ' data-sid="' + e.id + '">' + (e.open ? "close" : "edit") + "</button>" +
+      '<button class="subopener" data-act="subtoggle" data-list="enrolments" ' + d(f) + ' data-sid="' + e.id + '">' + (e.open ? "Hide" : "Change") + "</button>" +
       '<button class="del" data-act="subdel" data-list="enrolments" ' + d(f) + ' data-sid="' + e.id + '">remove</button></span>');
     h.push("</div>");
     if(e.open){
@@ -1373,7 +1390,7 @@
     // string turns the separator into a literal "&middot;"
     h.push('<span class="sub-m">' + bits.map(esc).join(" &middot; ") + "</span>");
     h.push('<span class="acts">' +
-      '<button data-act="subtoggle" data-list="compliance" ' + d(f) + ' data-sid="' + c.id + '">' + (c.open ? "close" : "edit") + "</button>" +
+      '<button class="subopener" data-act="subtoggle" data-list="compliance" ' + d(f) + ' data-sid="' + c.id + '">' + (c.open ? "Hide" : "Change") + "</button>" +
       '<button class="del" data-act="subdel" data-list="compliance" ' + d(f) + ' data-sid="' + c.id + '">remove</button></span></div>');
     if(c.open){
       var A = 'data-list="compliance" ' + d(f) + ' data-sid="' + c.id + '"';
@@ -1424,7 +1441,7 @@
       '<span class="sub-t">' + esc(c.name) + "</span>" +
       '<span class="sub-m">' + esc(chosen.length ? chosen.join(", ") : "nothing chosen yet") + "</span>");
     h.push('<span class="acts">' +
-      '<button data-act="subtoggle" data-list="config" ' + d(f) + ' data-sid="' + c.id + '">' + (c.open ? "close" : "edit") + "</button>" +
+      '<button class="subopener" data-act="subtoggle" data-list="config" ' + d(f) + ' data-sid="' + c.id + '">' + (c.open ? "Hide" : "Change") + "</button>" +
       '<button class="del" data-act="subdel" data-list="config" ' + d(f) + ' data-sid="' + c.id + '">remove</button></span></div>');
     if(c.open){
       var A = 'data-list="config" ' + d(f) + ' data-sid="' + c.id + '"';
@@ -1504,7 +1521,7 @@
     /* --- enrolment --- */
     h.push('<div class="sect"><div class="sect-head"><h4>Getting the devices enrolled</h4>' +
       '<span class="sh-note">Add more than one if different batches arrive differently.</span></div>');
-    if(!f.enrolments.length) h.push('<div class="info-note">No enrolment method chosen yet &mdash; this is the one thing we really do need.</div>');
+    if(!f.enrolments.length) h.push('<div class="info-note">No enrolment method chosen yet &mdash; this is the one thing we really do need. Use <b>+ Add an enrolment method</b> below and pick from the list.</div>');
     f.enrolments.forEach(function(e){ h.push(renderEnrolSub(f, e)); });
     h.push('<button class="addbtn" data-act="addenrol" ' + d(f) + ">+ Add an enrolment method</button>");
     if(pf === "windows" && f.ownership === "corporate"){
@@ -1532,6 +1549,7 @@
     /* --- config --- */
     h.push('<div class="sect"><div class="sect-head"><h4>Settings to push out</h4>' +
       '<span class="sh-note">Tick what you want; the recommended ones are a sensible starting point.</span></div>');
+    if(!f.config.length) h.push('<div class="info-note">No settings chosen for this group yet. Use <b>+ Add a settings policy</b> and tick what you need &mdash; the recommended ones are a sensible starting point.</div>');
     f.config.forEach(function(c){ h.push(renderConfigSub(f, c)); });
     h.push('<button class="addbtn" data-act="addconf" ' + d(f) + ">+ Add a settings policy</button>");
     h.push("</div>");
@@ -1607,7 +1625,8 @@
       h.push('<span class="nname" contenteditable="true" spellcheck="false" data-act="rename" data-fid="' + f.id + '">' + esc(f.name) + "</span>");
       h.push('<span class="meta-inline">' + fleetMeta(f) + "</span>");
       h.push('<span class="acts">' +
-        '<button data-act="toggle" data-fid="' + f.id + '">' + (f.open ? "close" : "details") + "</button>" +
+        '<button class="opener' + (f.open ? ' on' : '') + '" data-act="toggle" data-fid="' + f.id + '">' +
+        (f.open ? "Close" : "Open &amp; edit") + "</button>" +
         '<button data-act="dup" data-fid="' + f.id + '" title="Make a copy">copy</button>' +
         '<button data-act="up" data-fid="' + f.id + '" title="Move up">&uarr;</button>' +
         '<button data-act="down" data-fid="' + f.id + '" title="Move down">&darr;</button>' +
