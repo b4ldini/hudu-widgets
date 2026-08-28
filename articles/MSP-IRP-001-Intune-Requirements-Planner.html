@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tell Us About Your Devices – Active8 Managed Technologies</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #1a1a1a;
+    background: #f7f9fc;
+  }
+
+  /* NAV */
+  .sticky-nav {
+    background: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  }
+
+  .sticky-nav-inner {
+    padding: 0 40px;
+    display: flex;
+    align-items: stretch;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .sticky-nav-inner::-webkit-scrollbar { display: none; }
+
+  .nav-link {
+    padding: 0 14px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #888;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+    border-radius: 0;
+    position: relative;
+  }
+
+  .nav-link:hover {
+    color: #1a3a8f;
+    background: rgba(37,87,183,0.06);
+    border-bottom-color: #2557b7;
+  }
+
+  .nav-link:active {
+    background: rgba(37,87,183,0.12);
+  }
+
+  .nav-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .num-blue  { background: rgba(37,87,183,0.12); color: #2557b7; }
+  .num-green { background: rgba(0,122,61,0.12);  color: #007a3d; }
+  .num-lime  { background: rgba(194,224,0,0.2);  color: #6b8500; }
+
+  /* PAGE BODY */
+  .page-body { padding: 44px 40px 72px; }
+
+  /* OVERVIEW CARD */
+  .overview-card {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
+    border-radius: 12px;
+    padding: 30px 34px;
+    margin-bottom: 20px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .overview-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(194,224,0,0.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .card-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.38);
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .overview-card p {
+    color: rgba(255,255,255,0.8);
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .pill-row { display: flex; gap: 8px; flex-wrap: wrap; position: relative; margin-top: 18px; }
+
+  .pill {
+    padding: 4px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+  /* SECTION HEADING */
+  .section-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .step-badge {
+    flex-shrink: 0;
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 20px;
+    color: white;
+  }
+
+  .badge-blue  { background: #2557b7; }
+  .badge-green { background: #007a3d; }
+  .badge-lime  { background: #8aaa00; }
+
+  .step-meta {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #999;
+    margin-bottom: 4px;
+  }
+
+  .step-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 21px;
+    font-weight: 400;
+    color: #1a1a1a;
+    line-height: 1.2;
+  }
+
+  /* CONTENT CARD */
+  .content-card {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+    padding: 22px 26px 26px;
+  }
+
+  /* STEPS */
+  .steps { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #f7f9fc;
+    border-radius: 8px;
+    padding: 11px 14px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .step-num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: rgba(37,87,183,0.1);
+    color: #2557b7;
+    border: 1px solid rgba(37,87,183,0.2);
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step p { font-size: 13px; padding-top: 3px; }
+
+  code.inline-code {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 12px;
+    background: rgba(37,87,183,0.07);
+    border: 1px solid rgba(37,87,183,0.15);
+    padding: 1px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+
+  /* AMBER ALERT */
+  .lost-alert {
+    border-radius: 8px;
+    padding: 13px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    margin-bottom: 44px;
+  }
+
+  .lost-alert.in-card { margin-top: 20px; margin-bottom: 0; }
+  .lost-alert-icon { font-size: 15px; flex-shrink: 0; margin-top: 2px; color: #d97706; }
+  .lost-alert strong { display: block; font-size: 13px; font-weight: 600; margin-bottom: 3px; color: #92400e; }
+  .lost-alert p { font-size: 13px; color: #78350f; line-height: 1.6; }
+
+  /* CALLOUT */
+  .callout {
+    padding: 13px 16px;
+    margin-top: 14px;
+    border-radius: 8px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .callout-icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .callout-title { font-weight: 600; font-size: 13px; margin-bottom: 3px; }
+  .callout-body  { font-size: 13px; line-height: 1.6; }
+  .callout-info  { background: #eff6ff; border: 1px solid #bfdbfe; }
+  .callout-info .callout-icon  { color: #2563eb; }
+  .callout-info .callout-title { color: #1e40af; }
+  .callout-info .callout-body  { color: #1e3a5f; }
+
+  /* TRUST BANNER */
+  .app-trust-banner {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 60%, #1e4aa0 100%);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 48px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(30,74,160,0.25);
+  }
+
+  .app-trust-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(194,224,0,0.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .app-trust-banner h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 21px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 10px;
+    position: relative;
+  }
+
+  .app-trust-banner > p {
+    color: rgba(255,255,255,0.78);
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 22px;
+    position: relative;
+  }
+
+  .trust-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  .trust-card {
+    border-radius: 8px;
+    padding: 16px 18px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+
+  .trust-card-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .trust-card.pro .trust-card-label { color: #c2e000; }
+  .trust-card.con .trust-card-label { color: rgba(255,160,120,0.9); }
+
+  .trust-card-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 14px;
+    color: white;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+
+  .trust-card ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+  .trust-card ul li {
+    font-size: 13px;
+    color: rgba(255,255,255,0.68);
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    line-height: 1.5;
+  }
+
+  .trust-card ul li::before { font-weight: 700; font-size: 11px; flex-shrink: 0; margin-top: 1px; }
+  .trust-card.pro ul li::before { content: '✓'; color: #c2e000; }
+  .trust-card.con ul li::before { content: '!'; color: rgba(255,140,100,0.9); }
+
+  .privacy-callout {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 18px 20px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    position: relative;
+  }
+
+  .privacy-callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+
+  .privacy-callout-title {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 15px;
+    color: white;
+    margin-bottom: 8px;
+  }
+
+  .privacy-callout p { font-size: 13px; color: rgba(255,255,255,0.68); line-height: 1.65; }
+  .privacy-callout p + p { margin-top: 8px; }
+
+  /* DIVIDER */
+  .divider { margin: 34px 0; display: flex; align-items: center; gap: 14px; }
+  .divider-line { flex: 1; height: 1px; background: rgba(0,0,0,0.1); }
+  .divider-arrow { color: #bbb; font-size: 14px; }
+
+  /* REQUIREMENTS TABLE */
+  .id-table-wrap {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+
+  .id-table-intro { padding: 16px 22px 0; }
+  .id-table-intro p { font-size: 14px; line-height: 1.6; padding-bottom: 14px; border-bottom: 1px solid rgba(0,0,0,0.08); }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    background: #f7f9fc;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #888;
+    padding: 10px 22px;
+    text-align: left;
+    border-bottom: 2px solid rgba(0,0,0,0.08);
+  }
+
+  tbody tr { border-bottom: 1px solid rgba(0,0,0,0.07); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 14px 22px; font-size: 14px; vertical-align: middle; line-height: 1.5; }
+
+  .req-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+    background: rgba(37,87,183,0.1);
+    color: #2557b7;
+  }
+
+  /* FAQ / TROUBLESHOOTING */
+  .faq-wrap {
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+
+  .faq-header {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
+    padding: 18px 26px;
+  }
+
+  .faq-header h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 2px;
+  }
+
+  .faq-header p {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.42);
+    letter-spacing: 0.06em;
+  }
+
+  details { border-bottom: 1px solid rgba(0,0,0,0.08); }
+  details:last-child { border-bottom: none; }
+
+  summary {
+    padding: 15px 22px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1a1a;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    list-style: none;
+    user-select: none;
+  }
+
+  summary::-webkit-details-marker { display: none; }
+  summary:hover { background: #f7f9fc; }
+  summary::after { content: '+'; font-size: 20px; font-weight: 300; color: #bbb; flex-shrink: 0; }
+  details[open] summary::after { content: '×'; color: #2557b7; }
+  details[open] summary { color: #2557b7; background: #f7f9fc; }
+
+  .faq-answer {
+    padding: 4px 22px 16px;
+    font-size: 14px;
+    line-height: 1.7;
+    background: #f7f9fc;
+    color: #333;
+  }
+
+  /* HELP SECTION */
+  .help-section {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 60%, #1e4aa0 100%);
+    border-radius: 12px;
+    padding: 32px 34px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 44px;
+    color: white;
+    box-shadow: 0 4px 22px rgba(30,74,160,0.3);
+  }
+
+  .help-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 80% 20%, rgba(194,224,0,0.1) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .help-section h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 21px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 5px;
+    position: relative;
+  }
+
+  .help-sub {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 22px;
+    position: relative;
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    position: relative;
+    margin-bottom: 12px;
+  }
+
+  .contact-card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 14px 16px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .contact-card:hover { background: rgba(255,255,255,0.12); border-color: rgba(194,224,0,0.35); }
+
+  .contact-icon-wrap {
+    width: 38px; height: 38px;
+    border-radius: 8px;
+    background: rgba(194,224,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+
+  .contact-label {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #c2e000;
+    margin-bottom: 3px;
+  }
+
+  .contact-value { font-size: 13px; font-weight: 600; color: white; }
+
+  .rmm-note {
+    background: rgba(194,224,0,0.08);
+    border: 1px solid rgba(194,224,0,0.2);
+    border-radius: 8px;
+    padding: 13px 16px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.72);
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    position: relative;
+  }
+
+  .rmm-note strong { color: #c2e000; }
+
+  /* COMPLETION BANNER */
+  .completion-banner {
+    background: linear-gradient(135deg, #1e4aa0 0%, #2557b7 100%);
+    border-radius: 12px;
+    padding: 36px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 44px;
+    box-shadow: 0 4px 22px rgba(30,74,160,0.28);
+  }
+
+  .completion-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(194,224,0,0.18) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .completion-inner { position: relative; z-index: 1; }
+
+  .completion-icon {
+    width: 52px; height: 52px;
+    background: rgba(194,224,0,0.2);
+    border: 2px solid rgba(194,224,0,0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    font-size: 22px;
+    color: #c2e000;
+  }
+
+  .completion-eyebrow {
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(194,224,0,0.75);
+    margin-bottom: 10px;
+  }
+
+  .completion-banner h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 23px;
+    font-weight: 400;
+    color: white;
+    margin-bottom: 12px;
+  }
+
+  .completion-banner p { font-size: 14px; color: rgba(255,255,255,0.6); max-width: 460px; margin: 0 auto 20px; line-height: 1.7; }
+
+  .completion-pills { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+
+  .cpill-lime {
+    background: rgba(194,224,0,0.15);
+    border: 1px solid rgba(194,224,0,0.35);
+    border-radius: 20px;
+    padding: 4px 13px;
+    font-size: 12px;
+    color: #c2e000;
+    font-weight: 500;
+  }
+
+  /* FULL-SCREEN ESCAPE CHIP (shown only when embedded in a squeezed frame) */
+  .fullscreen-chip {
+    display: none;
+    position: fixed;
+    right: 14px;
+    bottom: 14px;
+    z-index: 200;
+    align-items: center;
+    gap: 7px;
+    background: #2557b7;
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 24px;
+    box-shadow: 0 4px 16px rgba(30,74,160,0.4);
+  }
+
+  .fullscreen-chip:hover { background: #1e4aa0; }
+
+  /* RESPONSIVE — squeezed column (e.g. Hudu public share view) */
+  @media (max-width: 980px) {
+    .page-body    { padding: 26px 16px 56px; }
+    .content-card { padding: 18px 16px 20px; }
+    .overview-card { padding: 22px 18px; }
+    #tool iframe  { height: 1400px !important; }
+    body.embedded .fullscreen-chip { display: inline-flex; }
+  }
+
+  @media (max-width: 640px) {
+    .sticky-nav-inner { padding: 0 14px; }
+    .page-body       { padding: 28px 14px 56px; }
+
+    .overview-card,
+    .app-trust-banner,
+    .help-section,
+    .completion-banner { padding: 20px 16px; }
+
+    .content-card { padding: 16px 16px 20px; }
+
+    .trust-grid,
+    .contact-grid { grid-template-columns: 1fr; }
+
+    .privacy-callout { flex-direction: column; gap: 10px; }
+
+    summary   { padding: 13px 16px; }
+    .faq-answer { padding: 4px 16px 14px; }
+    .faq-header { padding: 14px 18px; }
+
+    .completion-pills { flex-direction: column; align-items: center; }
+
+    thead th,
+    tbody td { padding: 10px 14px; }
+  }
+
+  @media (max-width: 380px) {
+    .step-title { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+<nav class="sticky-nav">
+  <div class="sticky-nav-inner">
+    <a class="nav-link" href="#need"><span class="nav-num num-lime">?</span> Before You Start</a>
+    <a class="nav-link" href="#step1"><span class="nav-num num-blue">1</span> Scope Questions</a>
+    <a class="nav-link" href="#step2"><span class="nav-num num-green">2</span> Device Groups</a>
+    <a class="nav-link" href="#step3"><span class="nav-num num-blue">3</span> Apps &amp; Wi-Fi</a>
+    <a class="nav-link" href="#step4"><span class="nav-num num-green">4</span> The Checker</a>
+    <a class="nav-link" href="#step5"><span class="nav-num num-blue">5</span> Send It Back</a>
+    <a class="nav-link" href="#tool"><span class="nav-num num-lime">&#128295;</span> The Planner</a>
+    <a class="nav-link" href="#why"><span class="nav-num num-lime">&#10003;</span> Why It Asks</a>
+    <a class="nav-link" href="#troubleshoot"><span class="nav-num num-blue">!</span> Questions</a>
+  </div>
+</nav>
+
+<main class="page-body">
+
+  <!-- OVERVIEW -->
+  <div class="overview-card">
+    <div class="card-label">Welcome</div>
+    <p>We&rsquo;re about to set up <strong>Microsoft Intune</strong> to look after your devices &mdash; laptops, tablets and phones. Before we build anything, we&rsquo;d like you to tell us how those devices are actually used. You know that far better than we do: who has what, which ones are shared, what has to be on them before anyone can work.</p>
+    <p>The <strong>Requirements Planner</strong> is embedded <a href="#tool" style="color:#c2e000;text-decoration:none;">in the middle of this page</a>. You don&rsquo;t need to know anything about Intune &mdash; every term is explained in plain English as you go, and a live <strong>checker</strong> flags anything that would cause trouble later. When you&rsquo;re happy, one click copies the whole thing into an email back to us.</p>
+    <p style="font-size:13px;">Hard to read or use in this window? <a href="https://b4ldini.github.io/hudu-widgets/articles/MSP-IRP-001-Intune-Requirements-Planner.html" target="_blank" rel="noopener" style="color:#c2e000;">Open this guide full-screen in its own tab</a> &mdash; it&rsquo;s exactly the same page, planner included.</p>
+    <div class="pill-row">
+      <div class="pill"><span class="dot" style="background:#c2e000;"></span> Takes 30&ndash;45 minutes</div>
+      <div class="pill"><span class="dot" style="background:#4d8cff;"></span> No Intune knowledge needed</div>
+      <div class="pill"><span class="dot" style="background:#4ade80;"></span> Saves automatically as you work</div>
+      <div class="pill"><span class="dot" style="background:rgba(255,255,255,0.4);"></span> One email sends it back to us</div>
+    </div>
+  </div>
+
+  <div class="lost-alert">
+    <div class="lost-alert-icon">&#9888;</div>
+    <div>
+      <strong>Your answers reach us only when you send them</strong>
+      <p>The planner saves your draft on your computer, in your browser &mdash; the page makes no internet connections at all while you work. That&rsquo;s good for privacy, but it means we can&rsquo;t see your answers until you finish with <strong>Copy as text</strong> and email us the result (Step 5). The job isn&rsquo;t done until that email is sent.</p>
+    </div>
+  </div>
+
+  <!-- BEFORE YOU START -->
+  <div id="need">
+    <div class="section-heading">
+      <div class="step-badge badge-lime">?</div>
+      <div>
+        <div class="step-meta">Preparation</div>
+        <div class="step-title">Before You Start</div>
+      </div>
+    </div>
+
+    <div class="id-table-wrap">
+      <div class="id-table-intro">
+        <p>There&rsquo;s nothing to install and nothing to sign in to &mdash; just have these to hand. Don&rsquo;t worry about being precise; &ldquo;about 40&rdquo; and &ldquo;not sure&rdquo; are perfectly good answers.</p>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>What</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="req-pill">&#128187; A web browser</span></td>
+            <td>Any modern browser on a computer (Edge, Chrome, Safari). A proper screen makes this much easier than a phone</td>
+          </tr>
+          <tr>
+            <td><span class="req-pill">&#128241; A rough count of your devices</span></td>
+            <td>How many laptops, tablets and phones, and roughly what they are. An estimate is fine &mdash; we&rsquo;re after the shape, not an audit</td>
+          </tr>
+          <tr>
+            <td><span class="req-pill">&#128100; Who uses what</span></td>
+            <td>The important one: which devices belong to <strong>one named person</strong>, and which are <strong>shared</strong> between several people. It changes almost everything else</td>
+          </tr>
+          <tr>
+            <td><span class="req-pill">&#128230; Your must-have software</span></td>
+            <td>The apps people genuinely can&rsquo;t work without &mdash; Microsoft 365, your management system, anything subject-specific</td>
+          </tr>
+          <tr>
+            <td><span class="req-pill">&#128273; Your Microsoft licences</span></td>
+            <td>Whatever you&rsquo;re paying for. If you&rsquo;re not sure, say so in the planner and we&rsquo;ll check &mdash; it&rsquo;s a five-minute job at our end and it decides what&rsquo;s possible</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 1 -->
+  <div id="step1">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">1</div>
+      <div>
+        <div class="step-meta">Step One</div>
+        <div class="step-title">Answer the Scope Questions</div>
+      </div>
+    </div>
+    <div class="content-card">
+      <p>The planner opens with six short questions &mdash; who you are, which kinds of device you have, how they&rsquo;re used, what you&rsquo;re licensed for, and whether Cyber Essentials is part of this project.</p>
+      <p>We use those answers to lay out a realistic <strong>starting point</strong> rather than handing you a blank page. If you have staff laptops, a shared tablet trolley and people using their own phones, you&rsquo;ll get three device groups already sketched out, with sensible settings on each. You then correct them.</p>
+      <p>The question that matters most is <strong>&ldquo;how are the devices used?&rdquo;</strong> A laptop belonging to one person and a tablet a whole class shares need completely different setup &mdash; different enrolment, different security rules, sometimes different licensing. That&rsquo;s why they become separate groups from the start.</p>
+      <p style="margin-bottom:0;">You can reopen these questions any time with the <strong>Scope questions</strong> button. Doing so rebuilds the device groups, but keeps your people, apps and Wi-Fi list.</p>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 2 -->
+  <div id="step2">
+    <div class="section-heading">
+      <div class="step-badge badge-green">2</div>
+      <div>
+        <div class="step-meta">Step Two</div>
+        <div class="step-title">Work Through Each Device Group</div>
+      </div>
+    </div>
+    <div class="content-card">
+      <p>A <strong>device group</strong> is a set of devices that should all behave the same way. Click <em>details</em> on one to open it up.</p>
+      <p>Inside you&rsquo;ll find everything about that set of devices: roughly how many there are, who uses them, how they get set up out of the box, the health rules they must meet, the settings we push out, which apps go on them, and how updates are handled. Every section explains itself, and the fields you don&rsquo;t recognise can be left alone &mdash; we fill in the gaps.</p>
+      <p><strong>Split a group whenever the answer to &ldquo;who uses this and how&rdquo; changes.</strong> Staff and pupils, one-per-person and shared, devices you own and devices they own &mdash; those all want to be separate. Use <em>copy</em> to duplicate a group you&rsquo;ve already set up and then change what&rsquo;s different.</p>
+      <p style="margin-bottom:0;">A group can have <strong>more than one of anything</strong>. If half your laptops arrive pre-registered from the supplier and half are already in a cupboard, add two enrolment methods and tell us which is which in the notes.</p>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 3 -->
+  <div id="step3">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">3</div>
+      <div>
+        <div class="step-meta">Step Three</div>
+        <div class="step-title">List Your Apps, Wi-Fi and People</div>
+      </div>
+    </div>
+    <div class="content-card">
+      <p>Underneath the device groups are three shared lists. Fill each one in once, then tick things onto the groups that need them.</p>
+      <p><strong>Apps</strong> &mdash; the software people actually need. Don&rsquo;t worry about how it gets installed; that&rsquo;s our problem. Just tell us what it is and which kinds of device need it.</p>
+      <p><strong>Wi-Fi, VPN and certificates</strong> &mdash; anything a device needs before someone can use it. This matters most on shared and single-purpose devices: nobody is standing there to type a Wi-Fi password, so the network has to be pushed to the device automatically.</p>
+      <p><strong>People and user groups</strong> &mdash; who each set of devices is for. You don&rsquo;t need to list every pupil; describe the group in your own words and we&rsquo;ll build it from your directory. Do name whoever will administer Intune day to day, and whoever should get the first test device.</p>
+      <p style="margin-bottom:0;">Settings only reach devices through a group, so this section is what makes the rest of the plan real.</p>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 4 -->
+  <div id="step4">
+    <div class="section-heading">
+      <div class="step-badge badge-green">4</div>
+      <div>
+        <div class="step-meta">Step Four</div>
+        <div class="step-title">Read What the Checker Tells You</div>
+      </div>
+    </div>
+    <div class="content-card">
+      <p>The panel on the right updates as you work. It isn&rsquo;t a form validator &mdash; it&rsquo;s there to catch the handful of things that genuinely bite later, and it explains <em>why</em> each one matters rather than just flagging it.</p>
+      <p>A red item is worth fixing or discussing before we quote. An amber one is worth a conversation. Blue ones are just things worth knowing. Green means that part looks right.</p>
+      <p><strong>Some of what it says will be about what you don&rsquo;t need.</strong> If Cyber Essentials is part of this project, the checker will also tell you where the scheme asks for <em>less</em> than people commonly assume &mdash; that&rsquo;s deliberate, and it saves money.</p>
+      <p style="margin-bottom:0;">Use <em>show me</em> on any item to jump straight to the thing it&rsquo;s talking about. And don&rsquo;t feel you have to clear the list &mdash; some findings are decisions for us to make together, not mistakes for you to fix.</p>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- STEP 5 -->
+  <div id="step5">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">5</div>
+      <div>
+        <div class="step-meta">Step Five</div>
+        <div class="step-title">Send It Back to Us</div>
+      </div>
+    </div>
+    <div class="content-card">
+      <p>When you&rsquo;re happy, press <strong>Copy as text</strong> and paste the whole thing into an email &mdash; replying to the message that sent you this link is perfect. Not sure who to send it to? Use <strong>ITSupport@a8mt.co.uk</strong>.</p>
+      <div class="privacy-callout">
+        <div class="privacy-icon">&#128273;</div>
+        <div>
+          <strong>Keep the &ldquo;plan data&rdquo; block at the bottom</strong>
+          <p>Underneath the readable summary is a long code between two lines of equals signs. That code lets us load your answers back into the planner exactly as you left them. It looks like junk &mdash; please don&rsquo;t tidy it out of the email.</p>
+        </div>
+      </div>
+      <p style="margin-bottom:0;">Prefer an attachment? <strong>Download plan file</strong> saves the same thing as a plain text file. And if you&rsquo;d rather send just the short code on its own, <strong>Copy share code</strong> does that &mdash; it recreates everything on our side.</p>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- THE TOOL -->
+  <div id="tool">
+    <div class="section-heading">
+      <div class="step-badge badge-lime">&#128295;</div>
+      <div>
+        <div class="step-meta">Work Here</div>
+        <div class="step-title">The Requirements Planner</div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:0 0 12px;">
+      <p style="font-size:13px;color:#64748b;margin:0;">Working on a bigger estate? Open it full screen &mdash; your draft carries over automatically between this page and the full-screen view.</p>
+      <a href="https://b4ldini.github.io/hudu-widgets/tools/intune-requirements-planner.html" target="_blank" rel="noopener" style="flex-shrink:0;display:inline-flex;align-items:center;gap:8px;background:#2557b7;color:#fff;font-size:13.5px;font-weight:600;padding:10px 18px;border-radius:8px;text-decoration:none;">&#x26F6; Open the planner full screen</a>
+    </div>
+
+    <div class="content-card" style="padding:0;overflow:hidden;">
+      <iframe
+        id="irpTool"
+        src="../tools/intune-requirements-planner.html?v=1"
+        style="width:100%;height:1150px;border:none;display:block;background:#fff;"
+        title="Intune Requirements Planner"
+        loading="lazy"
+      ></iframe>
+    </div>
+  </div>
+
+  <!-- COMPLETION BANNER -->
+  <div class="completion-banner">
+    <div class="completion-inner">
+      <div class="completion-icon">&#10003;</div>
+      <div class="completion-eyebrow">Answers Sent</div>
+      <h2>You describe it &mdash; we build it</h2>
+      <p>Once your answers land in our inbox, we take it from there: we&rsquo;ll go through them with you, agree anything the checker raised, and only then start building. Nothing is applied to a single device until the plan is agreed.</p>
+      <div class="completion-pills">
+        <div class="cpill-lime">&#10003; Your estate, described your way</div>
+        <div class="cpill-lime">&#10003; Surprises found now, not mid-rollout</div>
+        <div class="cpill-lime">&#10003; Nothing is built until you agree it</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHY IT ASKS -->
+  <div id="why">
+    <div class="section-heading">
+      <div class="step-badge badge-lime">&#10003;</div>
+      <div>
+        <div class="step-meta">Worth Knowing</div>
+        <div class="step-title">Why It Asks What It Asks</div>
+      </div>
+    </div>
+
+    <div class="app-trust-banner">
+      <div class="card-label">Guardrails, Not Hurdles</div>
+      <h2>Every question here exists because skipping it has cost somebody time</h2>
+      <p>The planner has opinions, and they follow published Microsoft guidance and well-established community baselines rather than house style. These are the things that go wrong on device rollouts, and finding them now costs a conversation instead of a re-run.</p>
+
+      <div class="trust-grid">
+        <div class="trust-card pro">
+          <div class="trust-card-label">What It Steers You Towards</div>
+          <div class="trust-card-title">Decisions that hold up</div>
+          <ul>
+            <li>Separating <strong>shared</strong> devices from <strong>one-per-person</strong> devices, because they need genuinely different setup</li>
+            <li>Naming <strong>who</strong> each set of devices is for &mdash; nothing reaches a device except through a group of people</li>
+            <li>Being honest about <strong>personally-owned</strong> devices, so we protect the work data rather than pretending we manage the phone</li>
+            <li>A short list of apps that must land <strong>before</strong> first use, and everything else afterwards</li>
+          </ul>
+        </div>
+        <div class="trust-card con">
+          <div class="trust-card-label">What It Saves You From</div>
+          <div class="trust-card-title">The classic surprises</div>
+          <ul>
+            <li>Discovering at go-live that the <strong>licence</strong> you bought never included device management &mdash; some Microsoft licence names are only one word apart</li>
+            <li>Security rules that look green in the portal and are checking <strong>nothing</strong>, because they were pointed at the wrong thing</li>
+            <li>Sign-in methods that work beautifully on a personal laptop and are <strong>meaningless</strong> on a shared one</li>
+            <li>Tablets bought with app licences tied to <strong>people</strong>, for devices that have no person attached to them</li>
+            <li>Devices that restart with no warning, which is how a good rollout gets a bad reputation in week one</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><div class="divider-arrow">&darr;</div><div class="divider-line"></div></div>
+
+  <!-- QUESTIONS -->
+  <div id="troubleshoot">
+    <div class="section-heading">
+      <div class="step-badge badge-blue">!</div>
+      <div>
+        <div class="step-meta">If You Get Stuck</div>
+        <div class="step-title">Common Questions</div>
+      </div>
+    </div>
+
+    <div class="faq-wrap">
+      <div class="faq-header">
+        <h2>Questions &amp; Answers</h2>
+      </div>
+
+      <details>
+        <summary>I don&rsquo;t know the answer to something &mdash; what do I put?</summary>
+        <div class="faq-answer">
+          <p>Leave it blank, or type what you do know into the notes box. &ldquo;Not sure&rdquo; is genuinely useful information &mdash; it tells us where to spend time. The planner never requires a field to be filled in.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>What does &ldquo;shared between people&rdquo; actually mean?</summary>
+        <div class="faq-answer">
+          <p>That no single person owns the device. A trolley of tablets a class works through, a laptop kept in a meeting room, a hot desk. If a device goes home with the same person every night, it&rsquo;s one-per-person even if somebody else occasionally borrows it.</p>
+          <p>It matters because a shared device can&rsquo;t use sign-in methods that are set up per person, and it usually shouldn&rsquo;t have anybody&rsquo;s files on it.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>We have staff using their own phones. Do those count?</summary>
+        <div class="faq-answer">
+          <p>Yes &mdash; add them as a device group with <strong>personally owned</strong> ticked. It doesn&rsquo;t mean we take over anybody&rsquo;s phone; in almost every case we protect the work data inside the work apps and never touch the rest of the device. The planner will steer you there.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>The checker says something is wrong but I think it&rsquo;s right</summary>
+        <div class="faq-answer">
+          <p>Then it probably is, and the checker is missing context. Leave it flagged and mention it in the notes &mdash; it becomes an agenda item rather than a problem. The checker is there to start conversations, not to grade your answers.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Can I come back to this later?</summary>
+        <div class="faq-answer">
+          <p>Yes. Your draft saves automatically in this browser as you work, so you can close the page and pick it up later &mdash; on the same computer, in the same browser. If you want to move it to another machine, use <strong>Copy share code</strong> and paste that code into <em>Load a plan</em> on the other one.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Can somebody else fill in part of it?</summary>
+        <div class="faq-answer">
+          <p>Yes, though not at the same time. Send them your <strong>share code</strong>; they paste it into <em>Load a plan</em>, add their part, and send a new code back. It&rsquo;s a hand-off rather than live collaboration.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>What are the &ldquo;For your Active8 engineer&rdquo; buttons?</summary>
+        <div class="faq-answer">
+          <p>They turn your answers into the technical documents we work from &mdash; a build checklist, a list of things worth discussing, and a machine-readable copy. You&rsquo;re very welcome to read them, but they&rsquo;re written for an engineer, so expect jargon. You don&rsquo;t need to send them; the <strong>Copy as text</strong> output contains everything.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Is anything I type here sent to you automatically?</summary>
+        <div class="faq-answer">
+          <p>No. The planner makes no internet connections whatsoever &mdash; there is nothing for it to send anything to. Your draft is stored by your own browser on your own computer. We see it when, and only when, you email it to us.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="help-section">
+    <h2>Need a hand?</h2>
+    <p class="help-sub">Active8 Managed Technologies &middot; here to help while you fill this in</p>
+    <div class="rmm-note">
+      <div>&#8505;</div>
+      <div>Stuck, or unsure how to answer something? Send us your draft&rsquo;s <strong>share code</strong> (the <strong>Copy share code</strong> button) with your question &mdash; we can open your answers exactly as they stand and advise.</div>
+    </div>
+    <div class="contact-grid" style="margin-top:20px;">
+      <a href="mailto:ITSupport@a8mt.co.uk" class="contact-card">
+        <div class="contact-icon-wrap">📧</div>
+        <div>
+          <div class="contact-label">Email</div>
+          <div class="contact-value">ITSupport@a8mt.co.uk</div>
+        </div>
+      </a>
+      <a href="tel:03339997355" class="contact-card">
+        <div class="contact-icon-wrap">📞</div>
+        <div>
+          <div class="contact-label">Phone</div>
+          <div class="contact-value">0333 999 7355</div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+</main>
+
+<a class="fullscreen-chip" href="https://b4ldini.github.io/hudu-widgets/articles/MSP-IRP-001-Intune-Requirements-Planner.html" target="_blank" rel="noopener">&#x2922; Open full-screen</a>
+
+<footer style="background:linear-gradient(135deg,#1e4aa0 0%,#2557b7 60%,#1e4aa0 100%);border-top:1px solid rgba(194,224,0,0.2);padding:18px 40px;text-align:center;">
+  <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);">Prepared by <span style="color:rgba(255,255,255,0.85);">Active8 Managed Technologies Limited</span> &middot; IT Service Management</div>
+  <div style="font-family:'Courier New',Consolas,monospace;font-size:10px;color:rgba(255,255,255,0.32);margin-top:5px;">v1.0 &middot; August 2026 &middot; This article is maintained by the Active 8 IT team.</div>
+</footer>
+
+<script>
+(function(){
+  // Flag when this page is inside another page's iframe (e.g. Hudu) so the
+  // full-screen escape chip only appears where it's useful
+  try { if(window.self !== window.top) document.body.classList.add('embedded'); } catch(e){ document.body.classList.add('embedded'); }
+  function sendHeight(){
+    var h = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+    window.parent.postMessage({type:'a8-iframe-resize', height:h}, '*');
+    try { if(window.frameElement) window.frameElement.style.height = (h+20)+'px'; } catch(e){}
+  }
+  // Fire immediately, on load, on resize, and via ResizeObserver
+  sendHeight();
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+  if(window.ResizeObserver){ new ResizeObserver(sendHeight).observe(document.body); }
+  // Retry every 300ms for 12 seconds to survive any parent-side load race
+  var attempts = 0;
+  var timer = setInterval(function(){
+    sendHeight();
+    if(++attempts >= 40) clearInterval(timer);
+  }, 300);
+})();
+
+(function(){
+  // Auto-size the planner iframe to fit its whole content (same origin on GitHub
+  // Pages), so the planner never scrolls inside a nested box: the health-check
+  // column stays fully visible and the page scrolls as one. If the document is
+  // unreachable (cross-origin host), the fixed fallback height above stays.
+  var frame = document.getElementById('irpTool');
+  if(!frame) return;
+  function fit(){
+    try {
+      var body = frame.contentDocument && frame.contentDocument.body;
+      if(!body) return;
+      var h = Math.ceil(body.getBoundingClientRect().height);
+      if(h > 400) frame.style.height = (h + 24) + 'px';
+    } catch(e){}
+  }
+  frame.addEventListener('load', function(){
+    fit();
+    try { new ResizeObserver(fit).observe(frame.contentDocument.body); } catch(e){}
+  });
+  setInterval(fit, 800);
+})();
+</script>
+
+</body>
+</html>

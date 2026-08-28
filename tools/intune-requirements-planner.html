@@ -1,0 +1,3181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Intune Requirements Planner &mdash; Active8 Managed Technologies</title>
+<style>
+  :root{
+    --paper:#F6F7F9; --panel:#FFFFFF; --panel-2:#EFF1F5;
+    --ink:#1D2530; --muted:#5C6878; --line:#DCE1E9; --line-soft:#E8ECF2;
+    --win:#2F5FA8; --win-bg:#E7EEF9; --win-line:#B9CCE9;
+    --apple:#4A5568; --apple-bg:#EBEEF2; --apple-line:#C6CDD6;
+    --droid:#1E7A6C; --droid-bg:#E2F1EC; --droid-line:#AFD6CC;
+    --pol:#7A4FA3; --pol-bg:#F0E9F8; --pol-line:#D5C2EA;
+    --app:#8A671F; --app-bg:#F6EEDB; --app-line:#E0CC9A;
+    --ok:#2E7D46; --ok-bg:#E4F1E7;
+    --warn:#A85410; --warn-bg:#FBEDDD;
+    --bad:#B3352E; --bad-bg:#F9E6E4;
+    --accent:#2F5FA8; --accent-ink:#FFFFFF;
+    --shadow:0 1px 3px rgba(29,37,48,.08), 0 4px 16px rgba(29,37,48,.06);
+    --radius:10px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --paper:#14181F; --panel:#1C222C; --panel-2:#232B37;
+      --ink:#E6EAF0; --muted:#94A1B2; --line:#303A48; --line-soft:#28313E;
+      --win:#82AAE4; --win-bg:#22304A; --win-line:#3A5378;
+      --apple:#A8B4C4; --apple-bg:#2A313C; --apple-line:#434D5C;
+      --droid:#5FC2AF; --droid-bg:#1B3A34; --droid-line:#2C5A50;
+      --pol:#BC93E0; --pol-bg:#33254A; --pol-line:#544073;
+      --app:#D9AE5F; --app-bg:#3B331F; --app-line:#5C4E2C;
+      --ok:#6FBF85; --ok-bg:#20342A;
+      --warn:#E39A55; --warn-bg:#3D2E1E;
+      --bad:#E08078; --bad-bg:#402425;
+      --accent:#6B99D8; --accent-ink:#0F1520;
+      --shadow:0 1px 3px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#F6F7F9; --panel:#FFFFFF; --panel-2:#EFF1F5;
+    --ink:#1D2530; --muted:#5C6878; --line:#DCE1E9; --line-soft:#E8ECF2;
+    --win:#2F5FA8; --win-bg:#E7EEF9; --win-line:#B9CCE9;
+    --apple:#4A5568; --apple-bg:#EBEEF2; --apple-line:#C6CDD6;
+    --droid:#1E7A6C; --droid-bg:#E2F1EC; --droid-line:#AFD6CC;
+    --pol:#7A4FA3; --pol-bg:#F0E9F8; --pol-line:#D5C2EA;
+    --app:#8A671F; --app-bg:#F6EEDB; --app-line:#E0CC9A;
+    --ok:#2E7D46; --ok-bg:#E4F1E7;
+    --warn:#A85410; --warn-bg:#FBEDDD;
+    --bad:#B3352E; --bad-bg:#F9E6E4;
+    --accent:#2F5FA8; --accent-ink:#FFFFFF;
+    --shadow:0 1px 3px rgba(29,37,48,.08), 0 4px 16px rgba(29,37,48,.06);
+  }
+  :root[data-theme="dark"]{
+    --paper:#14181F; --panel:#1C222C; --panel-2:#232B37;
+    --ink:#E6EAF0; --muted:#94A1B2; --line:#303A48; --line-soft:#28313E;
+    --win:#82AAE4; --win-bg:#22304A; --win-line:#3A5378;
+    --apple:#A8B4C4; --apple-bg:#2A313C; --apple-line:#434D5C;
+    --droid:#5FC2AF; --droid-bg:#1B3A34; --droid-line:#2C5A50;
+    --pol:#BC93E0; --pol-bg:#33254A; --pol-line:#544073;
+    --app:#D9AE5F; --app-bg:#3B331F; --app-line:#5C4E2C;
+    --ok:#6FBF85; --ok-bg:#20342A;
+    --warn:#E39A55; --warn-bg:#3D2E1E;
+    --bad:#E08078; --bad-bg:#402425;
+    --accent:#6B99D8; --accent-ink:#0F1520;
+    --shadow:0 1px 3px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.3);
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,sans-serif;
+    font-size:15px; line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:"Cascadia Code",Consolas,ui-monospace,monospace}
+  .wrap{max-width:1320px;margin:0 auto;padding:20px 24px 64px}
+
+  /* ---------- header ---------- */
+  header.app{
+    display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
+    flex-wrap:wrap;padding:8px 0 18px;border-bottom:1px solid var(--line);margin-bottom:20px;
+  }
+  .brand h1{font-size:22px;font-weight:650;margin:0;letter-spacing:-.01em;text-wrap:balance}
+  .brand .sub{color:var(--muted);font-size:13.5px;margin-top:2px;max-width:60ch}
+  .stats{display:flex;gap:8px;flex-wrap:wrap}
+  .stat{
+    background:var(--panel);border:1px solid var(--line);border-radius:8px;
+    padding:6px 12px;text-align:center;min-width:70px;
+  }
+  .stat b{display:block;font-size:18px;font-variant-numeric:tabular-nums;line-height:1.2}
+  .stat span{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+
+  /* ---------- help strip ---------- */
+  .howto{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:0;margin-bottom:16px;box-shadow:var(--shadow);overflow:hidden;
+  }
+  .howto summary{
+    cursor:pointer;padding:12px 18px;font-weight:600;font-size:14px;list-style:none;
+    display:flex;align-items:center;gap:10px;user-select:none;
+  }
+  .howto summary::-webkit-details-marker{display:none}
+  .howto summary .chev{transition:transform .15s;color:var(--muted);font-size:12px}
+  .howto[open] summary .chev{transform:rotate(90deg)}
+  .howto .body{padding:0 18px 16px;color:var(--muted);font-size:14px;max-width:82ch}
+  .howto .body ol,.howto .body ul{margin:6px 0 10px;padding-left:22px}
+  .howto .body li{margin:4px 0}
+  .howto .body strong{color:var(--ink)}
+
+  /* ---------- scope bar ---------- */
+  .scopebar{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:12px 16px;margin-bottom:20px;
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  }
+  .scopebar .sb-txt{font-size:13.5px;color:var(--muted);flex:1;min-width:220px}
+  .scopebar .sb-txt b{color:var(--ink);font-weight:650}
+  .cepill{
+    font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+    padding:4px 10px;border-radius:6px;border:1px solid var(--ok);
+    color:var(--ok);background:var(--ok-bg);
+  }
+
+  /* ---------- layout ---------- */
+  .cols{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
+  @media (max-width:1000px){.cols{grid-template-columns:1fr}}
+
+  .canvas{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:16px 16px 20px;min-height:120px;
+    min-width:0;max-width:100%;
+  }
+  .canvas-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;flex-wrap:wrap}
+  .canvas-head h2{font-size:15px;margin:0;font-weight:650}
+  .canvas-head .hint{font-size:12.5px;color:var(--muted)}
+  .canvas .lead{font-size:13px;color:var(--muted);margin:0 0 12px;max-width:80ch}
+
+  .empty{
+    border:1.5px dashed var(--line);border-radius:var(--radius);
+    padding:30px 20px;text-align:center;color:var(--muted);font-size:14px;
+  }
+
+  /* ---------- chips ---------- */
+  .chip{
+    font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+    padding:3px 8px;border-radius:5px;flex:none;line-height:1.3;border:1px solid;
+  }
+  .chip.windows{color:var(--win);background:var(--win-bg);border-color:var(--win-line)}
+  .chip.ios,.chip.macos{color:var(--apple);background:var(--apple-bg);border-color:var(--apple-line)}
+  .chip.android{color:var(--droid);background:var(--droid-bg);border-color:var(--droid-line)}
+  .chip.pol{color:var(--pol);background:var(--pol-bg);border-color:var(--pol-line)}
+  .chip.app{color:var(--app);background:var(--app-bg);border-color:var(--app-line)}
+  .chip.grp{color:var(--pol);background:var(--pol-bg);border-color:var(--pol-line)}
+
+  /* ---------- fleet cards ---------- */
+  .fleet{
+    border:1px solid var(--line);border-radius:9px;margin:10px 0;background:var(--paper);
+    min-width:0;max-width:100%;
+  }
+  .fleet.flash{background:var(--warn-bg);border-color:var(--warn)}
+  .frow{display:flex;align-items:center;gap:8px;padding:9px 11px;border-radius:8px;position:relative}
+  .frow:hover{background:var(--panel-2)}
+  .nname{
+    font-weight:600;font-size:14.5px;cursor:text;padding:2px 6px;border-radius:5px;
+    min-width:40px;outline:none;flex-shrink:0;max-width:60%;overflow-wrap:anywhere;
+  }
+  .frow .nname:hover{background:var(--panel);box-shadow:inset 0 0 0 1px var(--line)}
+  .nname:focus{background:var(--panel);box-shadow:inset 0 0 0 1.5px var(--accent)}
+  .meta-inline{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;min-width:0}
+  .meta-inline .miss{color:var(--bad);font-weight:600}
+  .meta-inline .sep{opacity:.5;padding:0 5px}
+
+  .acts{display:flex;gap:2px;margin-left:auto;opacity:.55;transition:opacity .12s;flex:none}
+  .fleet:hover .acts,.fleet:focus-within .acts,.grow:hover .acts,.grow:focus-within .acts{opacity:1}
+  .acts button{
+    border:none;background:transparent;color:var(--muted);cursor:pointer;
+    border-radius:5px;padding:3px 7px;font-size:12.5px;line-height:1.4;font-family:inherit;
+  }
+  .acts button:hover{background:var(--panel);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+  .acts button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+  .acts button.del:hover{color:var(--bad);background:var(--bad-bg);box-shadow:inset 0 0 0 1px var(--bad)}
+  .acts button.addb{color:var(--accent);font-weight:600}
+
+  /* On a narrow screen the fleet header row cannot hold name + summary + six
+     action buttons side by side; without this the row forces the whole page
+     into horizontal scroll. Let it wrap and give the summary its own line. */
+  @media (max-width:700px){
+    .frow{flex-wrap:wrap}
+    .nname{max-width:100%}
+    .meta-inline{flex:1 1 100%;order:3;white-space:normal;overflow:visible;text-overflow:clip}
+    .meta-inline .sep{padding:0 4px}
+    .acts{opacity:1}
+    .g-head input[type=text]{min-width:120px}
+    .padd input{min-width:0}
+  }
+
+  /* ---------- drawers & sections ---------- */
+  /* Every grid below declares minmax(0,1fr) and min-width:0. Without it an implicit
+     auto track sizes to its widest child (a long fieldnote, a run of long email
+     addresses) and the whole drawer inflates past its column, sliding under the
+     sticky sidebar. This exact bug reached a customer on the SharePoint planner. */
+  .drawer{
+    margin:0 10px 10px;padding:12px 14px;border:1px solid var(--line);
+    border-radius:8px;background:var(--panel);font-size:13px;
+    display:grid;grid-template-columns:minmax(0,1fr);gap:14px;min-width:0;
+  }
+  .sect{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;min-width:0}
+  .sect > .sect-head{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    border-bottom:1px solid var(--line-soft);padding-bottom:5px;
+  }
+  .sect > .sect-head h4{
+    margin:0;font-size:11px;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--muted);font-weight:700;
+  }
+  .sect > .sect-head .sh-note{font-size:12px;color:var(--muted);flex:1;min-width:120px}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;min-width:0}
+  .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;min-width:0}
+  .grid2 > *,.grid3 > *,.checkgrid > *{min-width:0}
+  .fld{min-width:0}
+  .fld label,.drawer label.top{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:650;margin-bottom:3px}
+  .drawer input[type=text],.drawer input[type=number],.drawer textarea,.drawer select,
+  .wiz input[type=text],.wiz select{
+    width:100%;border:1px solid var(--line);border-radius:6px;background:var(--panel);
+    color:var(--ink);padding:6px 9px;font:inherit;font-size:13.5px;
+  }
+  .drawer input:focus,.drawer textarea:focus,.drawer select:focus,
+  .wiz input:focus,.wiz select:focus{
+    outline:none;border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent);
+  }
+  .fieldnote{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.45}
+  .radio-row{display:flex;gap:14px;flex-wrap:wrap;font-size:13.5px}
+  .radio-row label,.check-row label{display:flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0;font-weight:450;font-size:13.5px;color:var(--ink);margin:0;cursor:pointer}
+  .check-row{display:flex;align-items:flex-start;gap:8px;font-size:13.5px}
+  .check-row input{margin-top:3px}
+  .checkgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:6px}
+  .checkgrid label{display:flex;align-items:flex-start;gap:7px;font-size:13px;cursor:pointer;line-height:1.4}
+  .checkgrid label input{margin-top:3px;flex:none}
+  .checkgrid label .cg-note{display:block;font-size:11.5px;color:var(--muted)}
+  .warn-note{
+    background:var(--warn-bg);border:1px solid var(--warn);color:var(--ink);
+    border-radius:6px;padding:8px 11px;font-size:12.5px;line-height:1.45;
+  }
+  .info-note{
+    background:var(--panel-2);border:1px solid var(--line);color:var(--muted);
+    border-radius:6px;padding:8px 11px;font-size:12.5px;line-height:1.45;
+  }
+  .info-note b,.warn-note b{color:var(--ink)}
+
+  /* ---------- sub-item rows (enrolment / compliance / config / apps) ---------- */
+  .sub{border:1px solid var(--line-soft);border-radius:7px;background:var(--paper);margin:0;min-width:0}
+  .sub-row{display:flex;align-items:center;gap:8px;padding:7px 9px;flex-wrap:wrap;min-width:0}
+  .sub-row .sub-t{font-size:13px;font-weight:600;flex-shrink:0}
+  .sub-row .sub-m{font-size:12px;color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sub-body{padding:2px 10px 11px;display:grid;grid-template-columns:minmax(0,1fr);gap:9px;min-width:0;border-top:1px solid var(--line-soft)}
+  .addbtn{
+    border:1px dashed var(--line);background:transparent;color:var(--accent);
+    border-radius:7px;padding:6px 12px;font-size:12.5px;cursor:pointer;font-family:inherit;font-weight:600;
+    justify-self:start;
+  }
+  .addbtn:hover{border-color:var(--accent);background:var(--panel-2)}
+  .addbtn:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+
+  /* ---------- groups / people / apps panels ---------- */
+  .grow{
+    border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:8px 0;
+    display:grid;gap:8px;background:var(--paper);
+  }
+  .grow.flash{background:var(--warn-bg);border-color:var(--warn)}
+  .g-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .g-head input[type=text]{
+    flex:1;min-width:150px;border:1px solid var(--line);border-radius:6px;background:var(--panel);
+    color:var(--ink);padding:5px 9px;font:inherit;font-size:13.5px;
+  }
+  .g-head input.mono{font-family:"Cascadia Code",Consolas,ui-monospace,monospace;font-size:13px;font-weight:600}
+  .g-head select{
+    border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);
+    padding:5px 8px;font:inherit;font-size:13px;
+  }
+  .g-head input:focus,.g-head select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent)}
+  .grow label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:650;margin-bottom:3px}
+  .g-use{font-size:12px;color:var(--muted)}
+  .cnt{color:var(--muted);font-size:12px;flex:none}
+
+  .ppills{display:flex;flex-wrap:wrap;gap:6px}
+  button.ppill{
+    border:1px solid var(--line);background:var(--panel);color:var(--ink);
+    border-radius:999px;padding:4px 12px;font-size:13px;cursor:pointer;font-family:inherit;line-height:1.4;
+  }
+  button.ppill:hover{border-color:var(--accent)}
+  button.ppill:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+  button.ppill.on{background:var(--pol-bg);border-color:var(--pol);color:var(--pol);font-weight:650}
+  button.ppill.on::before{content:"\2713\00a0"}
+  .person{
+    display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);
+    background:var(--paper);border-radius:999px;padding:3px 4px 3px 12px;font-size:13.5px;
+  }
+  .person .pname{outline:none;padding:1px 4px;border-radius:5px;min-width:24px;cursor:text}
+  .person .pname:hover{background:var(--panel);box-shadow:inset 0 0 0 1px var(--line)}
+  .person .pname:focus{background:var(--panel);box-shadow:inset 0 0 0 1.5px var(--accent)}
+  .person button.px{border:none;background:transparent;color:var(--muted);cursor:pointer;border-radius:50%;padding:2px 7px;font-size:12px;font-family:inherit}
+  .person button.px:hover{color:var(--bad);background:var(--bad-bg)}
+  .padd{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .padd input{
+    flex:1;min-width:190px;border:1px solid var(--line);border-radius:8px;background:var(--panel);
+    color:var(--ink);padding:8px 12px;font:inherit;font-size:13.5px;
+  }
+  .padd input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 25%, transparent)}
+  .pick-list{display:grid;gap:5px}
+  .pick-list label{display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;font-weight:450;font-size:13.5px;color:var(--ink);margin:0;cursor:pointer}
+
+  /* ---------- sidebar ---------- */
+  /* Sticky, but never taller than the viewport: when the cards outgrow the screen
+     (long finding lists, small laptops, the tall article iframe) the sidebar
+     scrolls inside itself instead of freezing over the page with its bottom cut off. */
+  .side{
+    display:grid;gap:16px;position:sticky;top:16px;
+    max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);
+    overflow-y:auto;overscroll-behavior:contain;
+  }
+  @media (max-width:1000px){.side{position:static;max-height:none;overflow:visible}}
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:16px 18px;
+  }
+  .card h3{margin:0 0 10px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700}
+  .card h3 .n{color:var(--ink);font-variant-numeric:tabular-nums}
+
+  .checks{display:grid;gap:7px;margin:0;padding:0;list-style:none}
+  .checks li{
+    display:flex;gap:9px;align-items:flex-start;font-size:13px;line-height:1.45;
+    padding:7px 10px;border-radius:7px;border:1px solid var(--line-soft);overflow-wrap:anywhere;
+  }
+  .checks li .ic{flex:none;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:10.5px;font-weight:800;margin-top:1px}
+  .checks li.ok{background:var(--ok-bg);border-color:transparent}
+  .checks li.ok .ic{background:var(--ok);color:var(--paper)}
+  .checks li.warn{background:var(--warn-bg);border-color:transparent}
+  .checks li.warn .ic{background:var(--warn);color:var(--paper)}
+  .checks li.bad{background:var(--bad-bg);border-color:transparent}
+  .checks li.bad .ic{background:var(--bad);color:var(--paper)}
+  .checks li.info .ic{background:var(--panel-2);color:var(--muted);border:1px solid var(--line)}
+  .checks li .ctxt b{font-weight:650}
+  .checks li .why{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+  .checks li button.jump{
+    background:none;border:none;padding:0;color:var(--accent);cursor:pointer;font:inherit;
+    text-decoration:underline;text-underline-offset:2px;
+  }
+
+  .prereqs{display:grid;gap:5px;margin:0;padding:0;list-style:none}
+  .prereqs li{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;line-height:1.4}
+  .prereqs li .pq{flex:none;width:15px;height:15px;border-radius:4px;border:1px solid var(--line);display:grid;place-items:center;font-size:9px;font-weight:800;margin-top:2px;background:var(--panel-2);color:var(--muted)}
+  .prereqs li b{font-weight:650}
+  .prereqs li span.pw{display:block;color:var(--muted);font-size:11.5px}
+
+  .btnrow{display:grid;gap:8px}
+  .btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    border-radius:8px;padding:9px 14px;font-size:13.5px;font-weight:600;cursor:pointer;
+    border:1px solid var(--line);background:var(--panel-2);color:var(--ink);font-family:inherit;
+    transition:filter .1s;
+  }
+  .btn:hover{filter:brightness(.97)}
+  :root[data-theme="dark"] .btn:hover,.btn:hover{filter:brightness(1.05)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .btn.danger:hover{border-color:var(--bad);color:var(--bad)}
+  .btn.wide{width:auto;padding:7px 14px}
+  .side .small{font-size:12px;color:var(--muted);margin:8px 0 0}
+  .side details.techx summary{
+    cursor:pointer;font-size:13px;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--muted);font-weight:700;list-style:none;margin-bottom:10px;
+  }
+  .side details.techx summary::-webkit-details-marker{display:none}
+
+  .legend{display:grid;gap:8px;font-size:13px}
+  .legend .lrow{display:flex;gap:9px;align-items:baseline}
+  .legend .lrow span.desc{color:var(--muted);font-size:12.5px}
+
+  .toast{
+    position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(8px);
+    background:var(--ink);color:var(--paper);border-radius:8px;padding:9px 18px;
+    font-size:13.5px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;
+    box-shadow:var(--shadow);z-index:50;max-width:88vw;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  dialog.export{
+    border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);color:var(--ink);
+    max-width:760px;width:94vw;padding:20px;box-shadow:var(--shadow);
+  }
+  dialog.export::backdrop{background:rgba(10,14,20,.45)}
+  dialog.export h3{margin:0 0 10px;font-size:16px}
+  dialog.export pre{
+    background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:14px;
+    font-size:12.5px;line-height:1.55;overflow-x:auto;max-height:min(50vh,420px);white-space:pre;
+  }
+  dialog .dlg-row{display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap}
+
+  /* ---------- wizard ---------- */
+  dialog.wiz{max-width:720px}
+  .wiz .q{margin:0 0 18px}
+  .wiz .q > label.top{
+    display:block;font-size:13.5px;font-weight:650;color:var(--ink);
+    text-transform:none;letter-spacing:0;margin-bottom:3px;
+  }
+  .wiz .q .qn{font-size:12.5px;color:var(--muted);margin:0 0 7px;max-width:70ch}
+  .wiz .wgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px}
+  .wiz .wopt{
+    display:flex;align-items:flex-start;gap:8px;border:1px solid var(--line);border-radius:8px;
+    padding:9px 11px;cursor:pointer;background:var(--paper);font-size:13.5px;line-height:1.4;
+  }
+  .wiz .wopt:hover{border-color:var(--accent)}
+  .wiz .wopt input{margin-top:3px;flex:none}
+  .wiz .wopt span.wn{display:block;font-size:11.5px;color:var(--muted);margin-top:1px}
+  .wiz .wopt b{font-weight:600}
+
+  @media (prefers-reduced-motion: reduce){ *{transition:none !important} }
+  @media print{ .side,.howto,.acts,.scopebar{display:none} .canvas{break-inside:avoid} }
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+  <header class="app">
+    <div class="brand">
+      <div style="font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:4px">Active8 Managed Technologies</div>
+      <h1>Intune Requirements Planner</h1>
+      <div class="sub">Tell us about the devices you want managed, and how you want them to behave. No Intune knowledge needed &mdash; every term is explained as you go, and the checker flags anything that would cause trouble later.</div>
+    </div>
+    <div class="stats" id="stats" aria-live="polite"></div>
+  </header>
+
+  <details class="howto">
+    <summary><span class="chev">&#9654;</span> How this works &mdash; please read before you start</summary>
+    <div class="body">
+      <p style="margin:10px 0 4px"><strong>First, the words you'll see.</strong> Microsoft Intune is the system that will set up and look after your devices. It has its own names for things:</p>
+      <ul>
+        <li><strong>Device group</strong> &mdash; a set of devices that should all behave the same way, e.g. "staff laptops" or "the Year 5 iPad trolley". Everything in this tool hangs off these. You can have as many as you need.</li>
+        <li><strong>Enrolment</strong> &mdash; how a device first joins Intune out of the box. Different device groups often need different methods, and a single group can have more than one.</li>
+        <li><strong>User affinity</strong> &mdash; whether a device belongs to one named person or is shared. This one answer changes almost everything else, so it's asked first on every group.</li>
+        <li><strong>Compliance policy</strong> &mdash; the health rules a device must meet to count as trustworthy (up-to-date, locked with a PIN, encrypted&hellip;).</li>
+        <li><strong>Configuration policy</strong> &mdash; the settings we push out: Wi-Fi, security hardening, browser settings, what users may and may not change.</li>
+        <li><strong>App deployment</strong> &mdash; software we install for you, either automatically or offered in a company app store on the device.</li>
+      </ul>
+      <p style="margin:10px 0 4px"><strong>What to do:</strong></p>
+      <ol>
+        <li><strong>Answer the short scope questions</strong> (they open automatically the first time). We use them to lay out a realistic starting point rather than a blank page.</li>
+        <li><strong>Work through each device group.</strong> Click <em>details</em> to open one. Correct the numbers, add or remove enrolment methods, compliance rules, configuration and apps. Add more groups if a set of devices needs to behave differently.</li>
+        <li><strong>List your apps and your Wi-Fi / network needs</strong> in the panels underneath, then tick them onto the device groups that need them.</li>
+        <li><strong>Add your people and groups</strong> so we know who each device group is for, and who will administer Intune.</li>
+        <li><strong>Watch the checker</strong> on the right. It flags things that genuinely bite later &mdash; a policy that will never apply to anyone, a rule that can't work on a shared device, a licence that doesn't include what you've asked for.</li>
+        <li><strong>Send it back to us.</strong> Use <strong>Copy as text</strong> and paste the whole thing into an email to your Active8 contact &mdash; replying to the message that sent you this link is perfect. It's a readable summary with a "plan data" code at the bottom that lets us reload your answers exactly. Please keep that code intact. Your draft also saves automatically in this browser.</li>
+      </ol>
+      <p><strong>Nothing you type here is sent anywhere.</strong> This page makes no network connections at all. Your draft stays in this browser until you choose to email it to us.</p>
+    </div>
+  </details>
+
+  <div class="scopebar">
+    <div class="sb-txt" id="scopeTxt"></div>
+    <span class="cepill" id="cePill" hidden>Cyber Essentials v3.3</span>
+    <button class="btn wide" id="openWiz">Scope questions</button>
+  </div>
+
+  <div class="cols">
+    <div style="display:grid;grid-template-columns:minmax(0,1fr);gap:20px;min-width:0">
+
+      <main class="canvas" aria-label="Device groups">
+        <div class="canvas-head">
+          <h2>Your device groups</h2>
+          <span class="hint">Click a name to rename &middot; <em>details</em> opens everything</span>
+        </div>
+        <p class="lead">One group per set of devices that should behave the same way. Split a group whenever the answer to &ldquo;who uses this and how&rdquo; changes &mdash; staff vs students, 1:1 vs shared, owned by you vs owned by them.</p>
+        <div id="fleets"></div>
+        <div style="margin-top:12px"><button class="addbtn" id="addFleet">+ Add a device group</button></div>
+      </main>
+
+      <section class="canvas" aria-label="Applications">
+        <div class="canvas-head">
+          <h2>Apps &mdash; software that needs to be on the devices</h2>
+          <span class="hint">List each app once, then tick it onto the device groups that need it</span>
+        </div>
+        <p class="lead">Include anything staff or students genuinely need: Microsoft 365, your MIS or line-of-business software, subject-specific software, printer drivers, VPN clients. Don't worry about how it gets installed &mdash; that's our problem, not yours.</p>
+        <div id="apps"></div>
+        <div class="padd">
+          <input type="text" id="newAppInput" placeholder="App name, e.g. Microsoft 365 Apps, SIMS, Adobe Reader, Sonar" autocomplete="off">
+          <button class="btn wide" id="addAppBtn">Add app</button>
+        </div>
+      </section>
+
+      <section class="canvas" aria-label="Network and shared resources">
+        <div class="canvas-head">
+          <h2>Wi-Fi, VPN and certificates</h2>
+          <span class="hint">Things the device needs before anyone can use it</span>
+        </div>
+        <p class="lead">If devices must join a particular Wi-Fi network automatically, reach an internal system over VPN, or trust an internal certificate, tell us here. On shared and single-purpose devices this matters a lot &mdash; nobody is there to type a Wi-Fi password.</p>
+        <div id="resources"></div>
+        <div class="padd">
+          <input type="text" id="newResInput" placeholder="e.g. Staff-WiFi (WPA2 Enterprise), Site VPN, Internal root CA" autocomplete="off">
+          <button class="btn wide" id="addResBtn">Add</button>
+        </div>
+      </section>
+
+      <section class="canvas" aria-label="People">
+        <div class="canvas-head">
+          <h2>People</h2>
+          <span class="hint">Type each person once &mdash; after that you just click their name</span>
+        </div>
+        <p class="lead">Who we'll need to talk to, who will administer Intune, and who to use for the first test devices. A name or an email address is fine.</p>
+        <div id="people"></div>
+      </section>
+
+      <section class="canvas" aria-label="User groups">
+        <div class="canvas-head">
+          <h2>User groups &mdash; who each set of devices is for</h2>
+          <span class="hint">Click names to put people in a group &middot; the INT-&hellip; label is the technical name we'll create</span>
+        </div>
+        <p class="lead">Groups are how settings reach devices. Nothing applies to anybody until it's pointed at a group, so this section is what makes the rest of the plan real. You don't need to list every student individually &mdash; describe the group and we'll build it from your directory.</p>
+        <div id="groups"></div>
+      </section>
+
+    </div>
+
+    <aside class="side">
+      <section class="card" aria-label="Checker">
+        <h3>Checker <span class="n" id="checkCount"></span></h3>
+        <ul class="checks" id="checks"></ul>
+      </section>
+
+      <section class="card" aria-label="Before we can start">
+        <h3>Before we can start</h3>
+        <p class="small" style="margin:0 0 10px">Things that must exist in your tenant before any of this can be built. Tick what you already have.</p>
+        <ul class="prereqs" id="prereqs"></ul>
+      </section>
+
+      <section class="card" aria-label="Send your plan">
+        <h3>Finished? Send it back</h3>
+        <div class="btnrow">
+          <button class="btn primary" id="copyText">Copy as text</button>
+          <button class="btn" id="shareCode">Copy share code</button>
+          <button class="btn" id="dlPlan">Download plan file</button>
+          <button class="btn" id="importPlan">Load a plan</button>
+          <button class="btn danger" id="resetAll">Start over</button>
+        </div>
+        <p class="small">Your draft saves automatically in this browser. &ldquo;Copy as text&rdquo; gives a readable summary to paste straight into an email &mdash; it includes a plan-data code at the bottom, so the email alone is enough for us. &ldquo;Copy share code&rdquo; gives just that code. Email it to your usual Active8 contact &mdash; replying to the message that sent you this link works perfectly. Not sure who? Use <strong>ITSupport@a8mt.co.uk</strong>.</p>
+        <input type="file" id="fileInput" accept=".txt,.json,text/plain,application/json" hidden>
+      </section>
+
+      <section class="card" aria-label="Technical exports">
+        <details class="techx">
+          <summary>For your Active8 engineer</summary>
+          <div class="btnrow">
+            <button class="btn" id="buildSheetBtn">Build sheet</button>
+            <button class="btn" id="gapReportBtn">Gap &amp; risk report</button>
+            <button class="btn" id="jsonSpecBtn">JSON spec</button>
+          </div>
+          <p class="small">These turn your answers into the build checklist, the list of things worth a conversation, and a machine-readable copy. You're welcome to read them &mdash; they're written for an engineer, so expect jargon.</p>
+        </details>
+      </section>
+
+      <section class="card" aria-label="Key">
+        <h3>Key</h3>
+        <div class="legend">
+          <div class="lrow"><span class="chip windows">Windows</span><span class="desc">Laptops, desktops and Windows tablets.</span></div>
+          <div class="lrow"><span class="chip ios">Apple</span><span class="desc">iPhones, iPads and Macs.</span></div>
+          <div class="lrow"><span class="chip android">Android</span><span class="desc">Android phones and tablets.</span></div>
+          <div class="lrow"><span class="chip pol">Policy</span><span class="desc">A rule or a set of settings we push to a device group.</span></div>
+          <div class="lrow"><span class="chip app">App</span><span class="desc">Software we install or offer on the device.</span></div>
+        </div>
+      </section>
+    </aside>
+  </div>
+
+  <div style="margin-top:26px;text-align:center;font-size:12px;color:var(--muted)">Prepared for you by <strong>Active8 Managed Technologies</strong> &middot; 0333 999 7355 &middot; ITSupport@a8mt.co.uk</div>
+</div>
+
+<div class="toast" id="toast" role="status"></div>
+
+<dialog class="export" id="exportDlg">
+  <h3 id="exportTitle">Your plan as text</h3>
+  <pre id="exportPre"></pre>
+  <div class="dlg-row">
+    <button class="btn" id="dlgClose">Close</button>
+    <button class="btn" id="dlgDownload">Download</button>
+    <button class="btn primary" id="dlgCopy">Copy to clipboard</button>
+  </div>
+</dialog>
+
+<dialog class="export" id="importDlg">
+  <h3>Load a plan</h3>
+  <p style="font-size:13.5px;color:var(--muted);margin:0 0 10px;max-width:62ch">Choose a plan file downloaded from this tool, or paste below &mdash; a share code, or a whole email containing the &ldquo;plan data&rdquo; section. This replaces the current draft.</p>
+  <div style="margin:0 0 10px"><button type="button" class="btn wide" id="importFileBtn">Choose a plan file&hellip;</button></div>
+  <textarea id="importTa" spellcheck="false" placeholder="&hellip;or paste a share code or plan data here" style="width:100%;min-height:140px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);padding:10px 12px;font-family:'Cascadia Code',Consolas,ui-monospace,monospace;font-size:12px"></textarea>
+  <div class="dlg-row">
+    <button class="btn" id="importClose">Cancel</button>
+    <button class="btn primary" id="importGo">Load</button>
+  </div>
+</dialog>
+
+<dialog class="export" id="confirmDlg">
+  <h3 id="confirmMsg" style="font-size:15px;font-weight:600;max-width:52ch"></h3>
+  <div class="dlg-row">
+    <button class="btn" id="confirmNo">Cancel</button>
+    <button class="btn primary" id="confirmYes">Yes, do it</button>
+  </div>
+</dialog>
+
+<dialog class="export wiz" id="wizDlg">
+  <h3>A few questions to get started</h3>
+  <p style="font-size:13.5px;color:var(--muted);margin:0 0 16px;max-width:66ch">Two minutes. We use these to lay out a sensible starting point &mdash; you can change anything afterwards, and adding or removing device groups later is easy.</p>
+  <div id="wizBody"></div>
+  <div class="dlg-row">
+    <button class="btn" id="wizCancel">Cancel</button>
+    <button class="btn primary" id="wizGo">Build my starting point</button>
+  </div>
+</dialog>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============================================================
+     Intune Requirements Planner - Active8 Managed Technologies
+     Single file, zero dependencies, no network calls of any kind.
+
+     Option catalogue sourced from Microsoft Learn (Intune device
+     enrollment guides + the Education device deployment tutorial)
+     and Open Intune Baseline v3.8 (github.com/SkipToTheEndpoint/
+     OpenIntuneBaseline). Cyber Essentials values are v3.3 (IASME
+     Danzell, April 2026) - see the anti-rules in RULES: the scheme
+     does NOT require BitLocker, does not require Conditional Access
+     enforcement, and explicitly says do not enforce password expiry
+     or complexity.
+     ============================================================ */
+
+  var STORE_KEY = "a8-intune-planner-v1";
+  var SEED_PREFIX = "INTUNEPLAN";
+  var OIB_VERSION = "v3.8";
+
+  /* ---------- catalogue ---------- */
+
+  var CAT = {};
+
+  CAT.platforms = {
+    windows:{ label:"Windows",       plain:"Laptops, desktops and Windows tablets" },
+    ios:    { label:"iOS / iPadOS",  plain:"iPhones and iPads" },
+    macos:  { label:"macOS",         plain:"MacBooks, iMacs and Mac minis" },
+    android:{ label:"Android",       plain:"Android phones and tablets" }
+  };
+  CAT.platformOrder = ["windows","ios","android","macos"];
+
+  CAT.affinity = {
+    user:  { label:"One person per device",  plain:"The device belongs to a named person (1:1). Intune calls this <b>user affinity</b>." },
+    shared:{ label:"Shared between people",  plain:"Several people use the same device &mdash; a trolley, a classroom set, a hot desk. Enrolled with <b>no user affinity</b>." },
+    kiosk: { label:"Single purpose / kiosk", plain:"The device does one job and usually nobody signs in &mdash; a signage screen, a visitor sign-in tablet, a till." }
+  };
+
+  CAT.ownership = {
+    corporate:{ label:"Owned by the organisation", plain:"You bought them, so they can be fully managed." },
+    personal: { label:"Personally owned (BYOD)",   plain:"Staff or students own them. We can protect the work data, not the device." }
+  };
+
+  /* prerequisites - referenced by key from enrolment methods */
+  CAT.prereqs = {
+    mdmAuthority:  { label:"Intune licences assigned to the right people", why:"A licence sitting unassigned in the tenant manages nothing." },
+    entraGroups:   { label:"Entra ID groups to target", why:"Nothing applies to anybody until it is pointed at a group with members in it." },
+    customDomain:  { label:"Your own domain verified in Microsoft 365", why:"Devices and users should not end up on the .onmicrosoft.com name." },
+    network:       { label:"Microsoft endpoints reachable through your firewall / web filter", why:"School filters in particular block enrolment traffic and the failure looks like a device fault." },
+    autopilotReg:  { label:"Windows devices registered with Autopilot", why:"Hardware hashes from you, or registration by the supplier / OEM / CSP partner before the boxes are opened." },
+    tpm2:          { label:"TPM 2.0 on every Windows device", why:"Autopilot self-deploying and pre-provisioned mode will not run without it." },
+    ppkgToken:     { label:"A current bulk-enrolment token", why:"The token inside a provisioning package expires after 180 days; the package silently stops working." },
+    apns:          { label:"Apple Push Notification certificate (APNs)", why:"Without it Intune cannot manage a single Apple device. It expires yearly - renew it, never recreate it, or every device drops out." },
+    abm:           { label:"Apple Business Manager account and token", why:"Needed for zero-touch Apple enrolment, and the devices must be in it - usually via the reseller." },
+    asm:           { label:"Apple School Manager", why:"Shared iPad and Managed Apple Accounts for pupils are Apple School Manager features specifically." },
+    vpp:           { label:"Apple Apps and Books (VPP) token", why:"How managed apps get licensed. Device-assigned licences are what shared and user-less iPads need." },
+    aeBinding:     { label:"Android Enterprise connected to Managed Google Play", why:"Every corporate Android mode depends on this binding; without it enrolment simply fails." },
+    caPolicy:      { label:"Conditional Access, if anything is to be blocked", why:"Compliance policies flag; Conditional Access is the thing that actually blocks." },
+    breakGlass:    { label:"A break-glass admin account excluded from Conditional Access", why:"So a policy mistake cannot lock every administrator out of the tenant at once." }
+  };
+
+  /* enrolment methods, per platform */
+  CAT.enrol = {
+    windows:[
+      { key:"autopilot-user-driven", label:"Windows Autopilot - user-driven",
+        plain:"The person unboxes it, connects to Wi-Fi, signs in with their work account, and it configures itself. The standard choice for a device belonging to one person.",
+        affinity:["user"], ownership:["corporate"], requires:["autopilotReg","entraGroups","network"] },
+      { key:"autopilot-self-deploying", label:"Windows Autopilot - self-deploying",
+        plain:"The device sets itself up with no one signed in. This is the right mode for shared and single-purpose devices.",
+        affinity:["shared","kiosk"], ownership:["corporate"], requires:["autopilotReg","tpm2","network"] },
+      { key:"autopilot-pre-provisioned", label:"Windows Autopilot - pre-provisioned",
+        plain:"We (or the supplier) do the slow part before the device reaches the user, so they get a nearly-ready machine and a short first sign-in.",
+        affinity:["user"], ownership:["corporate"], requires:["autopilotReg","tpm2","network"] },
+      { key:"ppkg", label:"Provisioning package on a USB stick",
+        plain:"A file on a USB stick that enrols the device. Set Up School PCs produces one. Good where you have the devices in hand and poor bandwidth.",
+        affinity:["user","shared","kiosk"], ownership:["corporate"], requires:["ppkgToken"],
+        note:"The enrolment token inside the package expires after 180 days and has to be refreshed." },
+      { key:"entra-join-oobe", label:"Sign in and join at first start-up",
+        plain:"Someone turns the device on and chooses to join the work account. Simple, but the first person to sign in becomes a local administrator of that device.",
+        affinity:["user"], ownership:["corporate"], requires:["entraGroups"],
+        note:"Microsoft specifically advises against this one for education devices." },
+      { key:"comanagement", label:"Co-management with Configuration Manager",
+        plain:"Existing domain-joined estate managed by both Configuration Manager and Intune while workloads move across.",
+        affinity:["user"], ownership:["corporate"], requires:["entraGroups"] },
+      { key:"win-byod-enrol", label:"Company Portal enrolment (personal PC)",
+        plain:"The owner enrols their own PC voluntarily to get access to work resources.",
+        affinity:["user"], ownership:["personal"], requires:["mdmAuthority"] },
+      { key:"win-mam-only", label:"No enrolment - protect the data only",
+        plain:"The PC is never managed. Work data is protected inside the apps instead.",
+        affinity:["user"], ownership:["personal"], requires:["mdmAuthority"] }
+    ],
+    ios:[
+      { key:"ade-affinity", label:"Automated Device Enrolment - assigned to one person",
+        plain:"Devices bought through Apple Business/School Manager set themselves up out of the box and belong to a named person.",
+        affinity:["user"], ownership:["corporate"], requires:["apns","abm","vpp"] },
+      { key:"ade-no-affinity", label:"Automated Device Enrolment - no user assigned",
+        plain:"The zero-touch option for shared iPads: the device enrols with nobody attached to it. This is what a class trolley normally wants.",
+        affinity:["shared","kiosk"], ownership:["corporate"], requires:["apns","abm","vpp"],
+        note:"Apps must be licensed to the device, not to a user - there is no user to license them to." },
+      { key:"shared-ipad", label:"Shared iPad (Apple School Manager)",
+        plain:"Pupils sign in to the same iPad with their own Managed Apple Account and get their own space back. Needs Apple School Manager and iPads with enough storage.",
+        affinity:["shared"], ownership:["corporate"], requires:["apns","abm","asm","vpp"],
+        note:"Shared iPad is the one supervised mode where a personal Apple Account cannot also be used." },
+      { key:"apple-configurator", label:"Apple Configurator on a Mac",
+        plain:"Plug each device into a Mac to enrol it. The fallback for devices that were never in Apple Business/School Manager - donated or second-hand kit.",
+        affinity:["user","shared","kiosk"], ownership:["corporate"], requires:["apns"] },
+      { key:"ios-company-portal", label:"Company Portal enrolment (personal phone)",
+        plain:"The owner installs Company Portal and enrols voluntarily. The device is managed but stays personally owned.",
+        affinity:["user"], ownership:["personal"], requires:["apns"] },
+      { key:"ios-mam-only", label:"No enrolment - protect the data only (recommended for BYOD)",
+        plain:"Nothing is installed on the phone and we never manage it. Work data lives inside Outlook, Teams and Word with its own PIN, and can be wiped on its own.",
+        affinity:["user"], ownership:["personal"], requires:["mdmAuthority"] }
+    ],
+    android:[
+      { key:"ae-work-profile", label:"Work profile (personal phone)",
+        plain:"A separate, walled-off work area on the owner's own phone. Their personal side is untouched and invisible to us.",
+        affinity:["user"], ownership:["personal"], requires:["aeBinding"] },
+      { key:"ae-fully-managed", label:"Fully managed (corporate-owned)",
+        plain:"The whole device is managed and belongs to one named person. Wiped and set up from scratch at enrolment.",
+        affinity:["user"], ownership:["corporate"], requires:["aeBinding"] },
+      { key:"ae-dedicated", label:"Dedicated device (kiosk)",
+        plain:"Nobody signs in. The device is locked to one app or a small set of apps - sign-in screens, stock scanners, room panels.",
+        affinity:["shared","kiosk"], ownership:["corporate"], requires:["aeBinding"] },
+      { key:"ae-dedicated-shared", label:"Dedicated device with shared sign-in",
+        plain:"A shared handset staff sign in and out of, with a single sign-out clearing them from every work app at the end of a shift.",
+        affinity:["shared"], ownership:["corporate"], requires:["aeBinding"],
+        note:"Only apps that support Microsoft Entra shared device mode will sign users out properly - check yours before committing." },
+      { key:"ae-corporate-work-profile", label:"Corporate-owned with a work profile",
+        plain:"You own the device but the user may also use it personally, in a separate personal area.",
+        affinity:["user"], ownership:["corporate"], requires:["aeBinding"] },
+      { key:"android-mam-only", label:"No enrolment - protect the data only (recommended for BYOD)",
+        plain:"Nothing is installed and we never manage the phone. Work data is protected inside the work apps.",
+        affinity:["user"], ownership:["personal"], requires:["mdmAuthority"] }
+    ],
+    macos:[
+      { key:"macos-ade", label:"Automated Device Enrolment",
+        plain:"Macs bought through Apple Business/School Manager set themselves up out of the box.",
+        affinity:["user","shared"], ownership:["corporate"], requires:["apns","abm"] },
+      { key:"macos-company-portal", label:"Company Portal enrolment",
+        plain:"The user installs Company Portal and enrols the Mac themselves. Used for existing Macs and for personally-owned ones.",
+        affinity:["user"], ownership:["corporate","personal"], requires:["apns"] }
+    ]
+  };
+
+  /* configuration packs, per platform. OIB-* entries map to Open Intune Baseline policies. */
+  CAT.config = {
+    windows:[
+      { key:"oib-device-security", label:"Security hardening baseline", pack:"OIB Win - Device Security " + OIB_VERSION,
+        plain:"The core hardening set - a known-good starting point built from NCSC, CIS and Microsoft guidance rather than invented by us.", rec:true },
+      { key:"oib-defender", label:"Microsoft Defender antivirus, firewall and attack surface rules", pack:"OIB Win - Defender AV / Firewall / ASR",
+        plain:"Antivirus, the built-in firewall, and rules that block the tricks ransomware uses to get started.", rec:true },
+      { key:"oib-bitlocker", label:"BitLocker disk encryption", pack:"OIB Win - BitLocker",
+        plain:"Encrypts the disk so a lost or stolen laptop is not a data breach, and stores the recovery key safely for us.", rec:true },
+      { key:"oib-laps", label:"Local administrator password (LAPS)", pack:"OIB Win - Windows LAPS",
+        plain:"Gives every device a different, automatically-rotated local admin password instead of one shared password everywhere.", rec:true },
+      { key:"oib-whfb", label:"Windows Hello - PIN, fingerprint or face sign-in", pack:"OIB Win - Windows Hello for Business",
+        plain:"Sign in with a PIN, fingerprint or face instead of typing a password.", affinity:["user"],
+        note:"Windows Hello is set up per person, so it does not suit a device several people share." },
+      { key:"oib-edge", label:"Microsoft Edge settings", pack:"OIB Win - Microsoft Edge",
+        plain:"Homepage, sign-in, sync and security settings for Edge." },
+      { key:"oib-chrome", label:"Google Chrome settings", pack:"OIB Win - Google Chrome",
+        plain:"The same for Chrome, where you use it." },
+      { key:"oib-office", label:"Microsoft 365 apps and OneDrive backup", pack:"OIB Win - Office + OneDrive Known Folder Move",
+        plain:"Office settings, plus automatically backing up Desktop, Documents and Pictures to OneDrive so nothing lives only on the device.", rec:true },
+      { key:"win-kiosk", label:"Lock the device to one app or a fixed set", pack:"Assigned Access / kiosk",
+        plain:"The device shows only what you choose and nothing else.", affinity:["kiosk","shared"] },
+      { key:"win-removable", label:"Control USB sticks and removable media", pack:"Settings catalog - removable storage",
+        plain:"Block, or allow read-only, so data cannot walk out on a memory stick." },
+      { key:"win-power", label:"Power, sleep and screen lock", pack:"Settings catalog - power and lock screen",
+        plain:"How long before the screen locks, and what the lid closing does." },
+      { key:"win-localadmin", label:"Who is a local administrator", pack:"Settings catalog - local group membership",
+        plain:"Whether the everyday user can install software and change system settings. Standard user is the safer answer." },
+      { key:"win-custom", label:"Something else", pack:"Custom", plain:"Describe it in the notes and we will work out how." }
+    ],
+    ios:[
+      { key:"ios-restrictions", label:"Device restrictions", pack:"iOS device restrictions",
+        plain:"What the user may and may not do - app store, camera, AirDrop, screen recording, account changes.", rec:true },
+      { key:"ios-passcode", label:"Passcode requirements", pack:"iOS device restrictions - passcode",
+        plain:"Whether a passcode is required, how long it must be, and how quickly the screen locks.", rec:true },
+      { key:"ios-supervised-layout", label:"Home screen layout", pack:"iOS home screen layout",
+        plain:"Fix which apps appear where, so every device in a set looks the same.", affinity:["shared","kiosk"] },
+      { key:"ios-single-app", label:"Lock to a single app", pack:"iOS single app mode",
+        plain:"The iPad runs one app and cannot leave it - exams, sign-in desks, information screens.", affinity:["kiosk"] },
+      { key:"ios-web-filter", label:"Web content filtering", pack:"iOS web content filter",
+        plain:"Limit which websites the device can reach. Schools usually need this alongside their existing filter." },
+      { key:"ios-shared-ipad-settings", label:"Shared iPad settings", pack:"Shared iPad - cached users, temporary sessions",
+        plain:"How many pupils' accounts stay cached on each iPad, and whether guest sessions are allowed.", affinity:["shared"] },
+      { key:"ios-appconfig", label:"App configuration", pack:"App configuration policy",
+        plain:"Pre-fill settings inside an app so nobody has to type a server address." },
+      { key:"ios-custom", label:"Something else", pack:"Custom", plain:"Describe it in the notes." }
+    ],
+    android:[
+      { key:"and-restrictions", label:"Device restrictions", pack:"Android Enterprise device restrictions",
+        plain:"What the user may and may not do - camera, screen capture, factory reset, adding accounts.", rec:true },
+      { key:"and-passcode", label:"Screen lock requirements", pack:"Android device restrictions - password",
+        plain:"Whether a PIN or password is required, its length, and how quickly the screen locks.", rec:true },
+      { key:"and-kiosk", label:"Kiosk / dedicated device layout", pack:"Dedicated device - single or multi-app kiosk",
+        plain:"Exactly which apps show on a device nobody signs in to.", affinity:["kiosk","shared"] },
+      { key:"and-workprofile", label:"Work profile settings", pack:"Work profile restrictions",
+        plain:"How the work side behaves - copy and paste between work and personal, work app badges, contacts sharing." },
+      { key:"and-oemconfig", label:"Manufacturer-specific settings (OEMConfig)", pack:"OEMConfig",
+        plain:"Settings only a particular manufacturer offers - Samsung Knox, Zebra, Honeywell." },
+      { key:"and-appconfig", label:"App configuration", pack:"Managed app configuration",
+        plain:"Pre-fill settings inside an app so nobody has to type a server address." },
+      { key:"and-custom", label:"Something else", pack:"Custom", plain:"Describe it in the notes." }
+    ],
+    macos:[
+      { key:"mac-oib", label:"Security hardening baseline", pack:"OIB macOS v1.0",
+        plain:"The community macOS hardening set - a known-good starting point.", rec:true },
+      { key:"mac-filevault", label:"FileVault disk encryption", pack:"Endpoint security - FileVault",
+        plain:"Encrypts the disk and escrows the recovery key with us.", rec:true },
+      { key:"mac-sso", label:"Platform single sign-on", pack:"Platform SSO",
+        plain:"Sign in to the Mac with the work account so the Mac password and the work password are the same thing." },
+      { key:"mac-restrictions", label:"Device restrictions", pack:"macOS device restrictions",
+        plain:"What the user may and may not change." },
+      { key:"mac-custom", label:"Something else", pack:"Custom", plain:"Describe it in the notes." }
+    ]
+  };
+
+  /* app install sources */
+  CAT.appSource = {
+    windows:[
+      { key:"m365", label:"Microsoft 365 Apps (Word, Excel, Outlook&hellip;)" },
+      { key:"store", label:"From the Microsoft Store" },
+      { key:"win32", label:"An installer you give us (.exe / .msi)" },
+      { key:"web",  label:"A website shortcut" },
+      { key:"unknown", label:"Not sure - please advise" }
+    ],
+    ios:[
+      { key:"vpp-device", label:"App Store app, licensed to the device" },
+      { key:"vpp-user",  label:"App Store app, licensed to a person" },
+      { key:"store", label:"Free App Store app" },
+      { key:"lob", label:"An in-house app you give us (.ipa)" },
+      { key:"web", label:"A web link" },
+      { key:"unknown", label:"Not sure - please advise" }
+    ],
+    android:[
+      { key:"play", label:"From Managed Google Play" },
+      { key:"play-private", label:"A private app published only to you" },
+      { key:"web", label:"A web link" },
+      { key:"unknown", label:"Not sure - please advise" }
+    ],
+    macos:[
+      { key:"m365", label:"Microsoft 365 Apps" },
+      { key:"store", label:"From the Mac App Store" },
+      { key:"pkg", label:"An installer you give us (.pkg / .dmg)" },
+      { key:"web", label:"A web link" },
+      { key:"unknown", label:"Not sure - please advise" }
+    ]
+  };
+  CAT.appIntent = {
+    required:  "Installed automatically on every device",
+    available: "Offered in the company app store, user chooses",
+    uninstall: "Removed if present"
+  };
+
+  CAT.resKind = {
+    wifi:"Wi-Fi network", vpn:"VPN connection", cert:"Certificate",
+    printer:"Printer", other:"Something else"
+  };
+
+  CAT.updateRing = {
+    pilot:  { label:"Pilot - a handful of test devices", plain:"Updates land here first so problems are found on 3 machines, not 300." },
+    uat:    { label:"Early adopters",  plain:"A wider but still forgiving group, a week or so behind pilot." },
+    prod:   { label:"Everyone else",   plain:"The main estate, the most delayed." }
+  };
+
+  CAT.sectors = {
+    school:  "School or academy trust",
+    college: "College or university",
+    business:"Business",
+    charity: "Charity or not-for-profit",
+    other:   "Something else"
+  };
+
+  CAT.licences = [
+    { key:"m365bp",   label:"Microsoft 365 Business Premium", intune:true,  entraP1:true },
+    { key:"m365e3",   label:"Microsoft 365 E3 / E5",          intune:true,  entraP1:true },
+    { key:"m365a3",   label:"Microsoft 365 A3 / A5 (education)", intune:true, entraP1:true },
+    { key:"o365a1",   label:"Office 365 A1 (education, free)", intune:false, entraP1:false },
+    { key:"o365a3",   label:"Office 365 A3 / A5 (education)",  intune:false, entraP1:false },
+    { key:"o365e3",   label:"Office 365 E1 / E3 / E5",         intune:false, entraP1:false },
+    { key:"intuneP1", label:"Intune Plan 1 (standalone)",      intune:true,  entraP1:false },
+    { key:"entraP1",  label:"Entra ID P1 / P2 (standalone)",   intune:false, entraP1:true },
+    { key:"unknown",  label:"Not sure",                        intune:null,  entraP1:null }
+  ];
+
+
+  /* ---------- helpers ---------- */
+  function uid(){ return "n" + Math.random().toString(36).slice(2,10); }
+  function esc(s){
+    return String(s == null ? "" : s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+  }
+  function slug(s){
+    return String(s||"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,28);
+  }
+  function titleSlug(s){
+    return String(s||"").replace(/[^A-Za-z0-9 ]+/g," ").trim().split(/\s+/)
+      .map(function(w){ return w.charAt(0).toUpperCase() + w.slice(1); }).join("-").slice(0,34);
+  }
+  function byId(list, id){
+    for(var i=0;i<list.length;i++) if(list[i].id === id) return list[i];
+    return null;
+  }
+  function catItem(list, key){
+    for(var i=0;i<(list||[]).length;i++) if(list[i].key === key) return list[i];
+    return null;
+  }
+  function plural(n, one, many){ return n + " " + (n === 1 ? one : (many || one + "s")); }
+
+  /* ---------- state ---------- */
+  var state = null;
+
+  function blankState(){
+    return {
+      v:1,
+      meta:{ org:"", contact:"", sector:"", tenant:"", licences:[], ce:false,
+             wizDone:false, prereqHave:{}, notes:"" },
+      people:[], groups:[], apps:[], resources:[], fleets:[]
+    };
+  }
+
+  function newFleet(platform, opts){
+    opts = opts || {};
+    return {
+      id:uid(), name:opts.name || "New device group", platform:platform || "windows",
+      ownership:opts.ownership || "corporate",
+      affinity:opts.affinity || "user",
+      count:opts.count || "",
+      model:opts.model || "",
+      userGroupIds:[],
+      enrolments:opts.enrolments || [],
+      esp:{ on:(platform === "windows"), blocking:"", note:"" },
+      compliance:opts.compliance || [],
+      config:opts.config || [],
+      appAssign:[],
+      resourceIds:[],
+      updates:{ ring:opts.ring || "prod", deferral:"", deadline:"", hours:"", pause:true, note:"" },
+      notes:"", open:false
+    };
+  }
+  function newEnrol(method){ return { id:uid(), method:method || "", note:"", open:false }; }
+  function newCompliance(platform, name){
+    return { id:uid(), name:name || "Standard health rules", open:false,
+      s:{ minOs:"", pin:true, pinLen:"6", attempts:"10", encrypt:(platform !== "ios"),
+          av:(platform === "windows"), fw:(platform === "windows" || platform === "macos"),
+          jailbreak:(platform === "ios" || platform === "android"),
+          grace:"1", email:true, retire:false } };
+  }
+  function newConfig(name){ return { id:uid(), name:name || "Settings", packs:[], note:"", open:false }; }
+
+  function migrate(st){
+    if(!st || typeof st !== "object") return blankState();
+    var b = blankState();
+    st.v = 1;
+    st.meta = st.meta || b.meta;
+    ["org","contact","sector","tenant","notes"].forEach(function(k){
+      if(typeof st.meta[k] !== "string") st.meta[k] = "";
+    });
+    if(!Array.isArray(st.meta.licences)) st.meta.licences = [];
+    st.meta.ce = !!st.meta.ce;
+    st.meta.wizDone = !!st.meta.wizDone;
+    if(!st.meta.prereqHave || typeof st.meta.prereqHave !== "object") st.meta.prereqHave = {};
+    ["people","groups","apps","resources","fleets"].forEach(function(k){
+      if(!Array.isArray(st[k])) st[k] = [];
+    });
+    st.fleets.forEach(function(f){
+      if(!f.id) f.id = uid();
+      if(!CAT.platforms[f.platform]) f.platform = "windows";
+      if(!CAT.ownership[f.ownership]) f.ownership = "corporate";
+      if(!CAT.affinity[f.affinity]) f.affinity = "user";
+      ["enrolments","compliance","config","appAssign"].forEach(function(k){
+        if(!Array.isArray(f[k])) f[k] = [];
+      });
+      ["userGroupIds","resourceIds"].forEach(function(k){
+        if(!Array.isArray(f[k])) f[k] = [];
+      });
+      if(!f.esp || typeof f.esp !== "object") f.esp = { on:false, blocking:"", note:"" };
+      if(!f.updates || typeof f.updates !== "object") f.updates = { ring:"prod", deferral:"", deadline:"", hours:"", pause:true, note:"" };
+      f.compliance.forEach(function(c){ if(!c.s || typeof c.s !== "object") c.s = newCompliance(f.platform).s; });
+      f.config.forEach(function(c){ if(!Array.isArray(c.packs)) c.packs = []; });
+      if(typeof f.notes !== "string") f.notes = "";
+    });
+    st.groups.forEach(function(g){
+      if(!Array.isArray(g.personIds)) g.personIds = [];
+      if(!g.kind) g.kind = "user";
+    });
+    st.apps.forEach(function(a){
+      if(!Array.isArray(a.platforms)) a.platforms = a.platform ? [a.platform] : [];
+      delete a.platform;
+      if(typeof a.source !== "string") a.source = "";
+    });
+    return st;
+  }
+
+  try{
+    var raw = localStorage.getItem(STORE_KEY);
+    state = raw ? migrate(JSON.parse(raw)) : blankState();
+  }catch(e){ state = blankState(); }
+
+  function save(){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
+  }
+
+  /* ---------- lookups ---------- */
+  function personById(id){ return byId(state.people, id); }
+  function groupById(id){ return byId(state.groups, id); }
+  function appById(id){ return byId(state.apps, id); }
+  function resById(id){ return byId(state.resources, id); }
+  function fleetById(id){ return byId(state.fleets, id); }
+  function personNames(ids){
+    return (ids||[]).map(function(i){ var p = personById(i); return p ? p.name : null; })
+      .filter(Boolean);
+  }
+  function groupNames(ids){
+    return (ids||[]).map(function(i){ var g = groupById(i); return g ? g.name : null; })
+      .filter(Boolean);
+  }
+  function uniqueGroupName(base){
+    var n = base, i = 2;
+    function taken(x){
+      return state.groups.some(function(g){ return (g.name||"").toLowerCase() === x.toLowerCase(); });
+    }
+    while(taken(n)){ n = base + "-" + i; i++; }
+    return n;
+  }
+  function groupUsage(gid){
+    return state.fleets.filter(function(f){ return (f.userGroupIds||[]).indexOf(gid) !== -1; })
+      .map(function(f){ return f.name; });
+  }
+  function appUsage(aid){
+    return state.fleets.filter(function(f){
+      return (f.appAssign||[]).some(function(a){ return a.appId === aid; });
+    }).map(function(f){ return f.name; });
+  }
+  function resUsage(rid){
+    return state.fleets.filter(function(f){ return (f.resourceIds||[]).indexOf(rid) !== -1; })
+      .map(function(f){ return f.name; });
+  }
+  function licenceFlags(){
+    var out = { intune:false, entraP1:false, unknown:false, hasEduOnlyOffice:false };
+    (state.meta.licences||[]).forEach(function(k){
+      var L = null;
+      CAT.licences.forEach(function(l){ if(l.key === k) L = l; });
+      if(!L) return;
+      if(L.key === "unknown"){ out.unknown = true; return; }
+      if(L.intune) out.intune = true;
+      if(L.entraP1) out.entraP1 = true;
+      if(L.intune === false && (L.key === "o365a1" || L.key === "o365a3" || L.key === "o365e3")) out.hasEduOnlyOffice = true;
+    });
+    return out;
+  }
+  function enrolMethodsFor(f){
+    return (CAT.enrol[f.platform] || []).filter(function(m){
+      return m.ownership.indexOf(f.ownership) !== -1;
+    });
+  }
+  function enrolDef(platform, key){ return catItem(CAT.enrol[platform], key); }
+  function configDefs(f){
+    return (CAT.config[f.platform] || []).filter(function(c){
+      return !c.affinity || c.affinity.indexOf(f.affinity) !== -1;
+    });
+  }
+  function configDef(platform, key){ return catItem(CAT.config[platform], key); }
+  function fleetHasPack(f, key){
+    return (f.config||[]).some(function(c){ return (c.packs||[]).indexOf(key) !== -1; });
+  }
+  function isUnmanaged(f){
+    return (f.enrolments||[]).length > 0 && (f.enrolments||[]).every(function(e){
+      return /mam-only/.test(e.method || "");
+    });
+  }
+
+  /* ---------- seeding from the wizard ---------- */
+  var SCENARIOS = {
+    staff1to1:{ label:"Devices belonging to one named person", affinity:"user", ownership:"corporate" },
+    shared:   { label:"Devices shared between several people",  affinity:"shared", ownership:"corporate" },
+    kiosk:    { label:"Single-purpose devices nobody signs in to", affinity:"kiosk", ownership:"corporate" },
+    byod:     { label:"People's own phones or laptops",          affinity:"user", ownership:"personal" }
+  };
+
+  var SEED_NAMES = {
+    school:{
+      staff1to1:{ windows:"Staff laptops", ios:"Staff iPads and iPhones", android:"Staff Android devices", macos:"Staff Macs" },
+      shared:   { windows:"Shared classroom PCs", ios:"Pupil iPad trolley", android:"Shared Android tablets", macos:"Shared Macs" },
+      kiosk:    { windows:"Signage and sign-in PCs", ios:"Single-purpose iPads", android:"Single-purpose tablets", macos:"Single-purpose Macs" },
+      byod:     { windows:"Personal laptops", ios:"Personal iPhones and iPads", android:"Personal Android phones", macos:"Personal Macs" }
+    },
+    business:{
+      staff1to1:{ windows:"Staff laptops", ios:"Company iPhones and iPads", android:"Company Android phones", macos:"Staff Macs" },
+      shared:   { windows:"Shared and hot-desk PCs", ios:"Shared iPads", android:"Shared Android devices", macos:"Shared Macs" },
+      kiosk:    { windows:"Signage and kiosk PCs", ios:"Single-purpose iPads", android:"Single-purpose devices", macos:"Single-purpose Macs" },
+      byod:     { windows:"Personal laptops", ios:"Personal iPhones and iPads", android:"Personal Android phones", macos:"Personal Macs" }
+    }
+  };
+
+  var SEED_ENROL = {
+    windows:{ staff1to1:"autopilot-user-driven", shared:"autopilot-self-deploying",
+              kiosk:"autopilot-self-deploying", byod:"win-mam-only" },
+    ios:    { staff1to1:"ade-affinity", shared:"ade-no-affinity",
+              kiosk:"ade-no-affinity", byod:"ios-mam-only" },
+    android:{ staff1to1:"ae-fully-managed", shared:"ae-dedicated",
+              kiosk:"ae-dedicated", byod:"android-mam-only" },
+    macos:  { staff1to1:"macos-ade", shared:"macos-ade",
+              kiosk:"macos-ade", byod:"macos-company-portal" }
+  };
+
+  var SEED_PACKS = {
+    windows:{
+      staff1to1:["oib-device-security","oib-defender","oib-bitlocker","oib-laps","oib-whfb","oib-edge","oib-office"],
+      shared:   ["oib-device-security","oib-defender","oib-bitlocker","oib-laps","oib-edge","win-localadmin"],
+      kiosk:    ["oib-device-security","oib-defender","win-kiosk","win-power"],
+      byod:     []
+    },
+    ios:{
+      staff1to1:["ios-restrictions","ios-passcode"],
+      shared:   ["ios-restrictions","ios-passcode","ios-supervised-layout"],
+      kiosk:    ["ios-restrictions","ios-single-app"],
+      byod:     []
+    },
+    android:{
+      staff1to1:["and-restrictions","and-passcode"],
+      shared:   ["and-restrictions","and-kiosk"],
+      kiosk:    ["and-restrictions","and-kiosk"],
+      byod:     ["and-workprofile"]
+    },
+    macos:{
+      staff1to1:["mac-oib","mac-filevault"],
+      shared:   ["mac-oib","mac-filevault"],
+      kiosk:    ["mac-oib"],
+      byod:     []
+    }
+  };
+
+  function seedPlan(w){
+    var st = blankState();
+    st.meta.org = w.org || "";
+    st.meta.contact = w.contact || "";
+    st.meta.sector = w.sector || "";
+    st.meta.licences = w.licences || [];
+    st.meta.ce = !!w.ce;
+    st.meta.wizDone = true;
+
+    var namebook = SEED_NAMES[w.sector === "school" || w.sector === "college" ? "school" : "business"];
+
+    (w.platforms || []).forEach(function(pf){
+      (w.scenarios || []).forEach(function(sc){
+        var scen = SCENARIOS[sc];
+        if(!scen) return;
+        if(pf === "macos" && sc === "kiosk") return;               // rare enough to be noise
+        var name = (namebook[sc] || {})[pf] || (CAT.platforms[pf].label + " devices");
+        var f = newFleet(pf, {
+          name:name, affinity:scen.affinity, ownership:scen.ownership,
+          ring:(sc === "staff1to1" ? "prod" : "prod")
+        });
+        var em = SEED_ENROL[pf][sc];
+        if(em) f.enrolments.push(newEnrol(em));
+        if(scen.ownership === "corporate" || pf === "android"){
+          f.compliance.push(newCompliance(pf, scen.ownership === "personal" ? "App protection rules" : "Standard health rules"));
+        }
+        var packs = (SEED_PACKS[pf] || {})[sc] || [];
+        if(packs.length){
+          var cfg = newConfig(sc === "byod" ? "Work data protection" : "Standard settings");
+          cfg.packs = packs.slice();
+          f.config.push(cfg);
+        }
+        f.esp.on = (pf === "windows" && scen.ownership === "corporate");
+        st.fleets.push(f);
+      });
+    });
+
+    // one user group per fleet, auto-named
+    st.fleets.forEach(function(f){
+      var g = { id:uid(), kind:"user", name:uniqueGroupNameIn(st, groupNameFor(f)), personIds:[], note:"" };
+      st.groups.push(g);
+      f.userGroupIds.push(g.id);
+    });
+    return st;
+  }
+  function groupNameFor(f){
+    var pf = ({ windows:"WIN", ios:"IOS", macos:"MAC", android:"AND" })[f.platform] || "DEV";
+    return "INT-" + pf + "-" + (titleSlug(f.name) || "Group");
+  }
+  function uniqueGroupNameIn(st, base){
+    var n = base, i = 2;
+    function taken(x){ return st.groups.some(function(g){ return (g.name||"").toLowerCase() === x.toLowerCase(); }); }
+    while(taken(n)){ n = base + "-" + i; i++; }
+    return n;
+  }
+
+  /* ---------- wizard ---------- */
+  var wizDlg = document.getElementById("wizDlg");
+  function renderWizard(){
+    var m = state.meta;
+    var pfSel = {}, scSel = {};
+    state.fleets.forEach(function(f){
+      pfSel[f.platform] = true;
+      var sc = f.ownership === "personal" ? "byod"
+             : f.affinity === "shared" ? "shared"
+             : f.affinity === "kiosk" ? "kiosk" : "staff1to1";
+      scSel[sc] = true;
+    });
+    var h = [];
+    h.push('<div class="q">' +
+      '<label class="top">Who are we doing this for?</label>' +
+      '<div class="grid2">' +
+        '<div><label class="top" style="font-size:11px">Organisation</label>' +
+          '<input type="text" id="wOrg" value="' + esc(m.org) + '" placeholder="Your organisation name"></div>' +
+        '<div><label class="top" style="font-size:11px">Your name</label>' +
+          '<input type="text" id="wContact" value="' + esc(m.contact) + '" placeholder="Who is filling this in"></div>' +
+      '</div></div>');
+
+    h.push('<div class="q"><label class="top">What kind of organisation is it?</label>' +
+      '<p class="qn">It changes the sensible defaults &mdash; a school trolley of iPads and a sales team\'s phones want very different things.</p>' +
+      '<div class="wgrid">');
+    Object.keys(CAT.sectors).forEach(function(k){
+      h.push('<label class="wopt"><input type="radio" name="wsector" value="' + k + '"' +
+        (m.sector === k ? " checked" : "") + '><b>' + esc(CAT.sectors[k]) + '</b></label>');
+    });
+    h.push('</div></div>');
+
+    h.push('<div class="q"><label class="top">Which kinds of device are in scope?</label>' +
+      '<p class="qn">Tick everything you want managed, even if some of it comes later.</p><div class="wgrid">');
+    CAT.platformOrder.forEach(function(k){
+      h.push('<label class="wopt"><input type="checkbox" class="wpf" value="' + k + '"' +
+        (pfSel[k] ? " checked" : "") + '><span><b>' + esc(CAT.platforms[k].label) + '</b>' +
+        '<span class="wn">' + esc(CAT.platforms[k].plain) + '</span></span></label>');
+    });
+    h.push('</div></div>');
+
+    h.push('<div class="q"><label class="top">How are the devices used?</label>' +
+      '<p class="qn">This is the most important question here. A device belonging to one person and a device a class shares need different enrolment, different policies and often different licensing &mdash; so we set them up as separate groups from the start.</p><div class="wgrid">');
+    Object.keys(SCENARIOS).forEach(function(k){
+      h.push('<label class="wopt"><input type="checkbox" class="wsc" value="' + k + '"' +
+        (scSel[k] ? " checked" : "") + '><span><b>' + esc(SCENARIOS[k].label) + '</b></span></label>');
+    });
+    h.push('</div></div>');
+
+    h.push('<div class="q"><label class="top">Which Microsoft licences do you have?</label>' +
+      '<p class="qn">Worth getting right &mdash; some licences that sound similar do not include device management at all, and it is much cheaper to find that out now.</p><div class="wgrid">');
+    CAT.licences.forEach(function(l){
+      h.push('<label class="wopt"><input type="checkbox" class="wlic" value="' + l.key + '"' +
+        ((m.licences||[]).indexOf(l.key) !== -1 ? " checked" : "") + '><span><b>' + esc(l.label) + '</b></span></label>');
+    });
+    h.push('</div></div>');
+
+    h.push('<div class="q"><label class="top">Does this also have to meet Cyber Essentials?</label>' +
+      '<p class="qn">If you are certifying (or recertifying) to Cyber Essentials, we will check your answers against what the scheme actually requires &mdash; and tell you where it requires <em>less</em> than people assume.</p><div class="wgrid">' +
+      '<label class="wopt"><input type="radio" name="wce" value="1"' + (m.ce ? " checked" : "") + '><span><b>Yes &mdash; Cyber Essentials is part of this</b><span class="wn">Adds the scheme\'s requirements to the checker.</span></span></label>' +
+      '<label class="wopt"><input type="radio" name="wce" value="0"' + (!m.ce ? " checked" : "") + '><span><b>No, or not yet</b><span class="wn">You can turn it on later.</span></span></label>' +
+      '</div></div>');
+
+    document.getElementById("wizBody").innerHTML = h.join("");
+  }
+  function readWizard(){
+    function checked(cls){
+      return Array.prototype.slice.call(document.querySelectorAll("." + cls + ":checked"))
+        .map(function(x){ return x.value; });
+    }
+    var sec = document.querySelector('input[name="wsector"]:checked');
+    var ce  = document.querySelector('input[name="wce"]:checked');
+    return {
+      org:(document.getElementById("wOrg").value || "").trim(),
+      contact:(document.getElementById("wContact").value || "").trim(),
+      sector:sec ? sec.value : "",
+      platforms:checked("wpf"),
+      scenarios:checked("wsc"),
+      licences:checked("wlic"),
+      ce:!!(ce && ce.value === "1")
+    };
+  }
+
+
+  /* ---------- render: fleets ---------- */
+  var fleetsEl = document.getElementById("fleets");
+
+  function fleetMeta(f){
+    var bits = [];
+    if(f.count) bits.push(esc(f.count) + " devices");
+    bits.push(CAT.affinity[f.affinity].label.toLowerCase());
+    bits.push(f.ownership === "personal" ? "personally owned" : "organisation-owned");
+    if(f.enrolments.length) bits.push(plural(f.enrolments.length, "enrolment profile"));
+    else bits.push('<span class="miss">no enrolment method yet</span>');
+    if(f.compliance.length) bits.push(plural(f.compliance.length, "health rule set"));
+    if(f.config.length) bits.push(plural(f.config.length, "settings policy", "settings policies"));
+    if(f.appAssign.length) bits.push(plural(f.appAssign.length, "app"));
+    if(!f.userGroupIds.length) bits.push('<span class="miss">not pointed at anyone</span>');
+    return bits.join('<span class="sep">&middot;</span>');
+  }
+
+  function selectHtml(id, opts, val, dataAttrs){
+    var h = ['<select id="' + id + '" ' + (dataAttrs || "") + '>'];
+    opts.forEach(function(o){
+      h.push('<option value="' + esc(o.v) + '"' + (String(o.v) === String(val) ? " selected" : "") + '>' + esc(o.l) + '</option>');
+    });
+    h.push("</select>");
+    return h.join("");
+  }
+  function fld(label, inner, note){
+    return '<div class="fld"><label>' + label + '</label>' + inner +
+      (note ? '<div class="fieldnote">' + note + '</div>' : "") + "</div>";
+  }
+  function d(f, extra){ return 'data-fid="' + f.id + '"' + (extra ? " " + extra : ""); }
+
+  function renderEnrolSub(f, e){
+    var methods = enrolMethodsFor(f);
+    var def = enrolDef(f.platform, e.method);
+    var suits = def && def.affinity.indexOf(f.affinity) !== -1;
+    var h = ['<div class="sub" data-sid="' + e.id + '">'];
+    h.push('<div class="sub-row">');
+    h.push('<span class="chip pol">Enrol</span>');
+    h.push('<span class="sub-t">' + esc(def ? def.label : "Choose a method") + "</span>");
+    if(def && !suits) h.push('<span class="sub-m" style="color:var(--warn)">does not match &ldquo;' + esc(CAT.affinity[f.affinity].label.toLowerCase()) + '&rdquo;</span>');
+    else h.push('<span class="sub-m">' + esc(e.note || "") + "</span>");
+    h.push('<span class="acts">' +
+      '<button data-act="subtoggle" data-list="enrolments" ' + d(f) + ' data-sid="' + e.id + '">' + (e.open ? "close" : "edit") + "</button>" +
+      '<button class="del" data-act="subdel" data-list="enrolments" ' + d(f) + ' data-sid="' + e.id + '">remove</button></span>');
+    h.push("</div>");
+    if(e.open){
+      h.push('<div class="sub-body">');
+      h.push(fld("How these devices get enrolled",
+        selectHtml("en-" + e.id, [{v:"",l:"- choose -"}].concat(methods.map(function(m){ return {v:m.key,l:m.label}; })),
+          e.method, 'data-k="method" data-list="enrolments" ' + d(f) + ' data-sid="' + e.id + '"'),
+        def ? def.plain : "Only the methods that work for " + esc(CAT.ownership[f.ownership].label.toLowerCase()) + " devices are listed."));
+      if(def && def.note) h.push('<div class="warn-note"><b>Worth knowing:</b> ' + def.note + "</div>");
+      if(def && !suits){
+        h.push('<div class="warn-note"><b>Mismatch.</b> ' + esc(def.label) + " is for " +
+          def.affinity.map(function(a){ return CAT.affinity[a].label.toLowerCase(); }).join(" or ") +
+          ", but this group is set to &ldquo;" + esc(CAT.affinity[f.affinity].label.toLowerCase()) +
+          "&rdquo;. Change one of the two.</div>");
+      }
+      h.push(fld("Anything we should know", '<input type="text" id="ennote-' + e.id + '" value="' + esc(e.note) +
+        '" placeholder="e.g. 40 already in Apple Business Manager, 15 bought privately" data-k="note" data-list="enrolments" ' + d(f) + ' data-sid="' + e.id + '">'));
+      h.push("</div>");
+    }
+    h.push("</div>");
+    return h.join("");
+  }
+
+  function renderComplianceSub(f, c){
+    var pf = f.platform, s = c.s;
+    var h = ['<div class="sub" data-sid="' + c.id + '">'];
+    h.push('<div class="sub-row"><span class="chip pol">Health</span>' +
+      '<span class="sub-t">' + esc(c.name) + "</span>");
+    var bits = [];
+    if(s.minOs) bits.push("min OS " + s.minOs);
+    if(s.pin) bits.push("unlock code, " + (s.pinLen || "?") + "+ characters");
+    if(s.encrypt) bits.push("encrypted");
+    if(s.av) bits.push("antivirus");
+    // escape each part first, then join with the entity - escaping the joined
+    // string turns the separator into a literal "&middot;"
+    h.push('<span class="sub-m">' + bits.map(esc).join(" &middot; ") + "</span>");
+    h.push('<span class="acts">' +
+      '<button data-act="subtoggle" data-list="compliance" ' + d(f) + ' data-sid="' + c.id + '">' + (c.open ? "close" : "edit") + "</button>" +
+      '<button class="del" data-act="subdel" data-list="compliance" ' + d(f) + ' data-sid="' + c.id + '">remove</button></span></div>');
+    if(c.open){
+      var A = 'data-list="compliance" ' + d(f) + ' data-sid="' + c.id + '"';
+      h.push('<div class="sub-body">');
+      h.push(fld("What to call this set", '<input type="text" id="cn-' + c.id + '" value="' + esc(c.name) + '" data-k="name" ' + A + '>'));
+      h.push('<div class="grid2">');
+      h.push(fld("Oldest operating system you will accept",
+        '<input type="text" id="cos-' + c.id + '" value="' + esc(s.minOs) + '" placeholder="' +
+        (pf === "windows" ? "e.g. Windows 11 23H2" : pf === "ios" ? "e.g. iOS 17" : pf === "android" ? "e.g. Android 13" : "e.g. macOS 14") +
+        '" data-k="s.minOs" ' + A + '>',
+        "Anything older is flagged. Leave blank if you are not sure and we will advise."));
+      h.push(fld("Shortest unlock code",
+        '<input type="number" min="4" max="16" id="cpl-' + c.id + '" value="' + esc(s.pinLen) + '" data-k="s.pinLen" ' + A + '>',
+        state.meta.ce ? "Cyber Essentials asks for a minimum of <b>6</b>." : "Six is the usual answer."));
+      h.push(fld("Lock the device after this many wrong attempts",
+        '<input type="number" min="3" max="20" id="cat-' + c.id + '" value="' + esc(s.attempts) + '" data-k="s.attempts" ' + A + '>',
+        state.meta.ce ? "Cyber Essentials asks for <b>no more than 10</b>." : "Ten is the usual answer."));
+      h.push(fld("Days to fix a problem before it counts as failed",
+        '<input type="number" min="0" max="30" id="cg-' + c.id + '" value="' + esc(s.grace) + '" data-k="s.grace" ' + A + '>',
+        "Zero means the moment a device slips it is marked non-compliant. A day or two avoids a lot of noise."));
+      h.push("</div>");
+      h.push('<div class="checkgrid">');
+      function chk(k, label, note){
+        return '<label><input type="checkbox" id="c' + k.replace(/\W/g,"") + "-" + c.id + '"' +
+          (s[k] ? " checked" : "") + ' data-k="s.' + k + '" ' + A + '><span>' + label +
+          (note ? '<span class="cg-note">' + note + "</span>" : "") + "</span></label>";
+      }
+      h.push(chk("pin", "An unlock code is required", "PIN, password, fingerprint or face."));
+      if(pf !== "ios") h.push(chk("encrypt", "The disk must be encrypted",
+        state.meta.ce ? "Strongly recommended &mdash; though note Cyber Essentials does <b>not</b> actually require it." : "So a lost device is not a data breach."));
+      if(pf === "windows") h.push(chk("av", "Antivirus must be running", "Any antivirus, not only Microsoft Defender."));
+      if(pf === "windows" || pf === "macos") h.push(chk("fw", "The firewall must be on"));
+      if(pf === "ios" || pf === "android") h.push(chk("jailbreak", "Block jailbroken / rooted devices", "Devices whose built-in protections have been removed."));
+      h.push(chk("email", "Email the user when their device fails", "They usually fix it themselves."));
+      h.push(chk("retire", "Eventually remove work access from a device that stays broken", "Only tick this if you mean it &mdash; we will confirm the timing with you."));
+      h.push("</div>");
+      h.push("</div>");
+    }
+    h.push("</div>");
+    return h.join("");
+  }
+
+  function renderConfigSub(f, c){
+    var defs = configDefs(f);
+    var h = ['<div class="sub" data-sid="' + c.id + '">'];
+    var chosen = (c.packs||[]).map(function(k){ var dd = configDef(f.platform, k); return dd ? dd.label : k; });
+    h.push('<div class="sub-row"><span class="chip pol">Settings</span>' +
+      '<span class="sub-t">' + esc(c.name) + "</span>" +
+      '<span class="sub-m">' + esc(chosen.length ? chosen.join(", ") : "nothing chosen yet") + "</span>");
+    h.push('<span class="acts">' +
+      '<button data-act="subtoggle" data-list="config" ' + d(f) + ' data-sid="' + c.id + '">' + (c.open ? "close" : "edit") + "</button>" +
+      '<button class="del" data-act="subdel" data-list="config" ' + d(f) + ' data-sid="' + c.id + '">remove</button></span></div>');
+    if(c.open){
+      var A = 'data-list="config" ' + d(f) + ' data-sid="' + c.id + '"';
+      h.push('<div class="sub-body">');
+      h.push(fld("What to call this", '<input type="text" id="gn-' + c.id + '" value="' + esc(c.name) + '" data-k="name" ' + A + '>'));
+      h.push('<div class="checkgrid">');
+      defs.forEach(function(dd){
+        h.push('<label><input type="checkbox" value="' + dd.key + '"' +
+          ((c.packs||[]).indexOf(dd.key) !== -1 ? " checked" : "") +
+          ' data-act="packtoggle" ' + A + '><span>' + esc(dd.label) +
+          (dd.rec ? ' <span class="chip pol" style="font-size:9px;padding:1px 5px">recommended</span>' : "") +
+          '<span class="cg-note">' + dd.plain + "</span></span></label>");
+      });
+      h.push("</div>");
+      (c.packs||[]).forEach(function(k){
+        var dd = configDef(f.platform, k);
+        if(dd && dd.note) h.push('<div class="warn-note"><b>' + esc(dd.label) + ":</b> " + dd.note + "</div>");
+      });
+      h.push(fld("Anything specific you need here",
+        '<textarea id="gnote-' + c.id + '" rows="2" placeholder="e.g. staff must not be local administrators; pupils cannot install apps; screen locks after 5 minutes" data-k="note" ' + A + '>' + esc(c.note) + "</textarea>"));
+      h.push("</div>");
+    }
+    h.push("</div>");
+    return h.join("");
+  }
+
+  function renderAppAssignSub(f, a){
+    var app = appById(a.appId);
+    var h = ['<div class="sub" data-sid="' + a.id + '">'];
+    h.push('<div class="sub-row"><span class="chip app">App</span>' +
+      '<span class="sub-t">' + esc(app ? app.name : "(deleted app)") + "</span>" +
+      '<span class="sub-m">' + esc(CAT.appIntent[a.intent] || "") + "</span>");
+    h.push('<span class="acts">' +
+      selectHtml("ai-" + a.id, Object.keys(CAT.appIntent).map(function(k){ return {v:k,l:CAT.appIntent[k]}; }),
+        a.intent, 'data-k="intent" data-list="appAssign" ' + d(f) + ' data-sid="' + a.id + '" style="font-size:12px"') +
+      '<button class="del" data-act="subdel" data-list="appAssign" ' + d(f) + ' data-sid="' + a.id + '">remove</button></span></div>');
+    h.push("</div>");
+    return h.join("");
+  }
+
+  function renderFleetDrawer(f){
+    var pf = f.platform;
+    var h = ['<div class="drawer">'];
+
+    /* --- basics --- */
+    h.push('<div class="sect"><div class="sect-head"><h4>The basics</h4>' +
+      '<span class="sh-note">The two answers that shape everything else are <b>who uses it</b> and <b>who owns it</b>.</span></div>');
+    h.push('<div class="grid2">');
+    h.push(fld("Kind of device", selectHtml("pf-" + f.id,
+      CAT.platformOrder.map(function(k){ return {v:k,l:CAT.platforms[k].label}; }), pf, 'data-k="platform" ' + d(f))));
+    h.push(fld("Roughly how many", '<input type="text" id="ct-' + f.id + '" value="' + esc(f.count) +
+      '" placeholder="e.g. 120, or 30 now and 30 in September" data-k="count" ' + d(f) + ">"));
+    h.push("</div>");
+    h.push('<div class="grid2">');
+    h.push(fld("Who uses each device", selectHtml("af-" + f.id,
+      Object.keys(CAT.affinity).map(function(k){ return {v:k,l:CAT.affinity[k].label}; }), f.affinity, 'data-k="affinity" ' + d(f)),
+      CAT.affinity[f.affinity].plain));
+    h.push(fld("Who owns them", selectHtml("ow-" + f.id,
+      Object.keys(CAT.ownership).map(function(k){ return {v:k,l:CAT.ownership[k].label}; }), f.ownership, 'data-k="ownership" ' + d(f)),
+      CAT.ownership[f.ownership].plain));
+    h.push("</div>");
+    h.push(fld("Make and model, if you know it", '<input type="text" id="md-' + f.id + '" value="' + esc(f.model) +
+      '" placeholder="e.g. Dell Latitude 3450, iPad 10th gen 64GB, Samsung Galaxy Tab A9" data-k="model" ' + d(f) + ">",
+      pf === "ios" && f.affinity === "shared" ? "Storage matters for shared iPads &mdash; each pupil signed in keeps a cached copy of their data." : ""));
+
+    /* who it's for */
+    h.push(fld("Who is this group of devices for",
+      '<div class="pick-list">' + state.groups.map(function(g){
+        return '<label><input type="checkbox" data-act="fgroup" ' + d(f) + ' value="' + g.id + '"' +
+          (f.userGroupIds.indexOf(g.id) !== -1 ? " checked" : "") + '><span class="mono">' + esc(g.name) + "</span>" +
+          '<span class="cnt">' + plural((g.personIds||[]).length, "person", "people") + "</span></label>";
+      }).join("") + "</div>" +
+      '<button class="addbtn" style="margin-top:7px" data-act="newgroup" ' + d(f) + ">+ New group for this</button>",
+      "Settings only reach devices through a group. A group with nobody in it applies to nobody, however correct it looks."));
+    h.push("</div>");
+
+    /* --- enrolment --- */
+    h.push('<div class="sect"><div class="sect-head"><h4>Getting the devices enrolled</h4>' +
+      '<span class="sh-note">Add more than one if different batches arrive differently.</span></div>');
+    if(!f.enrolments.length) h.push('<div class="info-note">No enrolment method chosen yet &mdash; this is the one thing we really do need.</div>');
+    f.enrolments.forEach(function(e){ h.push(renderEnrolSub(f, e)); });
+    h.push('<button class="addbtn" data-act="addenrol" ' + d(f) + ">+ Add an enrolment method</button>");
+    if(pf === "windows" && f.ownership === "corporate"){
+      h.push('<div class="check-row" style="margin-top:4px"><label><input type="checkbox" id="esp-' + f.id + '"' +
+        (f.esp.on ? " checked" : "") + ' data-k="esp.on" ' + d(f) + '>Show a progress screen while the device sets itself up, and hold the user out until it is ready</label></div>');
+      if(f.esp.on){
+        h.push(fld("Which apps must be installed before anyone can use it",
+          '<input type="text" id="espb-' + f.id + '" value="' + esc(f.esp.blocking) +
+          '" placeholder="e.g. Microsoft 365 Apps, the MIS client" data-k="esp.blocking" ' + d(f) + ">",
+          "Keep this list short. Every app here is time a person spends staring at a progress bar, and a long list is the usual cause of set-up timing out."));
+      }
+    }
+    h.push("</div>");
+
+    /* --- compliance --- */
+    h.push('<div class="sect"><div class="sect-head"><h4>Health rules</h4>' +
+      '<span class="sh-note">What a device must satisfy to count as trustworthy.</span></div>');
+    if(f.ownership === "personal" && !isUnmanaged(f)){
+      h.push('<div class="info-note">These are personally-owned devices. Health rules only work on a device that is actually enrolled &mdash; if you are not enrolling them, protection has to happen inside the apps instead.</div>');
+    }
+    f.compliance.forEach(function(c){ h.push(renderComplianceSub(f, c)); });
+    h.push('<button class="addbtn" data-act="addcomp" ' + d(f) + ">+ Add a set of health rules</button>");
+    h.push("</div>");
+
+    /* --- config --- */
+    h.push('<div class="sect"><div class="sect-head"><h4>Settings to push out</h4>' +
+      '<span class="sh-note">Tick what you want; the recommended ones are a sensible starting point.</span></div>');
+    f.config.forEach(function(c){ h.push(renderConfigSub(f, c)); });
+    h.push('<button class="addbtn" data-act="addconf" ' + d(f) + ">+ Add a settings policy</button>");
+    h.push("</div>");
+
+    /* --- apps --- */
+    h.push('<div class="sect"><div class="sect-head"><h4>Apps on these devices</h4>' +
+      '<span class="sh-note">Add apps in the panel below first, then tick them on here.</span></div>');
+    if(!state.apps.length){
+      h.push('<div class="info-note">No apps listed yet. Add them in the <b>Apps</b> panel below and they will appear here.</div>');
+    } else {
+      f.appAssign.forEach(function(a){ h.push(renderAppAssignSub(f, a)); });
+      var unused = state.apps.filter(function(ap){
+        return !f.appAssign.some(function(x){ return x.appId === ap.id; });
+      });
+      if(unused.length){
+        h.push('<div class="ppills" style="margin-top:4px">' + unused.map(function(ap){
+          return '<button class="ppill" data-act="addapp" ' + d(f) + ' data-appid="' + ap.id + '">+ ' + esc(ap.name) + "</button>";
+        }).join("") + "</div>");
+      }
+    }
+    h.push("</div>");
+
+    /* --- resources --- */
+    if(state.resources.length){
+      h.push('<div class="sect"><div class="sect-head"><h4>Wi-Fi, VPN and certificates</h4>' +
+        '<span class="sh-note">Tick what these devices need.</span></div><div class="pick-list">');
+      state.resources.forEach(function(r){
+        h.push('<label><input type="checkbox" data-act="fres" ' + d(f) + ' value="' + r.id + '"' +
+          (f.resourceIds.indexOf(r.id) !== -1 ? " checked" : "") + ">" + esc(r.name) +
+          '<span class="cnt">' + esc(CAT.resKind[r.kind] || "") + "</span></label>");
+      });
+      h.push("</div></div>");
+    }
+
+    /* --- updates --- */
+    h.push('<div class="sect"><div class="sect-head"><h4>Updates</h4>' +
+      '<span class="sh-note">How quickly security updates land, and how much say the user gets.</span></div>');
+    h.push('<div class="grid2">');
+    h.push(fld("When this group gets updates", selectHtml("ur-" + f.id,
+      Object.keys(CAT.updateRing).map(function(k){ return {v:k,l:CAT.updateRing[k].label}; }), f.updates.ring, 'data-k="updates.ring" ' + d(f)),
+      CAT.updateRing[f.updates.ring] ? CAT.updateRing[f.updates.ring].plain : ""));
+    h.push(fld("Days before an update is forced",
+      '<input type="text" id="ud-' + f.id + '" value="' + esc(f.updates.deadline) + '" placeholder="e.g. 7" data-k="updates.deadline" ' + d(f) + ">",
+      state.meta.ce ? "Cyber Essentials requires security updates within <b>14 days</b> of release, so this plus any delay must come in under that." : "Shorter is safer; too short and people lose work to a surprise restart."));
+    h.push("</div>");
+    h.push('<div class="grid2">');
+    h.push(fld("When restarts are acceptable",
+      '<input type="text" id="uh-' + f.id + '" value="' + esc(f.updates.hours) + '" placeholder="e.g. never 08:00-17:00 on a school day" data-k="updates.hours" ' + d(f) + ">"));
+    h.push('<div class="fld"><label>User control</label><div class="check-row"><label><input type="checkbox" id="up-' + f.id + '"' +
+      (f.updates.pause ? " checked" : "") + ' data-k="updates.pause" ' + d(f) +
+      ">Let people postpone a restart when they are mid-task</label></div>" +
+      '<div class="fieldnote">Taking this away is the single most common cause of &ldquo;the new system keeps rebooting my machine&rdquo; complaints.</div></div>');
+    h.push("</div></div>");
+
+    /* --- notes --- */
+    h.push('<div class="sect"><div class="sect-head"><h4>Anything else about this group</h4></div>');
+    h.push('<textarea id="fn-' + f.id + '" rows="2" placeholder="Anything that does not fit above &mdash; awkward software, a deadline, a room that has no Wi-Fi" data-k="notes" ' + d(f) + ">" + esc(f.notes) + "</textarea>");
+    h.push("</div>");
+
+    h.push("</div>");
+    return h.join("");
+  }
+
+  function renderFleets(){
+    if(!state.fleets.length){
+      fleetsEl.innerHTML = '<div class="empty">No device groups yet.<br>Use <b>Scope questions</b> above for a ready-made starting point, or add one below.</div>';
+      return;
+    }
+    fleetsEl.innerHTML = state.fleets.map(function(f){
+      var h = ['<div class="fleet" id="row-' + f.id + '" data-fid="' + f.id + '">'];
+      h.push('<div class="frow">');
+      h.push('<span class="chip ' + f.platform + '">' + esc(CAT.platforms[f.platform].label) + "</span>");
+      h.push('<span class="nname" contenteditable="true" spellcheck="false" data-act="rename" data-fid="' + f.id + '">' + esc(f.name) + "</span>");
+      h.push('<span class="meta-inline">' + fleetMeta(f) + "</span>");
+      h.push('<span class="acts">' +
+        '<button data-act="toggle" data-fid="' + f.id + '">' + (f.open ? "close" : "details") + "</button>" +
+        '<button data-act="dup" data-fid="' + f.id + '" title="Make a copy">copy</button>' +
+        '<button data-act="up" data-fid="' + f.id + '" title="Move up">&uarr;</button>' +
+        '<button data-act="down" data-fid="' + f.id + '" title="Move down">&darr;</button>' +
+        '<button class="del" data-act="del" data-fid="' + f.id + '">delete</button></span>');
+      h.push("</div>");
+      if(f.open) h.push(renderFleetDrawer(f));
+      h.push("</div>");
+      return h.join("");
+    }).join("");
+  }
+
+  /* ---------- render: apps, resources, people, groups ---------- */
+  var appsEl = document.getElementById("apps");
+  var resEl = document.getElementById("resources");
+  var peopleEl = document.getElementById("people");
+  var groupsEl = document.getElementById("groups");
+
+  function renderApps(){
+    if(!state.apps.length){
+      appsEl.innerHTML = '<div class="empty">No apps listed yet. Add the software people actually need &mdash; we will work out how to deliver it.</div>';
+      return;
+    }
+    appsEl.innerHTML = state.apps.map(function(a){
+      var use = appUsage(a.id);
+      var pfs = a.platforms.length ? a.platforms : CAT.platformOrder;
+      var srcOpts = [];
+      pfs.forEach(function(p){
+        (CAT.appSource[p] || []).forEach(function(s){
+          if(!srcOpts.some(function(x){ return x.v === s.key; })) srcOpts.push({ v:s.key, l:s.label });
+        });
+      });
+      var h = ['<div class="grow" id="row-' + a.id + '" data-aid="' + a.id + '">'];
+      h.push('<div class="g-head"><span class="chip app">App</span>' +
+        '<input type="text" id="an-' + a.id + '" value="' + esc(a.name) + '" data-k="name" data-aid="' + a.id + '">' +
+        selectHtml("as-" + a.id, [{v:"",l:"How is it installed?"}].concat(srcOpts), a.source, 'data-k="source" data-aid="' + a.id + '"') +
+        '<span class="acts"><button class="del" data-act="delapp" data-aid="' + a.id + '">remove</button></span></div>');
+      h.push('<div class="checkgrid">' + CAT.platformOrder.map(function(p){
+        return '<label><input type="checkbox" data-act="appplat" data-aid="' + a.id + '" value="' + p + '"' +
+          (a.platforms.indexOf(p) !== -1 ? " checked" : "") + ">" + esc(CAT.platforms[p].label) + "</label>";
+      }).join("") + "</div>");
+      h.push('<div class="g-use">' + (use.length ? "On: " + esc(use.join(", ")) :
+        "<b>Not on any device group yet</b> &mdash; open a group and tick it on.") + "</div>");
+      h.push("</div>");
+      return h.join("");
+    }).join("");
+  }
+
+  function renderResources(){
+    if(!state.resources.length){
+      resEl.innerHTML = '<div class="empty">Nothing listed. If devices need to join Wi-Fi or reach an internal system on their own, add it here.</div>';
+      return;
+    }
+    resEl.innerHTML = state.resources.map(function(r){
+      var use = resUsage(r.id);
+      var h = ['<div class="grow" id="row-' + r.id + '" data-rid="' + r.id + '">'];
+      h.push('<div class="g-head">' +
+        selectHtml("rk-" + r.id, Object.keys(CAT.resKind).map(function(k){ return {v:k,l:CAT.resKind[k]}; }), r.kind, 'data-k="kind" data-rid="' + r.id + '"') +
+        '<input type="text" id="rn-' + r.id + '" value="' + esc(r.name) + '" data-k="name" data-rid="' + r.id + '">' +
+        '<span class="acts"><button class="del" data-act="delres" data-rid="' + r.id + '">remove</button></span></div>');
+      h.push('<input type="text" id="rd-' + r.id + '" value="' + esc(r.details) +
+        '" placeholder="Anything we need &mdash; network name, security type, who to ask" data-k="details" data-rid="' + r.id + '">');
+      h.push('<div class="g-use">' + (use.length ? "Needed by: " + esc(use.join(", ")) : "Not attached to any device group yet.") + "</div>");
+      h.push("</div>");
+      return h.join("");
+    }).join("");
+  }
+
+  function renderPeople(){
+    var h = [];
+    if(!state.people.length){
+      h.push('<div class="empty">Nobody added yet. Start with whoever will administer Intune and whoever should get the first test device.</div>');
+    } else {
+      h.push('<div class="ppills">' + state.people.map(function(p){
+        return '<span class="person" data-pid="' + p.id + '">' +
+          '<span class="pname" contenteditable="true" spellcheck="false">' + esc(p.name) + "</span>" +
+          '<button class="px" data-act="delperson" data-pid="' + p.id + '" title="Remove">&times;</button></span>';
+      }).join("") + "</div>");
+    }
+    h.push('<div class="padd"><input type="text" id="newPersonInput" placeholder="Name or email &mdash; several at once is fine, separated by commas" autocomplete="off">' +
+      '<button class="btn wide" id="addPersonBtn">Add</button></div>');
+    peopleEl.innerHTML = h.join("");
+  }
+
+  function renderGroups(){
+    var h = [];
+    if(!state.groups.length){
+      h.push('<div class="empty">No groups yet. Open a device group and use <b>+ New group for this</b>, or add one below.</div>');
+    }
+    state.groups.forEach(function(g){
+      var use = groupUsage(g.id);
+      h.push('<div class="grow" id="row-' + g.id + '" data-gid="' + g.id + '">');
+      h.push('<div class="g-head"><span class="chip grp">Group</span>' +
+        '<input type="text" class="mono" id="gn2-' + g.id + '" value="' + esc(g.name) + '" data-k="name" data-gid="' + g.id + '">' +
+        '<span class="cnt">' + plural((g.personIds||[]).length, "person", "people") + "</span>" +
+        '<span class="acts"><button class="del" data-act="delgroup" data-gid="' + g.id + '">remove</button></span></div>');
+      h.push('<input type="text" id="gd-' + g.id + '" value="' + esc(g.note || "") +
+        '" placeholder="Who is in this, in your words &mdash; e.g. all teaching staff; Year 5 and 6 pupils" data-k="note" data-gid="' + g.id + '">');
+      if(state.people.length){
+        h.push('<div><label>Click names to add them</label><div class="ppills">' + state.people.map(function(p){
+          return '<button class="ppill' + ((g.personIds||[]).indexOf(p.id) !== -1 ? " on" : "") +
+            '" data-act="gpick" data-gid="' + g.id + '" data-pid="' + p.id + '">' + esc(p.name) + "</button>";
+        }).join("") + "</div></div>");
+      }
+      h.push('<div class="g-use">' + (use.length ? "Used by: " + esc(use.join(", ")) :
+        "<b>Not used by any device group</b> &mdash; nothing will reach these people.") + "</div>");
+      h.push("</div>");
+    });
+    h.push('<div class="padd"><input type="text" id="newGroupInput" placeholder="Group name, e.g. INT-WIN-Staff-Laptops" autocomplete="off">' +
+      '<button class="btn wide" id="addGroupBtn">Add group</button></div>');
+    groupsEl.innerHTML = h.join("");
+  }
+
+  function renderScope(){
+    var m = state.meta, bits = [];
+    if(m.org) bits.push("<b>" + esc(m.org) + "</b>");
+    if(m.sector && CAT.sectors[m.sector]) bits.push(esc(CAT.sectors[m.sector]));
+    var pfs = {};
+    state.fleets.forEach(function(f){ pfs[f.platform] = true; });
+    var pl = CAT.platformOrder.filter(function(k){ return pfs[k]; }).map(function(k){ return CAT.platforms[k].label; });
+    if(pl.length) bits.push(esc(pl.join(", ")));
+    var lic = (m.licences||[]).map(function(k){
+      var f = null; CAT.licences.forEach(function(l){ if(l.key === k) f = l; });
+      return f ? f.label : null;
+    }).filter(Boolean);
+    if(lic.length) bits.push(esc(lic.join(", ")));
+    document.getElementById("scopeTxt").innerHTML = bits.length ? bits.join(" &middot; ")
+      : "Tell us a little about your organisation and we will lay out a starting point &mdash;";
+    document.getElementById("cePill").hidden = !m.ce;
+  }
+
+  function renderStats(){
+    var devices = 0, unknown = false;
+    state.fleets.forEach(function(f){
+      var n = parseInt(String(f.count).replace(/[^0-9]/g,""), 10);
+      if(isNaN(n)) unknown = true; else devices += n;
+    });
+    var pols = 0;
+    state.fleets.forEach(function(f){ pols += f.compliance.length + f.config.length + f.enrolments.length; });
+    document.getElementById("stats").innerHTML =
+      '<div class="stat"><b>' + state.fleets.length + '</b><span>Groups</span></div>' +
+      '<div class="stat"><b>' + (devices || 0) + (unknown ? "+" : "") + '</b><span>Devices</span></div>' +
+      '<div class="stat"><b>' + pols + '</b><span>Policies</span></div>' +
+      '<div class="stat"><b>' + state.apps.length + '</b><span>Apps</span></div>';
+  }
+
+
+  /* ============================================================
+     RULES
+     Each rule pushes findings via add(). Severity drives sort order
+     and colour: bad > warn > info > ok.
+     Sources are noted per rule - Microsoft Learn, Open Intune
+     Baseline, or Cyber Essentials v3.3 (IASME Danzell, April 2026).
+     ============================================================ */
+
+  var SEV_ORDER = { bad:0, warn:1, info:2, ok:3 };
+
+  function analyse(){
+    var out = [];
+    function add(sev, title, why, jump){
+      out.push({ sev:sev, title:title, why:why || "", jump:jump || null });
+    }
+    var F = state.fleets, lic = licenceFlags();
+
+    /* --- nothing to check yet --- */
+    if(!F.length){
+      add("info", "No device groups yet",
+        "Answer the scope questions above and we will lay out a starting point for you.");
+      return out;
+    }
+
+    /* --- 1. every group needs an enrolment method --- */
+    F.forEach(function(f){
+      if(!f.enrolments.length){
+        add("bad", "&ldquo;" + esc(f.name) + "&rdquo; has no enrolment method",
+          "Without one we cannot tell you what happens when a device comes out of its box, and everything else on this group is guesswork.", f.id);
+      }
+    });
+
+    /* --- 2. every group must point at somebody (built is not applied) --- */
+    F.forEach(function(f){
+      if(!f.userGroupIds.length){
+        add("warn", "&ldquo;" + esc(f.name) + "&rdquo; is not pointed at anyone",
+          "Settings only reach devices through a group. A policy aimed at nothing is invisible in the portal &mdash; it looks perfectly correct and does nothing at all.", f.id);
+      } else {
+        var empty = f.userGroupIds.filter(function(gid){
+          var g = groupById(gid);
+          return g && !(g.personIds||[]).length && !(g.note||"").trim();
+        });
+        if(empty.length){
+          add("info", "&ldquo;" + esc(f.name) + "&rdquo; points at an empty group",
+            "That is fine while you are drafting &mdash; just tell us in the group description who should end up in it.", f.id);
+        }
+      }
+    });
+
+    /* --- 3. enrolment method must match the user-affinity answer --- */
+    F.forEach(function(f){
+      f.enrolments.forEach(function(e){
+        var def = enrolDef(f.platform, e.method);
+        if(!def) return;
+        if(def.affinity.indexOf(f.affinity) === -1){
+          add("bad", "&ldquo;" + esc(def.label) + "&rdquo; does not fit &ldquo;" + esc(f.name) + "&rdquo;",
+            "You have said these devices are " + esc(CAT.affinity[f.affinity].label.toLowerCase()) +
+            ", but that enrolment method is for " +
+            def.affinity.map(function(a){ return CAT.affinity[a].label.toLowerCase(); }).join(" or ") +
+            ". One of the two answers needs to change.", f.id);
+        }
+        if(def.ownership.indexOf(f.ownership) === -1){
+          add("warn", "&ldquo;" + esc(def.label) + "&rdquo; does not fit who owns these devices",
+            "That method is for " + def.ownership.map(function(o){ return CAT.ownership[o].label.toLowerCase(); }).join(" or ") + " devices.", f.id);
+        }
+      });
+    });
+
+    /* --- 4. Windows Hello on a shared device (OIB assumes single-user devices) --- */
+    F.forEach(function(f){
+      if(f.platform !== "windows") return;
+      if(f.affinity === "user") return;
+      if(fleetHasPack(f, "oib-whfb")){
+        add("bad", "Windows Hello will not work on &ldquo;" + esc(f.name) + "&rdquo;",
+          "Windows Hello sets up a PIN or fingerprint <i>per person on that device</i>. On a machine several people share, each new person has to enrol all over again &mdash; and on a device nobody signs in to it means nothing. Take it off this group.", f.id);
+      }
+      var hardened = ["oib-device-security","oib-bitlocker","oib-laps"].some(function(k){ return fleetHasPack(f, k); });
+      if(hardened){
+        add("info", "&ldquo;" + esc(f.name) + "&rdquo; is a shared device using the standard hardening set",
+          "The security baseline we start from is written for devices belonging to one person. It is the right starting point, but we will go through it with you rather than applying it as-is &mdash; a handful of settings behave differently when nobody owns the machine.", f.id);
+      }
+    });
+
+    /* --- 5. health rules on unenrolled BYOD (CE_Control_Reference) --- */
+    F.forEach(function(f){
+      if(f.ownership !== "personal") return;
+      if(f.compliance.length && isUnmanaged(f)){
+        add("bad", "Health rules cannot be checked on &ldquo;" + esc(f.name) + "&rdquo;",
+          "You have chosen not to enrol these devices, which is usually the right call for people's own phones. But a health rule has nothing to read on a device that was never enrolled &mdash; it would sit in the portal looking green and check nothing. Protection on these devices happens inside the apps instead, and we will set that up.", f.id);
+      }
+      if(!f.compliance.length && !isUnmanaged(f) && f.enrolments.length){
+        add("info", "&ldquo;" + esc(f.name) + "&rdquo; is enrolled but has no health rules",
+          "Worth adding a light set &mdash; screen lock and an up-to-date OS &mdash; even on a personally-owned device.", f.id);
+      }
+    });
+
+    /* --- 6. app protection is user-targeted --- */
+    var mamFleets = F.filter(isUnmanaged);
+    if(mamFleets.length){
+      var noGroup = mamFleets.filter(function(f){ return !f.userGroupIds.length; });
+      if(noGroup.length){
+        add("warn", "Tell us who the app-protection groups are for",
+          "Protecting work data inside apps follows the <i>person</i>, not the device &mdash; so these have to be aimed at a group of people. Pointing them at a list of devices is accepted without complaint and protects nobody.", noGroup[0].id);
+      }
+    }
+
+    /* --- 7. licensing (the Office-vs-Microsoft 365 trap) --- */
+    if((state.meta.licences||[]).length){
+      if(!lic.intune && !lic.unknown){
+        add("bad", "The licences listed do not include device management",
+          "Office 365 A1, A3 and E3 give you mailboxes and Office apps &mdash; they do not include Intune, and they do not include the Entra ID P1 needed to enforce anything. <b>Microsoft 365</b> A3/A5, Business Premium or E3/E5 do. The names are confusingly close; it is worth checking the invoice before we go any further.");
+      } else if(lic.intune && lic.hasEduOnlyOffice){
+        add("info", "Check that everyone is on the right licence, not just some people",
+          "You have listed both a licence that includes device management and one that does not. Anyone left on the Office-only licence cannot be managed at all &mdash; which usually surfaces as &ldquo;it works for the office but not for the site staff&rdquo;.");
+      }
+      if(lic.unknown){
+        add("info", "Licensing to confirm",
+          "You said you were not sure. We will check for you &mdash; it is a five-minute job at our end and it decides what is possible.");
+      }
+      if(lic.intune && !lic.entraP1){
+        add("info", "Blocking access needs Entra ID P1",
+          "You can manage devices with what you have. Actually <i>stopping</i> an unhealthy device reaching email needs Conditional Access, which is an Entra ID P1 feature.");
+      }
+    } else {
+      add("info", "Licences not answered yet",
+        "It is the answer that decides what is possible, so it is worth filling in.");
+    }
+
+    /* --- 8. enforcement reality: compliance without CA is flag-only --- */
+    var anyCompliance = F.some(function(f){ return f.compliance.length > 0; });
+    if(anyCompliance && !state.meta.prereqHave.caPolicy){
+      add("info", "Health rules flag; they do not block",
+        "A device that fails its health rules is <i>marked</i> unhealthy and the user gets an email. Nothing is actually stopped until Conditional Access is in place. That is a deliberate decision, not an oversight &mdash; but it should be a decision you have made, not one you discover later.");
+    }
+
+    /* --- 9. update policy that will annoy people --- */
+    F.forEach(function(f){
+      if(!f.updates.pause && f.affinity === "user"){
+        add("warn", "&ldquo;" + esc(f.name) + "&rdquo; cannot postpone a restart",
+          "Devices that restart with no warning and no way to delay are the most common reason people say a new setup is &ldquo;too strict&rdquo;. On devices belonging to one person, let them postpone. On shared devices, taking it away is usually right.", f.id);
+      }
+      var dl = parseInt(String(f.updates.deadline).replace(/[^0-9]/g,""), 10);
+      if(state.meta.ce && !isNaN(dl) && dl > 14){
+        add("bad", "&ldquo;" + esc(f.name) + "&rdquo; would miss the Cyber Essentials patching window",
+          "The scheme requires security updates to be applied within <b>14 days</b> of release. You have said " + dl + " days.", f.id);
+      }
+    });
+
+    /* --- 10. ESP --- */
+    F.forEach(function(f){
+      if(f.platform !== "windows" || !f.esp.on) return;
+      var n = (f.esp.blocking||"").split(",").filter(function(x){ return x.trim(); }).length;
+      if(n > 4){
+        add("warn", "&ldquo;" + esc(f.name) + "&rdquo; makes people wait for " + n + " apps",
+          "Every app that has to finish before the desktop appears is time somebody spends watching a progress bar, and a long list is the usual cause of set-up timing out and failing. Two or three genuinely essential apps is the sweet spot; everything else can arrive afterwards.", f.id);
+      }
+      if(f.affinity !== "user" && n === 0){
+        add("info", "&ldquo;" + esc(f.name) + "&rdquo; has a progress screen but nothing to wait for",
+          "On a shared device that is often exactly right &mdash; just checking it is deliberate.", f.id);
+      }
+    });
+
+    /* --- 11. iOS shared devices and app licensing --- */
+    F.forEach(function(f){
+      if(f.platform !== "ios") return;
+      var noAff = f.enrolments.some(function(e){ return e.method === "ade-no-affinity"; });
+      if(noAff){
+        var userLic = f.appAssign.some(function(a){
+          var ap = appById(a.appId); return ap && ap.source === "vpp-user";
+        });
+        if(userLic){
+          add("bad", "Apps on &ldquo;" + esc(f.name) + "&rdquo; are licensed to people, not devices",
+            "These iPads enrol with nobody attached to them, so there is no person to hand an app licence to. The same apps have to be bought as device-assigned licences instead. Apple lets you switch, but it is worth knowing before you buy.", f.id);
+        }
+      }
+      var shared = f.enrolments.some(function(e){ return e.method === "shared-ipad"; });
+      if(shared && !state.meta.prereqHave.asm){
+        add("warn", "Shared iPad needs Apple School Manager",
+          "Not Apple Business Manager &mdash; pupils signing in to a shared iPad with their own account is specifically a School Manager feature, with Managed Apple Accounts behind it.", f.id);
+      }
+      if(shared && f.model && !/(64|128|256|512|1t)/i.test(f.model)){
+        add("info", "Check the storage on your shared iPads",
+          "Every pupil who signs in keeps a cached copy of their data on the device. On 32GB iPads that runs out quickly and pupils start getting signed out mid-lesson.", f.id);
+      }
+    });
+
+    /* --- 12. Android shared sign-in --- */
+    F.forEach(function(f){
+      if(f.platform !== "android") return;
+      if(f.enrolments.some(function(e){ return e.method === "ae-dedicated-shared"; })){
+        add("info", "Check your apps support shared sign-in",
+          "&ldquo;" + esc(f.name) + "&rdquo; relies on one sign-out clearing the person from every work app. Microsoft's own apps do this; many third-party apps do not, and they quietly leave the previous person signed in.", f.id);
+      }
+    });
+
+    /* --- 13. Windows 10 --- */
+    F.forEach(function(f){
+      var os = "";
+      f.compliance.forEach(function(c){ os += " " + (c.s.minOs || ""); });
+      if(f.platform === "windows" && /windows\s*10|win\s*10/i.test(os + " " + f.model)){
+        add("bad", "Windows 10 is out of support",
+          "Support ended in October 2025. An unsupported operating system is a finding on its own, separate from patching. The options are upgrading to Windows 11 where the hardware allows, paying for Extended Security Updates, replacing the hardware, or taking it out of scope behind a real network boundary.", f.id);
+      }
+    });
+
+    /* --- 14. kiosk devices with no lock-down --- */
+    F.forEach(function(f){
+      if(f.affinity !== "kiosk") return;
+      var locked = fleetHasPack(f, "win-kiosk") || fleetHasPack(f, "ios-single-app") || fleetHasPack(f, "and-kiosk");
+      if(!locked){
+        add("warn", "&ldquo;" + esc(f.name) + "&rdquo; is single-purpose but not locked down",
+          "You have said nobody signs in to these. Without a policy restricting them to their one job, they are open devices sitting in a public place.", f.id);
+      }
+    });
+
+    /* --- 15. shared/kiosk devices and network --- */
+    F.forEach(function(f){
+      if(f.affinity === "user") return;
+      if(f.ownership !== "corporate") return;
+      if(!f.resourceIds.length && state.resources.length === 0){
+        add("info", "How do &ldquo;" + esc(f.name) + "&rdquo; get onto the network?",
+          "Nobody is standing there to type a Wi-Fi password on a shared or single-purpose device, so the Wi-Fi profile has to be pushed to it. Add your networks in the Wi-Fi panel.", f.id);
+      }
+    });
+
+    /* --- 16. apps not assigned anywhere --- */
+    var orphanApps = state.apps.filter(function(a){ return appUsage(a.id).length === 0; });
+    if(orphanApps.length){
+      add("info", plural(orphanApps.length, "app") + " not on any device group",
+        esc(orphanApps.map(function(a){ return a.name; }).slice(0,4).join(", ")) +
+        (orphanApps.length > 4 ? " and others" : "") + " &mdash; open a device group and tick them on, or remove them.");
+    }
+
+    /* --- 17. no admin named --- */
+    if(!state.people.length){
+      add("info", "No people listed",
+        "We will need at least one name: whoever administers Intune day to day, and whoever gets the first test device.");
+    }
+
+    /* ---------- Cyber Essentials overlay ---------- */
+    if(state.meta.ce){
+      F.forEach(function(f){
+        f.compliance.forEach(function(c){
+          var len = parseInt(c.s.pinLen, 10);
+          if(!isNaN(len) && len < 6){
+            add("bad", "&ldquo;" + esc(f.name) + "&rdquo; allows an unlock code shorter than six",
+              "Cyber Essentials sets a minimum of six characters for the credential that unlocks a device.", f.id);
+          }
+          var att = parseInt(c.s.attempts, 10);
+          if(!isNaN(att) && att > 10){
+            add("bad", "&ldquo;" + esc(f.name) + "&rdquo; allows more than ten wrong attempts",
+              "Cyber Essentials requires a device to lock after no more than ten unsuccessful attempts, or to throttle guessing to ten in five minutes.", f.id);
+          }
+          if(!c.s.pin){
+            add("bad", "&ldquo;" + esc(f.name) + "&rdquo; does not require an unlock code",
+              "Cyber Essentials requires a credential to unlock the device.", f.id);
+          }
+          if(f.platform === "windows" && !c.s.av){
+            add("warn", "&ldquo;" + esc(f.name) + "&rdquo; does not require antivirus",
+              "Malware protection is one of the five controls. We check that <i>some</i> antivirus is running rather than naming Microsoft Defender specifically, so a third-party product still passes.", f.id);
+          }
+        });
+        if(!f.compliance.length && !isUnmanaged(f)){
+          add("warn", "&ldquo;" + esc(f.name) + "&rdquo; has no health rules to evidence",
+            "For Cyber Essentials you have to be able to show an assessor that the controls are in place. Unmeasured is worse than non-compliant &mdash; a device reporting nothing evidences nothing.", f.id);
+        }
+      });
+      if(!state.meta.prereqHave.breakGlass){
+        add("info", "Multi-factor authentication and a way back in",
+          "Cyber Essentials requires MFA on cloud services and on <b>every</b> administrative account. Before we enforce anything, we set up an emergency admin account excluded from the rules, so a mistake cannot lock everyone out at once.");
+      }
+      add("info", "What Cyber Essentials does <i>not</i> ask for",
+        "Worth knowing so nobody gets talked into unnecessary work: the scheme does <b>not</b> require disk encryption, does <b>not</b> require Conditional Access, and does <b>not</b> mandate a particular MFA app. It also explicitly says <b>do not</b> force regular password changes or complexity rules. We recommend encryption anyway, on its own merits &mdash; but not because the scheme demands it.");
+    }
+
+    /* --- positives --- */
+    var ready = F.filter(function(f){
+      return f.enrolments.length && f.userGroupIds.length && (f.compliance.length || isUnmanaged(f));
+    });
+    if(ready.length){
+      add("ok", plural(ready.length, "device group") + " ready to quote",
+        "Enrolment, who it is for, and the rules are all answered.");
+    }
+    if(F.length && !out.some(function(x){ return x.sev === "bad"; })){
+      add("ok", "Nothing here would block the build", "No contradictions found in what you have described.");
+    }
+
+    out.sort(function(a,b){ return SEV_ORDER[a.sev] - SEV_ORDER[b.sev]; });
+    return out;
+  }
+
+  /* ---------- prerequisites ---------- */
+  function neededPrereqs(){
+    var need = {};
+    function mark(k){ if(CAT.prereqs[k]) need[k] = true; }
+    mark("mdmAuthority"); mark("entraGroups"); mark("network"); mark("customDomain");
+    state.fleets.forEach(function(f){
+      f.enrolments.forEach(function(e){
+        var def = enrolDef(f.platform, e.method);
+        if(def) (def.requires||[]).forEach(mark);
+      });
+      if(f.platform === "ios" || f.platform === "macos") mark("apns");
+      if(f.platform === "android" && f.ownership === "corporate") mark("aeBinding");
+    });
+    if(state.meta.ce){ mark("caPolicy"); mark("breakGlass"); }
+    return Object.keys(need);
+  }
+
+  function renderPrereqs(){
+    var keys = neededPrereqs();
+    var el = document.getElementById("prereqs");
+    if(!keys.length){ el.innerHTML = '<li><span class="pq"></span><span>Nothing yet &mdash; this fills in as you answer.</span></li>'; return; }
+    el.innerHTML = keys.map(function(k){
+      var p = CAT.prereqs[k], have = !!state.meta.prereqHave[k];
+      return '<li><span class="pq" data-act="prereq" data-pk="' + k + '" role="checkbox" tabindex="0" aria-checked="' +
+        have + '" style="cursor:pointer' + (have ? ";background:var(--ok);color:var(--paper);border-color:var(--ok)" : "") + '">' +
+        (have ? "&#10003;" : "") + "</span><span><b>" + esc(p.label) + "</b><span class=\"pw\">" + p.why + "</span></span></li>";
+    }).join("");
+  }
+
+  function renderChecks(){
+    var list = analyse();
+    var ic = { bad:"!", warn:"!", info:"i", ok:"&#10003;" };
+    document.getElementById("checkCount").textContent =
+      list.filter(function(x){ return x.sev === "bad" || x.sev === "warn"; }).length || "";
+    document.getElementById("checks").innerHTML = list.map(function(c){
+      return '<li class="' + c.sev + '"><span class="ic">' + ic[c.sev] + "</span>" +
+        '<span class="ctxt"><b>' + c.title + "</b>" +
+        (c.why ? '<span class="why">' + c.why + "</span>" : "") +
+        (c.jump ? ' <button class="jump" data-jump="' + c.jump + '">show me</button>' : "") +
+        "</span></li>";
+    }).join("");
+    return list;
+  }
+
+
+  /* ============================================================
+     EXPORTS
+     1. textExport  - customer summary + share code (emailed back)
+     2. buildSheet  - technician build checklist
+     3. gapReport   - findings with what / why / fix
+     4. jsonSpec    - machine-readable, for a future build script
+     ============================================================ */
+
+  function stripTags(s){ return String(s||"").replace(/<[^>]*>/g,"").replace(/&mdash;/g,"-")
+    .replace(/&ldquo;|&rdquo;/g,'"').replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">")
+    .replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/&middot;/g,"-").replace(/&hellip;/g,"...")
+    .replace(/&nbsp;/g," ").replace(/&uarr;|&darr;/g,"").replace(/&times;/g,"x").replace(/&#10003;/g,"y"); }
+
+  function today(){
+    return new Date().toLocaleDateString(undefined, { day:"numeric", month:"long", year:"numeric" });
+  }
+  function licLabels(){
+    return (state.meta.licences||[]).map(function(k){
+      var f = null; CAT.licences.forEach(function(l){ if(l.key === k) f = l; });
+      return f ? f.label : k;
+    });
+  }
+  function fleetGroupNames(f){
+    var n = groupNames(f.userGroupIds);
+    return n.length ? n : ["TO CONFIRM"];
+  }
+
+  /* ---- 1. customer summary ---- */
+  function textExport(code){
+    var L = [], m = state.meta;
+    L.push("INTUNE REQUIREMENTS");
+    if(m.org) L.push("Organisation: " + m.org);
+    if(m.contact) L.push("Completed by: " + m.contact);
+    if(m.sector && CAT.sectors[m.sector]) L.push("Type: " + CAT.sectors[m.sector]);
+    if(licLabels().length) L.push("Licences: " + licLabels().join(", "));
+    if(m.ce) L.push("Cyber Essentials: yes - this project also has to meet the scheme (v3.3)");
+    L.push("Drafted " + today());
+    L.push("");
+
+    state.fleets.forEach(function(f){
+      L.push("DEVICE GROUP: " + f.name);
+      L.push("  Platform: " + CAT.platforms[f.platform].label +
+        (f.model ? " (" + f.model + ")" : ""));
+      L.push("  How many: " + (f.count || "TO CONFIRM"));
+      L.push("  Used by: " + stripTags(CAT.affinity[f.affinity].label) +
+        " / " + stripTags(CAT.ownership[f.ownership].label));
+      L.push("  For: " + fleetGroupNames(f).join(", "));
+
+      if(f.enrolments.length){
+        f.enrolments.forEach(function(e){
+          var def = enrolDef(f.platform, e.method);
+          L.push("  ENROLMENT: " + (def ? def.label : "TO CONFIRM") + (e.note ? "  (" + e.note + ")" : ""));
+        });
+      } else L.push("  ENROLMENT: TO CONFIRM");
+
+      if(f.platform === "windows" && f.esp.on){
+        L.push("  SET-UP SCREEN: yes" + (f.esp.blocking ? "  - wait for: " + f.esp.blocking : " - nothing has to finish first"));
+      }
+
+      f.compliance.forEach(function(c){
+        var b = [];
+        if(c.s.minOs) b.push("min OS " + c.s.minOs);
+        if(c.s.pin) b.push("unlock code min " + (c.s.pinLen||"?") + " chars, lock after " + (c.s.attempts||"?") + " wrong attempts");
+        if(c.s.encrypt) b.push("disk encrypted");
+        if(c.s.av) b.push("antivirus running");
+        if(c.s.fw) b.push("firewall on");
+        if(c.s.jailbreak) b.push("block jailbroken/rooted");
+        if(c.s.grace) b.push(c.s.grace + " day(s) to fix before it counts as failed");
+        if(c.s.email) b.push("email the user on failure");
+        if(c.s.retire) b.push("eventually remove work access");
+        L.push("  HEALTH RULES: " + c.name + " - " + (b.join("; ") || "TO CONFIRM"));
+      });
+
+      f.config.forEach(function(c){
+        var names = (c.packs||[]).map(function(k){
+          var dd = configDef(f.platform, k); return dd ? dd.label : k;
+        });
+        L.push("  SETTINGS: " + c.name + " - " + (names.join("; ") || "TO CONFIRM"));
+        if(c.note) L.push("      note: " + c.note);
+      });
+
+      if(f.appAssign.length){
+        f.appAssign.forEach(function(a){
+          var ap = appById(a.appId);
+          L.push("  APP: " + (ap ? ap.name : "?") + " - " + stripTags(CAT.appIntent[a.intent] || ""));
+        });
+      }
+      if(f.resourceIds.length){
+        L.push("  NEEDS: " + f.resourceIds.map(function(r){
+          var x = resById(r); return x ? x.name : "?";
+        }).join(", "));
+      }
+      L.push("  UPDATES: " + stripTags(CAT.updateRing[f.updates.ring] ? CAT.updateRing[f.updates.ring].label : f.updates.ring) +
+        (f.updates.deadline ? "; forced after " + f.updates.deadline + " days" : "") +
+        (f.updates.hours ? "; restart window: " + f.updates.hours : "") +
+        (f.updates.pause ? "; user may postpone" : "; user may NOT postpone"));
+      if(f.notes) L.push("  NOTES: " + f.notes);
+      L.push("");
+    });
+
+    if(state.apps.length){
+      L.push("APPS");
+      state.apps.forEach(function(a){
+        var src = "";
+        (a.platforms.length ? a.platforms : CAT.platformOrder).forEach(function(p){
+          var s = catItem(CAT.appSource[p], a.source);
+          if(s && !src) src = stripTags(s.label);
+        });
+        var use = appUsage(a.id);
+        L.push("  " + a.name +
+          (a.platforms.length ? " [" + a.platforms.map(function(p){ return CAT.platforms[p].label; }).join(", ") + "]" : "") +
+          (src ? " - " + src : "") +
+          (use.length ? " - on: " + use.join(", ") : " - NOT ASSIGNED"));
+      });
+      L.push("");
+    }
+
+    if(state.resources.length){
+      L.push("WI-FI, VPN AND CERTIFICATES");
+      state.resources.forEach(function(r){
+        L.push("  " + (CAT.resKind[r.kind] || "") + ": " + r.name + (r.details ? " - " + r.details : ""));
+      });
+      L.push("");
+    }
+
+    if(state.groups.length){
+      L.push("USER GROUPS - who each set of devices is for");
+      state.groups.forEach(function(g){
+        var mem = personNames(g.personIds);
+        L.push("  " + g.name + (g.note ? " - " + g.note : ""));
+        if(mem.length) L.push("      named: " + mem.join(", "));
+        var use = groupUsage(g.id);
+        if(use.length) L.push("      used by: " + use.join("; "));
+      });
+      L.push("");
+    }
+
+    if(state.people.length){
+      L.push("PEOPLE: " + state.people.map(function(p){ return p.name; }).join(", "));
+      L.push("");
+    }
+
+    var pk = neededPrereqs();
+    if(pk.length){
+      L.push("BEFORE WE CAN START");
+      pk.forEach(function(k){
+        L.push("  [" + (state.meta.prereqHave[k] ? "have" : " ?  ") + "] " + CAT.prereqs[k].label);
+      });
+      L.push("");
+    }
+
+    if(m.notes){ L.push("ANYTHING ELSE"); L.push("  " + m.notes); L.push(""); }
+
+    L.push("===== PLAN DATA - please keep this section in your email so we can load your answers =====");
+    L.push(code || JSON.stringify(state));
+    L.push("===== END PLAN DATA =====");
+    return L.join("\n");
+  }
+
+  /* ---- 2. technician build sheet ---- */
+  function buildSheet(){
+    var L = [], m = state.meta, lic = licenceFlags();
+    L.push("# Intune build sheet - " + (m.org || "unnamed customer"));
+    L.push("");
+    L.push("Generated from the customer's own answers on " + today() + ".");
+    L.push("Catalogue: Open Intune Baseline " + OIB_VERSION + " + Microsoft Learn enrolment guides." +
+      (m.ce ? " Cyber Essentials overlay: ON (v3.3)." : ""));
+    L.push("");
+    L.push("| | |");
+    L.push("|---|---|");
+    L.push("| Contact | " + (m.contact || "-") + " |");
+    L.push("| Sector | " + (CAT.sectors[m.sector] || "-") + " |");
+    L.push("| Tenant | " + (m.tenant || "-") + " |");
+    L.push("| Licences | " + (licLabels().join(", ") || "NOT ANSWERED") + " |");
+    L.push("| Intune entitlement | " + (lic.unknown ? "UNCONFIRMED" : lic.intune ? "yes" : "**NO - blocker**") + " |");
+    L.push("| Entra ID P1 (for CA) | " + (lic.unknown ? "UNCONFIRMED" : lic.entraP1 ? "yes" : "no") + " |");
+    L.push("| Device groups | " + state.fleets.length + " |");
+    L.push("");
+
+    L.push("## Prerequisites");
+    L.push("");
+    var pk = neededPrereqs();
+    if(!pk.length) L.push("_None derived yet._");
+    pk.forEach(function(k){
+      L.push("- [" + (m.prereqHave[k] ? "x" : " ") + "] **" + CAT.prereqs[k].label + "** - " + stripTags(CAT.prereqs[k].why));
+    });
+    L.push("");
+
+    L.push("## Entra ID groups to create");
+    L.push("");
+    if(!state.groups.length) L.push("_None defined._");
+    else {
+      L.push("| Group | Type | Description given by customer | Targets |");
+      L.push("|---|---|---|---|");
+      state.groups.forEach(function(g){
+        L.push("| `" + g.name + "` | " + (g.kind === "device" ? "device" : "user") + " | " +
+          (g.note || personNames(g.personIds).join(", ") || "-") + " | " +
+          (groupUsage(g.id).join("; ") || "**unused**") + " |");
+      });
+    }
+    L.push("");
+
+    state.fleets.forEach(function(f, i){
+      L.push("## " + (i+1) + ". " + f.name);
+      L.push("");
+      L.push("- **Platform:** " + CAT.platforms[f.platform].label + (f.model ? " (" + f.model + ")" : ""));
+      L.push("- **Count:** " + (f.count || "TO CONFIRM"));
+      L.push("- **Affinity:** " + f.affinity + " (" + stripTags(CAT.affinity[f.affinity].label) + ")");
+      L.push("- **Ownership:** " + f.ownership);
+      L.push("- **Assign to:** " + fleetGroupNames(f).map(function(x){ return "`" + x + "`"; }).join(", "));
+      L.push("");
+
+      L.push("### Enrolment");
+      L.push("");
+      if(!f.enrolments.length) L.push("**NOT ANSWERED.**");
+      f.enrolments.forEach(function(e){
+        var def = enrolDef(f.platform, e.method);
+        L.push("- **" + (def ? def.label : "TO CONFIRM") + "** (`" + (e.method || "?") + "`)");
+        if(def && def.requires.length) L.push("  - Requires: " + def.requires.map(function(r){ return CAT.prereqs[r] ? CAT.prereqs[r].label : r; }).join("; "));
+        if(def && def.note) L.push("  - Note: " + stripTags(def.note));
+        if(e.note) L.push("  - Customer says: " + e.note);
+      });
+      if(f.platform === "windows" && f.ownership === "corporate"){
+        L.push("- **Enrolment Status Page:** " + (f.esp.on ? "enabled" : "disabled") +
+          (f.esp.on && f.esp.blocking ? "; blocking apps: " + f.esp.blocking : ""));
+      }
+      L.push("");
+
+      if(f.compliance.length){
+        L.push("### Compliance policies");
+        L.push("");
+        f.compliance.forEach(function(c){
+          L.push("**" + c.name + "**");
+          L.push("");
+          L.push("| Setting | Value |");
+          L.push("|---|---|");
+          L.push("| osMinimumVersion | " + (c.s.minOs || "-") + " |");
+          L.push("| password required | " + (c.s.pin ? "yes" : "no") + " |");
+          L.push("| passwordMinimumLength | " + (c.s.pinLen || "-") + " |");
+          L.push("| max failed attempts | " + (c.s.attempts || "-") + " |");
+          L.push("| encryption required | " + (c.s.encrypt ? "yes" : "no") + " |");
+          if(f.platform === "windows") L.push("| antivirusRequired | " + (c.s.av ? "yes (vendor-agnostic, NOT defenderEnabled)" : "no") + " |");
+          if(f.platform === "windows" || f.platform === "macos") L.push("| firewall required | " + (c.s.fw ? "yes" : "no") + " |");
+          if(f.platform === "ios" || f.platform === "android") L.push("| jailbreak/root blocked | " + (c.s.jailbreak ? "yes" : "no") + " |");
+          L.push("| grace period (days) | " + (c.s.grace || "0") + " |");
+          L.push("| actions | mark non-compliant" + (c.s.email ? " + email user" : "") + (c.s.retire ? " + retire (CONFIRM TIMING)" : "") + " |");
+          if(m.ce) L.push("| _CE note_ | omit passwordExpirationDays and character-set count - v3.3 says do not enforce them |");
+          L.push("");
+        });
+      }
+
+      if(f.config.length){
+        L.push("### Configuration policies");
+        L.push("");
+        L.push("| Policy | Import / build as |");
+        L.push("|---|---|");
+        f.config.forEach(function(c){
+          (c.packs||[]).forEach(function(k){
+            var dd = configDef(f.platform, k);
+            L.push("| " + (dd ? dd.label : k) + " | `" + (dd ? dd.pack : "custom") + "` |");
+          });
+          if(c.note) L.push("| _" + c.name + " note_ | " + c.note + " |");
+        });
+        L.push("");
+        if(f.platform === "windows" && f.affinity !== "user"){
+          L.push("> **Do not import the OIB Windows baseline wholesale here.** It is written for single-user, " +
+            "Autopilot-enrolled, Entra-joined devices. This group is " + f.affinity + " - review per policy.");
+          L.push("");
+        }
+      }
+
+      if(f.appAssign.length){
+        L.push("### Apps");
+        L.push("");
+        L.push("| App | Source | Intent |");
+        L.push("|---|---|---|");
+        f.appAssign.forEach(function(a){
+          var ap = appById(a.appId);
+          var s = ap ? catItem(CAT.appSource[f.platform], ap.source) : null;
+          L.push("| " + (ap ? ap.name : "?") + " | " + (s ? stripTags(s.label) : "TO CONFIRM") + " | " + a.intent + " |");
+        });
+        L.push("");
+      }
+
+      if(f.resourceIds.length){
+        L.push("### Network / certificates");
+        L.push("");
+        f.resourceIds.forEach(function(r){
+          var x = resById(r);
+          if(x) L.push("- " + (CAT.resKind[x.kind]||"") + ": **" + x.name + "**" + (x.details ? " - " + x.details : ""));
+        });
+        L.push("");
+      }
+
+      L.push("### Updates");
+      L.push("");
+      L.push("- Ring: **" + stripTags(CAT.updateRing[f.updates.ring] ? CAT.updateRing[f.updates.ring].label : f.updates.ring) + "**");
+      L.push("- Deadline: " + (f.updates.deadline || "TO CONFIRM") + " days" + (m.ce ? " (CE ceiling: 14)" : ""));
+      L.push("- Restart window: " + (f.updates.hours || "not specified"));
+      L.push("- User may pause: " + (f.updates.pause ? "yes" : "**no** - check this is deliberate"));
+      L.push("");
+      if(f.notes){ L.push("### Customer notes"); L.push(""); L.push("> " + f.notes); L.push(""); }
+    });
+
+    var findings = analyse().filter(function(x){ return x.sev === "bad" || x.sev === "warn"; });
+    if(findings.length){
+      L.push("## Open questions and conflicts");
+      L.push("");
+      findings.forEach(function(x){
+        L.push("- **" + stripTags(x.title) + "** - " + stripTags(x.why));
+      });
+      L.push("");
+    }
+    return L.join("\n");
+  }
+
+  /* ---- 3. gap and risk report ---- */
+  function gapReport(){
+    var L = [], list = analyse();
+    L.push("GAP AND RISK REPORT");
+    L.push((state.meta.org || "Unnamed customer") + " - " + today());
+    if(state.meta.ce) L.push("Cyber Essentials v3.3 overlay applied.");
+    L.push("");
+    var lab = { bad:"MUST FIX", warn:"WORTH A CONVERSATION", info:"FOR INFORMATION", ok:"LOOKS RIGHT" };
+    ["bad","warn","info","ok"].forEach(function(sev){
+      var g = list.filter(function(x){ return x.sev === sev; });
+      if(!g.length) return;
+      L.push(lab[sev]);
+      L.push(new Array(lab[sev].length + 1).join("="));
+      g.forEach(function(x){
+        L.push("");
+        L.push("* " + stripTags(x.title));
+        if(x.why) L.push("  " + stripTags(x.why));
+      });
+      L.push("");
+    });
+    L.push("");
+    L.push("Findings are derived from the customer's answers against Microsoft Learn enrolment");
+    L.push("guidance, Open Intune Baseline " + OIB_VERSION + ", and (where enabled) Cyber Essentials v3.3.");
+    return L.join("\n");
+  }
+
+  /* ---- 4. machine-readable spec ---- */
+  function jsonSpec(){
+    var derived = state.fleets.map(function(f){
+      return {
+        id:f.id, name:f.name, platform:f.platform,
+        ownership:f.ownership, affinity:f.affinity, count:f.count,
+        assignTo:groupNames(f.userGroupIds),
+        enrolment:f.enrolments.map(function(e){
+          var def = enrolDef(f.platform, e.method);
+          return { method:e.method, label:def ? def.label : null,
+                   requires:def ? def.requires : [], note:e.note };
+        }),
+        esp:(f.platform === "windows" ? f.esp : null),
+        compliance:f.compliance.map(function(c){ return { name:c.name, settings:c.s }; }),
+        configuration:f.config.map(function(c){
+          return { name:c.name, note:c.note,
+            policies:(c.packs||[]).map(function(k){
+              var dd = configDef(f.platform, k);
+              return { key:k, label:dd ? dd.label : k, source:dd ? dd.pack : "custom" };
+            }) };
+        }),
+        apps:f.appAssign.map(function(a){
+          var ap = appById(a.appId);
+          return { name:ap ? ap.name : null, source:ap ? ap.source : null, intent:a.intent };
+        }),
+        resources:f.resourceIds.map(function(r){
+          var x = resById(r); return x ? { kind:x.kind, name:x.name, details:x.details } : null;
+        }).filter(Boolean),
+        updates:f.updates,
+        notes:f.notes
+      };
+    });
+    return JSON.stringify({
+      schema:"a8-intune-plan/1",
+      generated:new Date().toISOString(),
+      catalogue:{ openIntuneBaseline:OIB_VERSION },
+      meta:state.meta,
+      prerequisites:neededPrereqs().map(function(k){
+        return { key:k, label:CAT.prereqs[k].label, customerHas:!!state.meta.prereqHave[k] };
+      }),
+      groups:state.groups.map(function(g){
+        return { name:g.name, kind:g.kind, description:g.note || "", named:personNames(g.personIds) };
+      }),
+      apps:state.apps.map(function(a){
+        return { name:a.name, platforms:a.platforms, source:a.source };
+      }),
+      resources:state.resources,
+      fleets:derived,
+      findings:analyse().map(function(x){
+        return { severity:x.sev, title:stripTags(x.title), detail:stripTags(x.why) };
+      }),
+      state:state
+    }, null, 2);
+  }
+
+
+  /* ============================================================
+     Share code (seed)
+     INTUNEPLAN1.<base64url of deflate(JSON)>  - or INTUNEPLAN0.<base64url of JSON>
+     where CompressionStream is missing. Decoding strips whitespace so a code
+     hard-wrapped by a mail client still loads.
+     ============================================================ */
+  function bytesToB64u(bytes){
+    var bin = "";
+    for(var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+  }
+  function b64uToBytes(s){
+    s = s.replace(/-/g,"+").replace(/_/g,"/");
+    while(s.length % 4) s += "=";
+    var bin = atob(s);
+    var out = new Uint8Array(bin.length);
+    for(var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+  function pumpStream(stream, bytes, cb){
+    try{
+      var writer = stream.writable.getWriter();
+      writer.write(bytes).catch(function(){});
+      writer.close().catch(function(){});
+      var reader = stream.readable.getReader();
+      var chunks = [], total = 0;
+      (function pump(){
+        reader.read().then(function(r){
+          if(r.done){
+            var out = new Uint8Array(total), off = 0;
+            chunks.forEach(function(c){ out.set(c, off); off += c.length; });
+            cb(out); return;
+          }
+          chunks.push(r.value); total += r.value.length; pump();
+        }, function(){ cb(null); });
+      })();
+    }catch(e){ cb(null); }
+  }
+  function encodeSeed(cb){
+    var bytes = new TextEncoder().encode(JSON.stringify(state));
+    if(typeof CompressionStream === "undefined"){ cb(SEED_PREFIX + "0." + bytesToB64u(bytes)); return; }
+    pumpStream(new CompressionStream("deflate"), bytes, function(out){
+      cb(out ? SEED_PREFIX + "1." + bytesToB64u(out) : SEED_PREFIX + "0." + bytesToB64u(bytes));
+    });
+  }
+  function validPlan(p){ return (p && Array.isArray(p.fleets)) ? p : null; }
+  function decodeSeed(code, cb){
+    var m = new RegExp("^" + SEED_PREFIX + "([01])\\.([A-Za-z0-9_\\-]+)$").exec(code || "");
+    if(!m){ cb(null); return; }
+    var bytes;
+    try{ bytes = b64uToBytes(m[2]); }catch(e){ cb(null); return; }
+    if(m[1] === "0"){
+      try{ cb(validPlan(JSON.parse(new TextDecoder().decode(bytes)))); }catch(e){ cb(null); }
+      return;
+    }
+    if(typeof DecompressionStream === "undefined"){ cb(null); return; }
+    pumpStream(new DecompressionStream("deflate"), bytes, function(out){
+      if(!out){ cb(null); return; }
+      try{ cb(validPlan(JSON.parse(new TextDecoder().decode(out)))); }catch(e){ cb(null); }
+    });
+  }
+  function seedCandidates(text){
+    var ix = (text || "").indexOf(SEED_PREFIX);
+    if(ix === -1) return [];
+    var m = new RegExp("^" + SEED_PREFIX + "[01]\\.[\\sA-Za-z0-9_\\-]+").exec(text.slice(ix));
+    if(!m) return [];
+    var raw = m[0];
+    var cands = [
+      raw.replace(/\s+/g,""),                            // wrapped by a mail client
+      raw.split(/\s+/)[0],                               // bare code with words after it
+      raw.split(/\r?\n\s*\r?\n/)[0].replace(/\s+/g,"")   // wrapped code, then a new paragraph
+    ];
+    return cands.filter(function(c, i){ return cands.indexOf(c) === i; });
+  }
+  function decodeSeedAttempts(cands, cb){
+    if(!cands.length){ cb(null); return; }
+    decodeSeed(cands[0], function(p){
+      if(p) cb(p); else decodeSeedAttempts(cands.slice(1), cb);
+    });
+  }
+
+  /* ---------- dialogs, toast, confirm ----------
+     window.confirm / alert are silently blocked inside a sandboxed iframe,
+     so everything goes through these. When the page is embedded full-height
+     in an article the iframe IS the viewport, so a centred dialog would land
+     far from the click - pin it near the last pointerdown instead. */
+  var lastClickY = 0;
+  document.addEventListener("pointerdown", function(e){ lastClickY = e.clientY; }, true);
+  function tallEmbed(){
+    return window.self !== window.top &&
+      window.innerHeight > 1200 &&
+      document.documentElement.scrollHeight <= window.innerHeight + 40;
+  }
+  function openDlg(d){
+    if(tallEmbed()){
+      d.style.top = Math.max(16, lastClickY - 140) + "px";
+      d.style.bottom = "auto";
+      d.style.margin = "0 auto";
+    } else { d.style.top = ""; d.style.bottom = ""; d.style.margin = ""; }
+    d.showModal();
+  }
+  var toastEl = document.getElementById("toast"), toastTimer;
+  function toast(msg){
+    if(tallEmbed()){
+      toastEl.style.bottom = "auto";
+      toastEl.style.top = Math.max(60, lastClickY + 90) + "px";
+    } else { toastEl.style.bottom = ""; toastEl.style.top = ""; }
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove("show"); }, 2600);
+  }
+  var confirmDlg = document.getElementById("confirmDlg"), confirmCb = null;
+  function askConfirm(msg, onYes){
+    document.getElementById("confirmMsg").textContent = msg;
+    confirmCb = onYes;
+    openDlg(confirmDlg);
+  }
+  document.getElementById("confirmYes").addEventListener("click", function(){
+    confirmDlg.close();
+    var cb = confirmCb; confirmCb = null;
+    if(cb) cb();
+  });
+  document.getElementById("confirmNo").addEventListener("click", function(){
+    confirmCb = null; confirmDlg.close();
+  });
+
+  /* ---------- master render ---------- */
+  function render(){
+    save();
+    renderScope();
+    renderStats();
+    renderFleets();
+    renderApps();
+    renderResources();
+    renderPeople();
+    renderGroups();
+    renderPrereqs();
+    renderChecks();
+  }
+
+  var rTimer = null;
+  function debounceRender(){
+    save();
+    clearTimeout(rTimer);
+    rTimer = setTimeout(function(){
+      var active = document.activeElement;
+      var id = active && active.id;
+      var pos = active && active.selectionStart;
+      render();
+      if(id){
+        var el = document.getElementById(id);
+        if(el){ el.focus(); if(pos != null && el.setSelectionRange) try{ el.setSelectionRange(pos, pos); }catch(e){} }
+      }
+    }, 600);
+  }
+
+  /* ---------- generic field setter ---------- */
+  function setPath(obj, path, val){
+    var parts = path.split("."), t = obj;
+    for(var i = 0; i < parts.length - 1; i++){
+      if(t[parts[i]] == null) t[parts[i]] = {};
+      t = t[parts[i]];
+    }
+    t[parts[parts.length - 1]] = val;
+  }
+  function targetObject(el){
+    var fid = el.getAttribute("data-fid");
+    if(fid){
+      var f = fleetById(fid);
+      if(!f) return null;
+      var list = el.getAttribute("data-list"), sid = el.getAttribute("data-sid");
+      if(list && sid) return byId(f[list] || [], sid);
+      return f;
+    }
+    if(el.getAttribute("data-aid")) return appById(el.getAttribute("data-aid"));
+    if(el.getAttribute("data-rid")) return resById(el.getAttribute("data-rid"));
+    if(el.getAttribute("data-gid")) return groupById(el.getAttribute("data-gid"));
+    return null;
+  }
+  function fieldValue(el){
+    if(el.type === "checkbox") return el.checked;
+    return el.value;
+  }
+  function onFieldChange(ev){
+    var el = ev.target;
+    var k = el.getAttribute("data-k");
+    if(!k) return;
+    var obj = targetObject(el);
+    if(!obj) return;
+    setPath(obj, k, fieldValue(el));
+    // platform change invalidates enrolment/config choices - re-render immediately
+    if(k === "platform" || k === "affinity" || k === "ownership" ||
+       el.tagName === "SELECT" || el.type === "checkbox"){ render(); }
+    else debounceRender();
+  }
+  document.addEventListener("input", onFieldChange);
+  document.addEventListener("change", onFieldChange);
+
+  /* ---------- fleet actions ---------- */
+  function addFleet(platform){
+    var f = newFleet(platform || "windows", { name:"New device group" });
+    f.open = true;
+    state.fleets.push(f);
+    render();
+    var row = document.getElementById("row-" + f.id);
+    if(row) row.scrollIntoView({ behavior:"smooth", block:"center" });
+  }
+
+  fleetsEl.addEventListener("click", function(ev){
+    var b = ev.target.closest("[data-act]");
+    if(!b) return;
+    var act = b.getAttribute("data-act");
+    var f = fleetById(b.getAttribute("data-fid"));
+    if(!f && act !== "rename") return;
+    var list = b.getAttribute("data-list"), sid = b.getAttribute("data-sid");
+
+    if(act === "toggle"){ f.open = !f.open; render(); }
+    else if(act === "del"){
+      askConfirm("Delete the device group “" + f.name + "” and everything in it?", function(){
+        state.fleets = state.fleets.filter(function(x){ return x.id !== f.id; });
+        render(); toast("Device group deleted");
+      });
+    }
+    else if(act === "dup"){
+      var copy = JSON.parse(JSON.stringify(f));
+      copy.id = uid(); copy.name = f.name + " (copy)"; copy.open = true;
+      ["enrolments","compliance","config","appAssign"].forEach(function(k){
+        copy[k].forEach(function(x){ x.id = uid(); });
+      });
+      state.fleets.splice(state.fleets.indexOf(f) + 1, 0, copy);
+      render(); toast("Copied - now change what is different");
+    }
+    else if(act === "up" || act === "down"){
+      var i = state.fleets.indexOf(f), j = act === "up" ? i - 1 : i + 1;
+      if(j < 0 || j >= state.fleets.length) return;
+      state.fleets.splice(i, 1); state.fleets.splice(j, 0, f); render();
+    }
+    else if(act === "addenrol"){ f.enrolments.push(newEnrol("")); f.enrolments[f.enrolments.length-1].open = true; render(); }
+    else if(act === "addcomp"){ f.compliance.push(newCompliance(f.platform)); f.compliance[f.compliance.length-1].open = true; render(); }
+    else if(act === "addconf"){ f.config.push(newConfig()); f.config[f.config.length-1].open = true; render(); }
+    else if(act === "subtoggle"){
+      var s = byId(f[list] || [], sid);
+      if(s){ s.open = !s.open; render(); }
+    }
+    else if(act === "subdel"){
+      f[list] = (f[list] || []).filter(function(x){ return x.id !== sid; });
+      render();
+    }
+    else if(act === "addapp"){
+      var aid = b.getAttribute("data-appid");
+      if(!f.appAssign.some(function(x){ return x.appId === aid; })){
+        f.appAssign.push({ id:uid(), appId:aid, intent:"required" });
+      }
+      render();
+    }
+    else if(act === "fgroup"){
+      var gid = b.value;
+      var ix = f.userGroupIds.indexOf(gid);
+      if(b.checked && ix === -1) f.userGroupIds.push(gid);
+      else if(!b.checked && ix !== -1) f.userGroupIds.splice(ix, 1);
+      render();
+    }
+    else if(act === "fres"){
+      var rid = b.value, rix = f.resourceIds.indexOf(rid);
+      if(b.checked && rix === -1) f.resourceIds.push(rid);
+      else if(!b.checked && rix !== -1) f.resourceIds.splice(rix, 1);
+      render();
+    }
+    else if(act === "packtoggle"){
+      var c = byId(f[list] || [], sid);
+      if(!c) return;
+      var key = b.value, kix = (c.packs||[]).indexOf(key);
+      if(b.checked && kix === -1) c.packs.push(key);
+      else if(!b.checked && kix !== -1) c.packs.splice(kix, 1);
+      render();
+    }
+    else if(act === "newgroup"){
+      var g = { id:uid(), kind:"user", name:uniqueGroupName(groupNameFor(f)), personIds:[], note:"" };
+      state.groups.push(g);
+      f.userGroupIds.push(g.id);
+      render(); toast("Group created - say who is in it below");
+    }
+  });
+
+  fleetsEl.addEventListener("keydown", function(ev){
+    if(ev.target.classList && ev.target.classList.contains("nname") && ev.key === "Enter"){
+      ev.preventDefault(); ev.target.blur();
+    }
+  });
+  fleetsEl.addEventListener("focusout", function(ev){
+    if(!ev.target.classList || !ev.target.classList.contains("nname")) return;
+    var f = fleetById(ev.target.getAttribute("data-fid"));
+    if(!f) return;
+    var v = ev.target.textContent.trim();
+    if(v && v !== f.name){ f.name = v; render(); }
+    else if(!v){ ev.target.textContent = f.name; }
+  });
+
+  document.getElementById("addFleet").addEventListener("click", function(){ addFleet("windows"); });
+
+  /* ---------- apps ---------- */
+  function addApp(name){
+    name = (name||"").trim();
+    if(!name) return;
+    name.split(",").map(function(x){ return x.trim(); }).filter(Boolean).forEach(function(n){
+      if(state.apps.some(function(a){ return a.name.toLowerCase() === n.toLowerCase(); })) return;
+      var pfs = {};
+      state.fleets.forEach(function(f){ pfs[f.platform] = true; });
+      state.apps.push({ id:uid(), name:n, platforms:Object.keys(pfs), source:"" });
+    });
+    render();
+  }
+  document.getElementById("addAppBtn").addEventListener("click", function(){
+    var i = document.getElementById("newAppInput");
+    addApp(i.value); i.value = "";
+    var again = document.getElementById("newAppInput"); if(again) again.focus();
+  });
+  document.addEventListener("keydown", function(ev){
+    if(ev.target.id === "newAppInput" && ev.key === "Enter"){
+      ev.preventDefault();
+      addApp(ev.target.value); ev.target.value = "";
+      var a = document.getElementById("newAppInput"); if(a) a.focus();
+    }
+    if(ev.target.id === "newResInput" && ev.key === "Enter"){
+      ev.preventDefault();
+      addRes(ev.target.value); ev.target.value = "";
+      var r = document.getElementById("newResInput"); if(r) r.focus();
+    }
+    if(ev.target.id === "newPersonInput" && ev.key === "Enter"){
+      ev.preventDefault();
+      addPeopleFrom(ev.target.value);
+      var p = document.getElementById("newPersonInput"); if(p) p.focus();
+    }
+    if(ev.target.id === "newGroupInput" && ev.key === "Enter"){
+      ev.preventDefault();
+      addGroup(ev.target.value);
+      var g = document.getElementById("newGroupInput"); if(g) g.focus();
+    }
+  });
+  appsEl.addEventListener("click", function(ev){
+    var b = ev.target.closest("[data-act]");
+    if(!b) return;
+    var a = appById(b.getAttribute("data-aid"));
+    if(!a) return;
+    if(b.getAttribute("data-act") === "delapp"){
+      askConfirm("Remove “" + a.name + "” from the list?", function(){
+        state.apps = state.apps.filter(function(x){ return x.id !== a.id; });
+        state.fleets.forEach(function(f){
+          f.appAssign = f.appAssign.filter(function(x){ return x.appId !== a.id; });
+        });
+        render();
+      });
+    } else if(b.getAttribute("data-act") === "appplat"){
+      var p = b.value, ix = a.platforms.indexOf(p);
+      if(b.checked && ix === -1) a.platforms.push(p);
+      else if(!b.checked && ix !== -1) a.platforms.splice(ix, 1);
+      render();
+    }
+  });
+
+  /* ---------- resources ---------- */
+  function addRes(name){
+    name = (name||"").trim();
+    if(!name) return;
+    var kind = /vpn/i.test(name) ? "vpn" : /cert|ca\b/i.test(name) ? "cert"
+             : /print/i.test(name) ? "printer" : /wi-?fi|wlan|ssid/i.test(name) ? "wifi" : "wifi";
+    state.resources.push({ id:uid(), kind:kind, name:name, details:"" });
+    render();
+  }
+  document.getElementById("addResBtn").addEventListener("click", function(){
+    var i = document.getElementById("newResInput");
+    addRes(i.value); i.value = "";
+    var again = document.getElementById("newResInput"); if(again) again.focus();
+  });
+  resEl.addEventListener("click", function(ev){
+    var b = ev.target.closest('[data-act="delres"]');
+    if(!b) return;
+    var r = resById(b.getAttribute("data-rid"));
+    if(!r) return;
+    askConfirm("Remove “" + r.name + "”?", function(){
+      state.resources = state.resources.filter(function(x){ return x.id !== r.id; });
+      state.fleets.forEach(function(f){
+        f.resourceIds = f.resourceIds.filter(function(x){ return x !== r.id; });
+      });
+      render();
+    });
+  });
+
+  /* ---------- people ---------- */
+  function addPeopleFrom(text){
+    var names = String(text||"").split(/[,;\n]+/).map(function(x){ return x.trim(); }).filter(Boolean);
+    var added = 0;
+    names.forEach(function(n){
+      if(state.people.some(function(p){ return p.name.toLowerCase() === n.toLowerCase(); })) return;
+      state.people.push({ id:uid(), name:n }); added++;
+    });
+    render();
+    if(added) toast(plural(added, "person", "people") + " added");
+  }
+  peopleEl.addEventListener("click", function(ev){
+    var addb = ev.target.closest("#addPersonBtn");
+    if(addb){
+      var i = document.getElementById("newPersonInput");
+      addPeopleFrom(i.value);
+      var again = document.getElementById("newPersonInput"); if(again) again.focus();
+      return;
+    }
+    var b = ev.target.closest('[data-act="delperson"]');
+    if(!b) return;
+    var pid = b.getAttribute("data-pid"), p = personById(pid);
+    if(!p) return;
+    askConfirm("Remove " + p.name + "? They will be taken out of every group as well.", function(){
+      state.people = state.people.filter(function(x){ return x.id !== pid; });
+      state.groups.forEach(function(g){
+        g.personIds = (g.personIds||[]).filter(function(x){ return x !== pid; });
+      });
+      render();
+    });
+  });
+  peopleEl.addEventListener("keydown", function(ev){
+    if(ev.target.classList && ev.target.classList.contains("pname") && ev.key === "Enter"){
+      ev.preventDefault(); ev.target.blur();
+    }
+  });
+  peopleEl.addEventListener("focusout", function(ev){
+    if(!ev.target.classList || !ev.target.classList.contains("pname")) return;
+    var sp = ev.target.closest(".person");
+    var p = sp && personById(sp.getAttribute("data-pid"));
+    if(!p) return;
+    var v = ev.target.textContent.trim();
+    if(v && v !== p.name){ p.name = v; render(); }
+    else if(!v){ ev.target.textContent = p.name; }
+  });
+
+  /* ---------- groups ---------- */
+  function addGroup(name){
+    name = (name||"").trim();
+    if(!name) return;
+    state.groups.push({ id:uid(), kind:"user", name:uniqueGroupName(name), personIds:[], note:"" });
+    render();
+  }
+  groupsEl.addEventListener("click", function(ev){
+    var addb = ev.target.closest("#addGroupBtn");
+    if(addb){
+      var i = document.getElementById("newGroupInput");
+      addGroup(i.value); i.value = "";
+      var again = document.getElementById("newGroupInput"); if(again) again.focus();
+      return;
+    }
+    var b = ev.target.closest("[data-act]");
+    if(!b) return;
+    var act = b.getAttribute("data-act"), g = groupById(b.getAttribute("data-gid"));
+    if(!g) return;
+    if(act === "gpick"){
+      var pid = b.getAttribute("data-pid"), ix = (g.personIds||[]).indexOf(pid);
+      if(ix === -1) g.personIds.push(pid); else g.personIds.splice(ix, 1);
+      render();
+    } else if(act === "delgroup"){
+      askConfirm("Remove the group “" + g.name + "”?", function(){
+        state.groups = state.groups.filter(function(x){ return x.id !== g.id; });
+        state.fleets.forEach(function(f){
+          f.userGroupIds = f.userGroupIds.filter(function(x){ return x !== g.id; });
+        });
+        render();
+      });
+    }
+  });
+
+  /* ---------- prerequisites tick ---------- */
+  document.getElementById("prereqs").addEventListener("click", function(ev){
+    var b = ev.target.closest('[data-act="prereq"]');
+    if(!b) return;
+    var k = b.getAttribute("data-pk");
+    state.meta.prereqHave[k] = !state.meta.prereqHave[k];
+    render();
+  });
+  document.getElementById("prereqs").addEventListener("keydown", function(ev){
+    if(ev.key !== " " && ev.key !== "Enter") return;
+    var b = ev.target.closest('[data-act="prereq"]');
+    if(!b) return;
+    ev.preventDefault();
+    state.meta.prereqHave[b.getAttribute("data-pk")] = !state.meta.prereqHave[b.getAttribute("data-pk")];
+    render();
+  });
+
+  /* ---------- jump links ---------- */
+  document.getElementById("checks").addEventListener("click", function(ev){
+    var b = ev.target.closest("button.jump");
+    if(!b) return;
+    var f = fleetById(b.getAttribute("data-jump"));
+    if(f && !f.open){ f.open = true; render(); }
+    var row = document.getElementById("row-" + b.getAttribute("data-jump"));
+    if(!row) return;
+    row.scrollIntoView({ behavior:"smooth", block:"center" });
+    row.classList.add("flash");
+    setTimeout(function(){ row.classList.remove("flash"); }, 1600);
+  });
+
+
+  /* ---------- export dialog ---------- */
+  var dlg = document.getElementById("exportDlg");
+  var currentDownload = { name:"", type:"text/plain" };
+
+  function showExport(title, body, filename, mime){
+    document.getElementById("exportTitle").textContent = title;
+    document.getElementById("exportPre").textContent = body;
+    currentDownload.name = filename;
+    currentDownload.type = mime || "text/plain";
+    openDlg(dlg);
+  }
+
+  document.getElementById("copyText").addEventListener("click", function(){
+    encodeSeed(function(code){
+      showExport("Your answers as text - paste this into an email to us",
+        textExport(code), "intune-requirements.txt");
+    });
+  });
+  document.getElementById("shareCode").addEventListener("click", function(){
+    encodeSeed(function(code){
+      showExport("Your answers as a share code", code, "intune-requirements-code.txt");
+    });
+  });
+  document.getElementById("dlPlan").addEventListener("click", function(){
+    encodeSeed(function(code){
+      downloadText(textExport(code), "intune-requirements.txt", "text/plain");
+      toast("Saved - attach it to your email back to Active8");
+    });
+  });
+  document.getElementById("buildSheetBtn").addEventListener("click", function(){
+    showExport("Build sheet (for the engineer)", buildSheet(), "intune-build-sheet.md", "text/markdown");
+  });
+  document.getElementById("gapReportBtn").addEventListener("click", function(){
+    showExport("Gap and risk report", gapReport(), "intune-gap-report.txt");
+  });
+  document.getElementById("jsonSpecBtn").addEventListener("click", function(){
+    showExport("Machine-readable spec", jsonSpec(), "intune-plan.json", "application/json");
+  });
+
+  document.getElementById("dlgClose").addEventListener("click", function(){ dlg.close(); });
+  document.getElementById("dlgDownload").addEventListener("click", function(){
+    downloadText(document.getElementById("exportPre").textContent,
+      currentDownload.name || "intune-plan.txt", currentDownload.type);
+    toast("Saved to your downloads");
+  });
+  document.getElementById("dlgCopy").addEventListener("click", function(){
+    var t = document.getElementById("exportPre").textContent;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(
+        function(){ toast("Copied - paste it into an email"); dlg.close(); },
+        function(){ fallbackCopy(t); });
+    } else fallbackCopy(t);
+  });
+  function fallbackCopy(t){
+    var ta = document.createElement("textarea");
+    ta.value = t; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); toast("Copied - paste it into an email"); }
+    catch(e){ toast("Copy failed - select the text and copy manually"); }
+    document.body.removeChild(ta); dlg.close();
+  }
+  function downloadText(text, filename, mime){
+    var blob = new Blob([text], { type:mime || "text/plain" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+  }
+
+  /* ---------- import ---------- */
+  var importDlg = document.getElementById("importDlg");
+  var importTa = document.getElementById("importTa");
+  var fileInput = document.getElementById("fileInput");
+
+  function parsePlan(text){
+    text = (text || "").trim();
+    var attempts = [text];
+    var start = text.indexOf('{"v"');
+    if(start === -1) start = text.indexOf('{"meta"');
+    if(start === -1) start = text.indexOf('{ "meta"');
+    var end = text.lastIndexOf("}");
+    if(start !== -1 && end > start){
+      var block = text.slice(start, end + 1);
+      attempts.push(block);
+      attempts.push(block.replace(/[\r\n]+\s*/g, ""));
+    }
+    for(var i = 0; i < attempts.length; i++){
+      try{
+        var parsed = JSON.parse(attempts[i]);
+        // a full JSON spec export wraps the raw state
+        if(parsed && parsed.schema === "a8-intune-plan/1" && parsed.state) parsed = parsed.state;
+        if(parsed && Array.isArray(parsed.fleets)) return parsed;
+      }catch(e){}
+    }
+    return null;
+  }
+  function applyPlan(p){
+    state = migrate(p);
+    render();
+    importDlg.close();
+    toast("Answers loaded");
+  }
+  function loadPlan(text){
+    var cands = seedCandidates(text);
+    if(cands.length){
+      decodeSeedAttempts(cands, function(p){
+        if(p){ applyPlan(p); return; }
+        var p2 = parsePlan(text);
+        if(p2) applyPlan(p2);
+        else toast("Couldn't read that share code - check it copied completely, start to end");
+      });
+      return;
+    }
+    var parsed = parsePlan(text);
+    if(!parsed){
+      toast("Couldn't find plan data in that - paste the whole email, the share code, or the plan file contents");
+      return;
+    }
+    applyPlan(parsed);
+  }
+  document.getElementById("importPlan").addEventListener("click", function(){
+    importTa.value = "";
+    openDlg(importDlg);
+  });
+  document.getElementById("importClose").addEventListener("click", function(){ importDlg.close(); });
+  document.getElementById("importGo").addEventListener("click", function(){ loadPlan(importTa.value); });
+  document.getElementById("importFileBtn").addEventListener("click", function(){ fileInput.click(); });
+  fileInput.addEventListener("change", function(){
+    var f = fileInput.files && fileInput.files[0];
+    if(!f) return;
+    var r = new FileReader();
+    r.onload = function(){ loadPlan(r.result); fileInput.value = ""; };
+    r.readAsText(f);
+  });
+
+  document.getElementById("resetAll").addEventListener("click", function(){
+    askConfirm("Start over? This clears everything in this browser. Use “Download plan file” first if you might want it back.", function(){
+      state = blankState();
+      render();
+      toast("Cleared - starting fresh");
+      renderWizard();
+      openDlg(wizDlg);
+    });
+  });
+
+  /* ---------- wizard wiring ---------- */
+  document.getElementById("openWiz").addEventListener("click", function(){
+    renderWizard();
+    openDlg(wizDlg);
+  });
+  document.getElementById("wizCancel").addEventListener("click", function(){
+    state.meta.wizDone = true;
+    save();
+    wizDlg.close();
+  });
+  document.getElementById("wizGo").addEventListener("click", function(){
+    var w = readWizard();
+    if(!w.platforms.length || !w.scenarios.length){
+      toast("Please tick at least one kind of device and one way they are used");
+      return;
+    }
+    var hasWork = state.fleets.length > 0;
+    function build(){
+      var fresh = seedPlan(w);
+      // keep anything the customer already typed that the wizard does not own
+      fresh.people = state.people;
+      fresh.apps = state.apps;
+      fresh.resources = state.resources;
+      fresh.meta.tenant = state.meta.tenant;
+      fresh.meta.notes = state.meta.notes;
+      fresh.meta.prereqHave = state.meta.prereqHave;
+      state = fresh;
+      render();
+      wizDlg.close();
+      toast("Starting point built - now work through each group");
+    }
+    if(hasWork){
+      wizDlg.close();
+      askConfirm("This replaces the device groups you already have with a fresh starting point. Your people, apps and Wi-Fi list are kept. Carry on?", build);
+    } else build();
+  });
+
+  /* ---------- boot ---------- */
+  render();
+  if(!state.meta.wizDone && !state.fleets.length){
+    setTimeout(function(){ renderWizard(); openDlg(wizDlg); }, 260);
+  }
+})();
+</script>
+</body>
+</html>
