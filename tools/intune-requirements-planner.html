@@ -290,6 +290,8 @@
     color:var(--accent);cursor:pointer;font:inherit;font-size:12.5px;
     text-decoration:underline;text-underline-offset:2px;
   }
+  .ib-line{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--muted);margin:0 0 10px}
+  .ib-line .ib{margin-left:0}
   .wiz .wopt .ib{margin-left:6px}
   .wiz .ibox{margin:2px 0 10px}
   .sect > .sect-head .ib{margin-left:0}
@@ -967,12 +969,95 @@
     compliance:{ t:"Health rules", p:"A set of checks a device has to pass to count as trustworthy - for example that it is up to date, locked with a PIN, has its disk encrypted, and has antivirus running.<br><br>On their own these rules only <b>flag</b> a device that fails; they do not stop it doing anything. Actually blocking access is a separate decision we will talk through with you." },
     config:{ t:"Settings we push out", p:"The settings applied to devices automatically, so nobody has to set them up by hand - Wi-Fi, security hardening, browser settings, and what people are allowed to change themselves.<br><br>The ones marked <b>recommended</b> come from a well-established public security baseline rather than being invented by us." },
     apps:{ t:"Apps", p:"Software we install or offer on the devices. <b>Installed automatically</b> means it simply appears without anyone doing anything. <b>Offered</b> means it shows up in a company app store on the device, and people install it if they want it.<br><br>You do not need to know how any of it is packaged or delivered - just tell us what people need." },
-    esp:{ t:"The set-up progress screen", p:"When a brand new device is setting itself up, this screen holds the person out until the essentials have finished installing, so they do not land on a half-configured desktop.<br><br>Keep the list of things it waits for short. Every item is time somebody spends watching a progress bar, and a long list is the most common cause of set-up timing out and failing." },
+    esp:{ t:"The set-up progress screen", p:"When a brand new device builds itself, this screen (Microsoft calls it the Enrolment Status Page) holds the person out until the essentials have installed, so nobody lands on a half-configured desktop and starts reporting faults that are really just <i>not finished yet</i>.<br><br>It has a time limit: if what it is waiting for has not finished within the window (an hour, by default), setup fails and the device usually has to be reset and started again - which is why what goes on the must-finish-first list is a real decision, not a formality. Everything not on the list still installs, just quietly in the background after the person is already working." },
     updates:{ t:"Updates", p:"How quickly security updates reach these devices, and how much say the person using the device gets over when it restarts.<br><br>Letting a small pilot group take updates first means problems are found on a handful of machines instead of all of them. Taking away someone's ability to postpone a restart is the most common reason a new setup gets a bad reputation in its first week." },
-    groups:{ t:"Groups", p:"A group is a named list of people. Everything we set up reaches devices <b>through</b> a group - which makes them matter far more than they sound.<br><br>A policy pointed at a group with nobody in it looks completely correct in the admin console and does absolutely nothing. That is why the checker nags about it." },
+    groups:{ t:"Groups", p:"Each group here becomes a real group in your Microsoft directory, and the <span class=\"mono\">INT-&hellip;</span> label is simply the technical name we will give it - you never need to type or remember it.<br><br>You do not need to list members one by one. A description in your own words - <i>all teaching staff</i>, <i>Year 5 and 6 pupils</i> - is enough: we build the membership from your existing directory, and where it can be rule-based (everyone in a year group, everyone with a staff account) it maintains itself as people join and leave.<br><br>Do name individuals for the small groups that matter: who administers this day to day, and who gets the first test devices." },
     resources:{ t:"Wi-Fi, VPN and certificates", p:"Things a device needs before anybody can actually use it. If a device must join a particular Wi-Fi network on its own, reach an internal system, or trust an internal certificate, it has to be given those automatically.<br><br>This matters most on shared and single-purpose devices - there is nobody standing there to type in a Wi-Fi password." },
+    appsources:{ t:"What the install options mean", p:"You only need to name the app - but if you know how it is obtained, the dropdown saves us a question:<ul class=\"ib-list\"><li><b>Microsoft 365 Apps</b><span>Word, Excel, Outlook and the rest, installed as one package and kept up to date automatically.</span></li><li><b>From the store (Microsoft Store, App Store, Mac App Store)</b><span>Published in the platform's own store; we deploy it from there with no installer to handle.</span></li><li><b>An installer you give us</b><span>Software from a supplier's website or disc - your MIS client, subject software. We package it so it installs silently, with no clicking through wizards on each machine.</span></li><li><b>App Store app, licensed to the <u>device</u></b><span>An Apple app whose licence belongs to the iPad itself. Required for shared iPads and any iPad with no user attached - there is no person to hold a licence. Bought through Apple's volume scheme, where even free apps need a (free) licence.</span></li><li><b>App Store app, licensed to a <u>person</u></b><span>The licence follows the person across their devices. Right for one-per-person iPads and iPhones; will not work on a user-less trolley - the checker flags that clash.</span></li><li><b>From Managed Google Play</b><span>The version of the Play Store we control: only apps you have approved appear on the device.</span></li><li><b>A private app / an in-house app</b><span>Something built for you and not in any public store; we publish it privately to your devices only.</span></li><li><b>A website shortcut</b><span>Not an install at all - an icon that opens a web page. Often all a &lsquo;system&rsquo; needs.</span></li></ul>Whether each app is <b>installed automatically</b> or <b>offered</b> in a self-service company store is chosen per device group, after you tick the app onto it." },
     licences:{ t:"Microsoft licences", p:"Worth getting right, because some Microsoft licence names are only one word apart and include completely different things.<br><br>Anything beginning <b>Microsoft 365</b> generally includes device management. Anything beginning <b>Office 365</b> generally does not - it is email and the Office apps only. If you are not sure, say so and we will check; it takes us five minutes and it decides what is possible." },
     ce:{ t:"Cyber Essentials", p:"A UK government-backed certification covering five basic security controls. If you are certifying or recertifying, we check your answers against what the scheme actually requires.<br><br>Just as usefully, we will tell you where it requires <b>less</b> than people assume - it does not, for example, demand disk encryption, and it explicitly says not to force regular password changes." }
+  };
+
+  /* Depth layer for the (i) buttons. RULE: nothing in here may repeat text that
+     is already visible on screen next to the button - the visible note is the
+     one-liner, this is what it actually means in practice: what happens, what
+     the person notices, what goes wrong without it. */
+  CAT.deep = {
+
+    /* ---- platforms: what being managed means on each ---- */
+    "plat:windows":"The most fully manageable platform - everything in this tool applies. One thing to check early: Windows 10 left support in October 2025, so any Windows 10 machines in scope need a decision (upgrade, paid extended updates, replace) before anything else.",
+    "plat:ios":"What we can control depends on whether the device is <b>supervised</b> - which it is when bought through Apple Business or School Manager. Supervised covers everything from kiosk mode to forcing updates; a personally-set-up iPhone allows far less, by Apple's deliberate design.",
+    "plat:android":"Managed through Android Enterprise. Its work-profile model means we can promise staff genuine privacy on their own phones, while company-owned devices can be locked all the way down to a single app. Devices on Android 9 or older cannot be properly managed any more.",
+    "plat:macos":"Enrolled the same way as iPads (through Apple Business Manager) but configured more like Windows. Slightly fewer controls than Windows overall; the essentials - disk encryption, updates, hardening - are all there.",
+
+    /* ---- affinity: how to decide, and the cost of getting it wrong ---- */
+    "aff:user":"The person signs in with their own account, keeps their files on it, and can use per-person sign-in like a fingerprint or face. Rule of thumb: if it goes home with - or lives on the desk of - the same person, it is one-per-person. Occasional borrowing does not change that.",
+    "aff:shared":"Set up so nobody's data sticks: files live in the cloud, sign-ins are fresh, and anything cached can be cleared. Calling a device one-per-person when it is really shared is the expensive mistake - the first person's account effectively owns it and everyone after them fights the machine.",
+    "aff:kiosk":"There is no sign-in at all - the device wakes up already doing its one job. If people sign in with individual accounts it is not a kiosk, it is shared, and needs different setup.",
+
+    /* ---- ownership ---- */
+    "own:corporate":"Because you own it, we can enforce everything in this tool: wipe it if lost, reset it between users, install and remove software, lock it down. It also means the organisation carries the responsibility - repairs, disposal, and wiping before either.",
+    "own:personal":"We deliberately take <b>less</b> control, not more: work data is protected inside the work apps, and the device stays the owner's. We cannot see photos, messages, browsing or personal apps. Worth telling staff that explicitly - fear of being watched is the main reason people resist this, and it is unfounded.",
+
+    /* ---- update rings ---- */
+    "ring:pilot":"Two or three willing people with ordinary hardware - not just the IT-savvy. They take every update first, so if something breaks it breaks on three machines with warning rather than three hundred without.",
+    "ring:uat":"Follows the pilot group after about a week, with a broader mix of roles and hardware. Catches the problems the pilot group's particular machines could not.",
+    "ring:prod":"Everyone else, typically a week or two behind first release - late enough that problems have surfaced elsewhere, early enough to stay inside the security window.",
+
+    /* ---- enrolment methods: what actually happens, step by step ---- */
+    "enrol:autopilot-user-driven":"The box goes to the person unopened. They switch on, pick a Wi-Fi network, sign in with their work email, and the machine builds itself - apps, settings, security - typically 20 to 40 minutes. Nobody in IT touches the device, which is the point: it works the same for 5 devices or 500.",
+    "enrol:autopilot-self-deploying":"The device is switched on, connected to power and network, and builds itself with nobody signing in - it belongs to the organisation, not a person. Needs a wired connection or open Wi-Fi at first boot, and a TPM 2.0 security chip (any recent machine has one).",
+    "enrol:autopilot-pre-provisioned":"The slow part - apps and settings - is done in advance by us or the supplier using a special boot mode. The person still signs in on first use, but waits a few minutes instead of half an hour. Made for term-start deployments, where 200 pupils cannot each sit through a 40-minute build.",
+    "enrol:ppkg":"A technician plugs a USB stick in at the first-start screen and a small file on it joins the device to your organisation. Works with poor internet and without per-device registration - but somebody has to physically touch every machine, and the file silently expires after 180 days.",
+    "enrol:entra-join-oobe":"At the first-start screen the person chooses to join with their work account. Needs zero preparation - but whoever signs in first becomes a full administrator of that machine, able to install anything and undo our settings. Acceptable in a small office of trusted staff; wrong for schools.",
+    "enrol:comanagement":"For organisations already running Microsoft Configuration Manager on their own servers - existing management stays while responsibilities move across one at a time. If you do not know whether you have Configuration Manager, you do not have it.",
+    "enrol:win-byod-enrol":"The owner installs the Company Portal app on their own PC and chooses to enrol it. The whole machine then has to meet your health rules, which many owners find intrusive on hardware they paid for. Consider protecting just the work data first.",
+    "enrol:win-mam-only":"Nothing is installed on the PC at all. Work files opened through the browser or Office are protected by policy - they cannot be saved out to the machine, and access can be cut off remotely - while the PC itself stays untouched and invisible to us.",
+    "enrol:ade-affinity":"Devices bought through your Apple account appear in it automatically before the box is opened. Turned on, they set themselves up over Wi-Fi, assigned to their named person. The device becomes <b>supervised</b> - Apple's strongest management level - and cannot be un-enrolled by the user, even with a factory reset.",
+    "enrol:ade-no-affinity":"The same zero-touch setup, but no person is attached - the iPad belongs to the organisation. That is why apps for these devices must be licensed to the <b>device</b> rather than to a person: there is no person to hold the licence.",
+    "enrol:shared-ipad":"Apple's own multi-user mode: each pupil signs in with a school-issued Apple account and gets their own home screen and work back on any iPad in the set. Each cached pupil takes a slice of storage, so 32GB models fill up fast. Needs Apple School Manager with pupil accounts created in it.",
+    "enrol:apple-configurator":"Each device is plugged, one at a time, into a Mac running Apple's free Configurator app. Slow and hands-on - minutes per device - so it is the fallback for kit that was never in Apple's system: donations, second-hand devices, or purchases from a non-enrolled reseller.",
+    "enrol:ios-company-portal":"The owner installs the Company Portal app and enrols their own iPhone. This gives more control than data-only protection, but the phone appears in our console and owners often dislike that. Usually only right where policy explicitly demands managed personal phones.",
+    "enrol:ios-mam-only":"Nothing is installed and the phone never appears in any console. Instead the work apps themselves - Outlook, Teams, OneDrive - require their own PIN, encrypt their contents, stop work text being copied into personal apps, and can have just the work data wiped remotely. The rest of the phone: untouched, invisible to us.",
+    "enrol:ae-work-profile":"Enrolling creates a separate work section on the phone, with badge-marked app icons and its own app store. We manage only that section - personal apps, photos, messages and browsing are invisible to us - and removing the work profile removes every trace of us.",
+    "enrol:ae-fully-managed":"The device arrives new (or is factory-reset), scans a QR code or comes pre-registered by the supplier, and builds itself as a wholly company device for one named person. Everything on it is managed.",
+    "enrol:ae-dedicated":"Set up with no user account and locked to its purpose, typically by scanning a QR code at first start. You choose the apps it runs; settings, notifications and everything else are out of reach.",
+    "enrol:ae-dedicated-shared":"A dedicated device plus Microsoft's shared sign-in: staff sign in once at the start of a shift, and one sign-out clears them from every participating work app. The catch: only apps built for Entra shared device mode participate. Microsoft's own apps do; many third-party apps silently leave the previous person signed in.",
+    "enrol:ae-corporate-work-profile":"Company-owned, but personal use is allowed in a separate personal area. Work lives in the managed profile; the personal side stays private, though basics like a lock screen and minimum OS version apply to the whole device.",
+    "enrol:android-mam-only":"Nothing installed, nothing visible to us. Work data lives protected inside the work apps with its own PIN, and can be wiped on its own without touching anything else on the phone.",
+    "enrol:macos-ade":"Macs bought through your Apple account set themselves up on first start, the way iPads do - no imaging, no engineer visit. They can be assigned to a person or set up as shared machines.",
+    "enrol:macos-company-portal":"The user downloads Company Portal, signs in and approves management. The route for Macs that predate your Apple Business Manager account or were bought retail.",
+
+    /* ---- settings packs: what it actually does and what the person notices ---- */
+    "cfg:oib-device-security":"Around a hundred individually-chosen settings closing the classic attack routes: sign-in protections, obsolete protocols disabled, limits on what unsigned software can do. Drawn from the UK National Cyber Security Centre's guidance and the CIS industry benchmarks. Day-to-day work is unaffected - the visible changes are things like USB sticks no longer auto-running.",
+    "cfg:oib-defender":"Three layers: the antivirus with cloud-checked scanning; the firewall on every network; and attack-surface-reduction rules - tripwires that block the specific behaviours ransomware depends on, such as an emailed document quietly launching a hidden program. That third layer is what defeats the classic fake-invoice attachment.",
+    "cfg:oib-bitlocker":"Scrambles the entire disk, so pulling the drive out of a stolen laptop reads as noise. The person notices nothing - no prompt, no slowdown on modern hardware. The unlock key is stored centrally by us, because a machine whose key is lost is unrecoverable by anyone, including Microsoft.",
+    "cfg:oib-laps":"Every Windows machine keeps one built-in repair account. Without this, it tends to have the same password on every machine - one leak opens the lot. With it, each device gets its own long random password, rotated automatically, released to a technician only when needed and changed again after use.",
+    "cfg:oib-whfb":"After a one-time setup the person unlocks with a PIN, fingerprint or face. The secret never leaves that device, so unlike a password it cannot be phished, guessed from another breach, or typed into a fake sign-in page. The password still exists; it just stops being the daily habit.",
+    "cfg:oib-edge":"Homepage and new-tab page, how saved passwords behave, which extensions are allowed, and automatic work sign-in in the browser so people are not prompted over and over.",
+    "cfg:oib-chrome":"The same treatment for Chrome - including forcing the one extension that lets Chrome prove the device is healthy. Without it, a perfectly compliant PC can be refused sign-in just for using Chrome instead of Edge.",
+    "cfg:oib-office":"Office settings, plus Desktop, Documents and Pictures silently becoming OneDrive folders. Everything in them is versioned and recoverable, and when a laptop dies or is replaced, the files reappear on the new machine by themselves. This single policy removes the most common data-loss call we get.",
+    "cfg:win-kiosk":"The machine boots straight into your chosen app - full screen, no desktop, no Start menu, no Settings. Getting out requires a hidden key combination and an administrator sign-in.",
+    "cfg:win-removable":"Block USB sticks entirely, allow read-only, or allow only encrypted ones. The trade-off is real: blocking closes a common data-leak route, but people use sticks for legitimate reasons - decide per device group, not blanket.",
+    "cfg:win-power":"Screen-lock timing, sleep, and what closing the lid does. Boring but load-bearing: an unattended unlocked machine is an open door, and it is one of the first things any audit checks.",
+    "cfg:win-localadmin":"Standard user is the single strongest security improvement available - most malware simply fails without admin rights. Software installs still happen, just remotely by us: the experience becomes ask, and it appears, rather than download-and-run.",
+    "cfg:ios-restrictions":"The master list of what the device may do: App Store on or off, camera, AirDrop, screenshots, adding personal accounts, deleting apps, in-app purchases. On pupil devices this is where most of the decisions live - tell us the house rules in plain English and we translate.",
+    "cfg:ios-passcode":"Whether a code is required, how long, how quickly the screen locks, and whether Face ID or Touch ID may stand in for it.",
+    "cfg:ios-supervised-layout":"Same apps, same positions, on every device in the set. Nobody wastes lesson time hunting, and a missing app is visible at a glance across a whole trolley.",
+    "cfg:ios-single-app":"The iPad is pinned inside one app and cannot leave it - home gestures included. Used for exams, sign-in desks and displays; can be permanent or applied on demand.",
+    "cfg:ios-web-filter":"Filtering on the device itself: Apple's adult-content filter plus your own allow and deny lists. Unlike your school network filter, it still applies at home and on any other Wi-Fi.",
+    "cfg:ios-shared-ipad-settings":"How many pupils' spaces stay cached on each iPad - more means fewer re-downloads but less free storage - and whether there is a guest mode that wipes itself on sign-out.",
+    "cfg:ios-appconfig":"Pre-fills settings inside apps: server addresses, tenant names, sign-in hints. The difference between an app that just works and a lesson lost to typing a URL onto thirty iPads.",
+    "cfg:and-restrictions":"What the device may do: camera, screenshots, factory reset, adding accounts, USB file transfer. On single-purpose devices this is what stops a stock scanner becoming somebody's video player.",
+    "cfg:and-passcode":"Whether a PIN or password is required, how long, and how quickly the screen locks - with fingerprint or face allowed to stand in where the hardware has it.",
+    "cfg:and-kiosk":"Exactly which apps show on a device nobody signs in to: one app pinned full-screen, or a small fixed menu of several. Status bar, notifications and settings access are all controllable.",
+    "cfg:and-workprofile":"Fine-tunes the boundary between work and personal: whether work text can be pasted into personal apps, whether work contacts show names on incoming calls, whether the personal side can see work files. Defaults are sensible - tell us if your data rules are stricter.",
+    "cfg:and-oemconfig":"Some manufacturers expose extra controls through their own add-on - Samsung Knox, Zebra, Honeywell: scanner behaviour, hardware buttons, docking rules. Only exists on those brands; tell us the model and we will check what is available.",
+    "cfg:and-appconfig":"Pre-fills settings inside apps - server addresses, account hints - so devices are ready to use rather than ready to configure.",
+    "cfg:mac-oib":"The macOS equivalent of the Windows hardening set: Gatekeeper, firewall, login window, password rules and update handling, from the same community baseline.",
+    "cfg:mac-filevault":"Apple's whole-disk encryption with the recovery key stored by us. Like BitLocker on Windows: invisible day to day, essential the day a MacBook goes missing.",
+    "cfg:mac-sso":"The Mac login and the Microsoft 365 sign-in become one identity - one password, changed in one place, and the repeated sign-in prompts inside apps and browsers largely disappear.",
+    "cfg:mac-restrictions":"What the user may change on the Mac - from App Store access to system preferences panes."
   };
 
   CAT.licences = [
@@ -1462,9 +1547,9 @@
     var kind = key.slice(0, ix), id = key.slice(ix + 1), o;
 
     if(kind === "term")   return CAT.terms[id] || null;
-    if(kind === "plat")   { o = CAT.platforms[id];  return o && { t:o.label, p:o.plain }; }
-    if(kind === "aff")    { o = CAT.affinity[id];   return o && { t:o.label, p:o.plain }; }
-    if(kind === "own")    { o = CAT.ownership[id];  return o && { t:o.label, p:o.plain }; }
+    if(kind === "plat")   { o = CAT.platforms[id];  return o && { t:o.label, p:CAT.deep["plat:" + id] || o.plain }; }
+    if(kind === "aff")    { o = CAT.affinity[id];   return o && { t:o.label, p:CAT.deep["aff:" + id] || o.plain }; }
+    if(kind === "own")    { o = CAT.ownership[id];  return o && { t:o.label, p:CAT.deep["own:" + id] || o.plain }; }
     if(kind === "scen")   { o = SCENARIOS[id];      return o && { t:o.label, p:o.plain }; }
     if(kind === "sector") return CAT.sectors[id] ? { t:CAT.sectors[id], p:CAT.sectorNote[id] || "" } : null;
     if(kind === "lic"){
@@ -1480,17 +1565,17 @@
     if(kind === "enrolopts" || kind === "affopts" || kind === "ownopts" || kind === "platopts" || kind === "ringopts"){
       var f = fleetById(id);
       if(!f) return null;
-      if(kind === "affopts")  return { t:CAT.terms.affinity.t,  p:CAT.terms.affinity.p  + optList(CAT.affinity,  f.affinity)  };
-      if(kind === "ownopts")  return { t:CAT.terms.ownership.t, p:CAT.terms.ownership.p + optList(CAT.ownership, f.ownership) };
-      if(kind === "platopts") return { t:"Kind of device", p:"Pick whichever is closest. If a group has a mixture, split it into two groups - they need different setup." + optList(CAT.platforms, f.platform) };
-      if(kind === "ringopts") return { t:CAT.terms.updates.t, p:CAT.terms.updates.p + optList(CAT.updateRing, f.updates.ring) };
+      if(kind === "affopts")  return { t:"How to decide who uses it", p:"The short description is beside the box; here is how to decide, and what getting it wrong costs:" + optList(CAT.affinity, f.affinity, "aff:") };
+      if(kind === "ownopts")  return { t:"Why ownership changes so much", p:optList(CAT.ownership, f.ownership, "own:") };
+      if(kind === "platopts") return { t:"Kind of device", p:"Pick whichever is closest - and if a group has a mixture, split it into two groups, because they need different setup. What being managed means on each:" + optList(CAT.platforms, f.platform, "plat:") };
+      if(kind === "ringopts") return { t:"Choosing an update ring", p:"Updates are staged deliberately, so problems surface on a few machines before they can reach all of them:" + optList(CAT.updateRing, f.updates.ring, "ring:") };
       /* enrolment: only the methods valid for this group's ownership */
       var ms = enrolMethodsFor(f), h = [CAT.terms.enrolment.p, '<ul class="ib-list">'];
       ms.forEach(function(m){
         var fits = m.affinity.indexOf(f.affinity) !== -1;
         h.push('<li class="' + (m.key === (currentMethod(f) || "") ? "on" : "") + '"><b>' + esc(m.label) + "</b>" +
           (fits ? "" : '<span class="na">Not for &ldquo;' + esc(CAT.affinity[f.affinity].label.toLowerCase()) + '&rdquo; devices</span>') +
-          "<span>" + m.plain + "</span>" +
+          "<span>" + (CAT.deep["enrol:" + m.key] || m.plain) + "</span>" +
           (m.note ? '<span class="na">Worth knowing: ' + m.note + "</span>" : "") + "</li>");
       });
       h.push("</ul>");
@@ -1498,18 +1583,21 @@
     }
     if(kind === "cfg"){
       var parts = id.split("|"), dd = configDef(parts[0], parts[1]);
-      return dd && { t:dd.label, p:dd.plain + (dd.note ? "<br><br><b>Worth knowing:</b> " + dd.note : "") };
+      /* the one-line dd.plain is already printed under the checkbox - the (i)
+         serves the deep text only, so it never merely repeats the screen */
+      return dd && { t:dd.label, p:(CAT.deep["cfg:" + parts[1]] || dd.plain) + (dd.note ? "<br><br><b>Worth knowing:</b> " + dd.note : "") };
     }
     return null;
   }
   function currentMethod(f){
     return (f.enrolments[0] && f.enrolments[0].method) || "";
   }
-  function optList(obj, sel){
+  function optList(obj, sel, prefix){
     var h = ['<ul class="ib-list">'];
     Object.keys(obj).forEach(function(k){
-      h.push('<li class="' + (k === sel ? "on" : "") + '"><b>' + esc(obj[k].label) + "</b><span>" +
-        (obj[k].plain || "") + "</span></li>");
+      h.push('<li class="' + (k === sel ? "on" : "") + '"><b>' + esc(obj[k].label) +
+        (k === sel ? " &mdash; your current answer" : "") + "</b><span>" +
+        ((prefix && CAT.deep[prefix + k]) || obj[k].plain || "") + "</span></li>");
     });
     h.push("</ul>");
     return h.join("");
@@ -1625,12 +1713,13 @@
       h.push('<div class="checkgrid">');
       defs.forEach(function(dd){
         var ik = "cfg:" + f.platform + "|" + dd.key;
+        var hasDeep = !!CAT.deep["cfg:" + dd.key];
         h.push('<label><input type="checkbox" value="' + dd.key + '"' +
           ((c.packs||[]).indexOf(dd.key) !== -1 ? " checked" : "") +
           ' data-act="packtoggle" ' + A + '><span>' + esc(dd.label) +
           (dd.rec ? ' <span class="chip pol" style="font-size:9px;padding:1px 5px">recommended</span>' : "") +
-          ib(ik) + '<span class="cg-note">' + dd.plain + "</span></span></label>");
-        h.push(ibox(ik));
+          (hasDeep ? ib(ik) : "") + '<span class="cg-note">' + dd.plain + "</span></span></label>");
+        if(hasDeep) h.push(ibox(ik));
       });
       h.push("</div>");
       (c.packs||[]).forEach(function(k){
@@ -1829,7 +1918,9 @@
       appsEl.innerHTML = '<div class="empty">No apps listed yet. Add the software people actually need &mdash; we will work out how to deliver it.</div>';
       return;
     }
-    appsEl.innerHTML = state.apps.map(function(a){
+    var srcHelp = '<div class="ib-line">' + ib("term:appsources") +
+      "<span>Not sure what the install options mean? Press the i.</span></div>" + ibox("term:appsources");
+    appsEl.innerHTML = srcHelp + state.apps.map(function(a){
       var use = appUsage(a.id);
       var pfs = a.platforms.length ? a.platforms : CAT.platformOrder;
       var srcOpts = [];
@@ -1894,6 +1985,10 @@
     var h = [];
     if(!state.groups.length){
       h.push('<div class="empty">No groups yet. Open a device group and use <b>+ New group for this</b>, or add one below.</div>');
+    }
+    if(state.groups.length){
+      h.push('<div class="ib-line">' + ib("term:groups") +
+        "<span>What these groups are, and why you do not need to list every pupil.</span></div>" + ibox("term:groups"));
     }
     state.groups.forEach(function(g){
       var use = groupUsage(g.id);
